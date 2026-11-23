@@ -2,6 +2,7 @@ import { state, sellFish, sellAllFish, addFishToAquarium, autoAddBestFishToAquar
 import { FISH, RARITIES, MESSAGES } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
 import { showToast, switchTab } from './ui.js';
+import { getFishSvg } from './fish-icons.js';
 
 let bagFilterRarity = 'all'; // 'all', 'common', 'rare', 'epic', 'legendary', 'mythic'
 let bagSortBy = 'latest'; // 'latest', 'price', 'size'
@@ -84,7 +85,9 @@ export function renderBag() {
                 const rarityMeta = RARITIES[fishMeta.rarity] || RARITIES.common;
                 return `
                 <div class="bag-item-row" data-uid="${item.uid}">
-                  <div class="bag-item-emoji">${fishMeta.emoji}</div>
+                  <div class="bag-item-emoji" style="display: flex; align-items: center; justify-content: center;">
+                    ${getFishSvg(fishMeta.id, 40)}
+                  </div>
                   <div class="bag-item-info">
                     <div style="display: flex; align-items: center; gap: 6px;">
                       <span class="t-card-title">${fishMeta.name}</span>

@@ -34,6 +34,7 @@ import { isInstantBiteEnabled } from './debug.js';
 import { showKingCelebrationModal } from './collection.js';
 import { playSound } from './sound.js';
 import { getCurrentWeather, updateWeatherVisual, cycleWeather, WEATHERS } from './weather.js';
+import { getFishSvg } from './fish-icons.js';
 
 export const FishingState = {
   IDLE: 'IDLE',
@@ -540,7 +541,9 @@ function showResultModal(fish, recordResult = {}) {
           <div class="modal-badge-group">
             ${badgeHtml}
           </div>
-          <div class="modal-fish-emoji">${fish.emoji}</div>
+          <div class="modal-fish-emoji" style="display: flex; align-items: center; justify-content: center;">
+            ${fish.isChest || fish.isTrash ? fish.emoji : getFishSvg(fish.id, 90)}
+          </div>
         </div>
         <div class="modal-content">
           <div class="t-display modal-fish-name">${fish.name}</div>

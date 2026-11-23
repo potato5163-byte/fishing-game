@@ -2,6 +2,7 @@ import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromA
 import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
+import { getFishSvg } from './fish-icons.js';
 
 export function renderCollection() {
   const screen = document.getElementById('screen-collection');
@@ -59,7 +60,7 @@ export function renderCollection() {
                   const topPos = 12 + ((i * 22) % 65);
                   return `
                   <div class="aquarium-swimming-fish" style="top: ${topPos}%; animation-duration: ${animDuration}s; animation-delay: -${animDelay}s;" data-aq-id="${f.id}">
-                    <span class="fish-sprite">${meta.emoji || '🐟'}</span>
+                    <span class="fish-sprite">${getFishSvg(meta.id || meta.fishId, 36)}</span>
                     <span class="fish-name-tag">${meta.name || '물고기'}</span>
                   </div>
                 `;
@@ -185,7 +186,7 @@ function renderFishCard(fish) {
       <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
       ${crownBadge}
       <div class="collection-card-emoji-box ${themeClass}">
-        <span>${fish.emoji}</span>
+        ${getFishSvg(fish.id, 46)}
       </div>
       <div class="collection-card-name t-body-sm" style="font-weight: 700;">${fish.name}</div>
       <span class="fish-family-tag">${familyTag}</span>
@@ -217,8 +218,8 @@ function showFishDetailModal(fishId) {
     <div class="modal-scrim" id="modal-detail-scrim">
       <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}">
         <div class="modal-content" style="padding: var(--space-xl) var(--space-lg); text-align: center;">
-          <div style="font-size: 64px; line-height: 1; margin-bottom: var(--space-xs); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));">
-            ${fish.emoji}
+          <div style="display: flex; justify-content: center; align-items: center; margin-bottom: var(--space-sm); filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));">
+            ${getFishSvg(fish.id, 100)}
           </div>
           <div class="t-display" style="font-size: 26px; font-weight: 700;">${fish.name}</div>
           <div style="margin: 6px 0 var(--space-xs) 0;">
