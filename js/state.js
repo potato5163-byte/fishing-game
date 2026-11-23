@@ -418,20 +418,22 @@ export function addFishToAquarium(bagIndex) {
   const item = state.bag[bagIndex];
   state.bag.splice(bagIndex, 1);
 
+  const fishMeta = FISH.find((f) => f.id === item.fishId) || FISH[0];
+
   state.aquarium.push({
     id: `aq_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     fishId: item.fishId,
-    name: item.name,
-    emoji: item.emoji,
+    name: fishMeta.name,
+    emoji: fishMeta.emoji,
     size: item.size,
-    rarity: item.rarity,
+    rarity: fishMeta.rarity,
     price: item.price,
     addedAt: Date.now(),
   });
 
   saveGame();
   updateTopbar();
-  return { ok: true, fish: item };
+  return { ok: true, fish: { ...item, name: fishMeta.name } };
 }
 
 export function releaseFishFromAquarium(aquariumId) {

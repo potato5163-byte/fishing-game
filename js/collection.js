@@ -33,24 +33,34 @@ export function renderCollection() {
     <!-- 나만의 수족관 라이브 뷰 -->
     <div class="aquarium-live-section">
       <div class="aquarium-header">
-        <div class="t-card-title">🐟 내 아쿠아리움 (${aquariumList.length}/20)</div>
+        <div>
+          <div class="t-card-title">🐟 내 아쿠아리움 (${aquariumList.length}/20)</div>
+          <div class="t-body-sm" style="color: var(--color-subtext); font-size: 11px;">물고기 클릭 시 자연으로 방출</div>
+        </div>
         <button id="btn-collect-revenue" class="btn-primary btn-aquarium-claim" ${pendingRevenue <= 0 ? 'disabled' : ''}>
           🪙 관람료 수령 (${formatGold(pendingRevenue)}G)
         </button>
       </div>
       <div class="aquarium-tank" id="aquarium-tank">
+        <!-- 수조 장식: 산호초 및 해초 -->
+        <div class="aquarium-seaweed seaweed-1">🌿</div>
+        <div class="aquarium-seaweed seaweed-2">🪸</div>
+        <div class="aquarium-seaweed seaweed-3">🌿</div>
+        <div class="aquarium-bubbles-overlay"></div>
+
         ${
           aquariumList.length === 0
-            ? `<div class="aquarium-empty-msg">가방에서 [🐠 수족관] 버튼을 눌러 물고기를 넣어보세요!<br>물고기가 헤엄치며 방치 관람료 골드를 생산합니다.</div>`
+            ? `<div class="aquarium-empty-msg">가방 탭에서 잡은 물고기의 [🐠 수족관] 버튼을 눌러 넣어보세요!<br>물고기들이 헤엄치며 방치 관람료 골드를 생산합니다.</div>`
             : aquariumList
                 .map((f, i) => {
-                  const animDelay = (i * 0.4) % 3;
-                  const animDuration = 4 + (i % 4);
-                  const topPos = 15 + ((i * 19) % 65);
+                  const meta = FISH.find((item) => item.id === f.fishId) || f;
+                  const animDuration = 6 + (i % 5) * 1.5;
+                  const animDelay = (i * 0.7) % 4;
+                  const topPos = 12 + ((i * 22) % 65);
                   return `
-                  <div class="aquarium-swimming-fish" style="top: ${topPos}%; animation-delay: -${animDelay}s; animation-duration: ${animDuration}s;" data-aq-id="${f.id}" title="${f.name} (${f.size.toFixed(1)}cm) - 방출하려면 클릭">
-                    <span class="fish-sprite">${f.emoji}</span>
-                    <span class="fish-name-tag">${f.name}</span>
+                  <div class="aquarium-swimming-fish" style="top: ${topPos}%; animation-duration: ${animDuration}s; animation-delay: -${animDelay}s;" data-aq-id="${f.id}">
+                    <span class="fish-sprite">${meta.emoji || '🐟'}</span>
+                    <span class="fish-name-tag">${meta.name || '물고기'}</span>
                   </div>
                 `;
                 })

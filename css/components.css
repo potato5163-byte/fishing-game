@@ -1238,75 +1238,99 @@
 
 .aquarium-tank {
   width: 100%;
-  height: 180px;
-  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%);
+  height: 220px;
+  background: radial-gradient(circle at 50% 30%, #38bdf8 0%, #0284c7 45%, #075985 85%, #082f49 100%);
   border-radius: var(--radius-md);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.25);
-  border: 2px solid #7dd3fc;
+  box-shadow: inset 0 3px 15px rgba(0, 0, 0, 0.4), 0 4px 15px rgba(2, 132, 199, 0.2);
+  border: 3px solid #7dd3fc;
 }
 
-.aquarium-empty-msg {
+.aquarium-bubbles-overlay {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #ffffff;
-  font-size: 12px;
-  line-height: 1.5;
-  padding: var(--space-md);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(circle at 25% 80%, rgba(255, 255, 255, 0.3) 2px, transparent 3px),
+              radial-gradient(circle at 65% 90%, rgba(255, 255, 255, 0.25) 3px, transparent 4px),
+              radial-gradient(circle at 80% 65%, rgba(255, 255, 255, 0.35) 2px, transparent 3px);
+  background-size: 80px 80px;
+  animation: bubbles-rise 4s linear infinite;
+  pointer-events: none;
+}
+
+.aquarium-seaweed {
+  position: absolute;
+  bottom: -4px;
+  font-size: 32px;
+  pointer-events: none;
+  animation: seaweed-sway 3s infinite ease-in-out alternate;
+  transform-origin: bottom center;
+  z-index: 1;
+}
+
+.seaweed-1 { left: 10%; animation-delay: 0s; }
+.seaweed-2 { left: 45%; animation-delay: -1.2s; font-size: 26px; }
+.seaweed-3 { right: 12%; animation-delay: -0.6s; }
+
+@keyframes seaweed-sway {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(8deg); }
 }
 
 .aquarium-swimming-fish {
   position: absolute;
-  display: flex;
+  left: 0;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  animation: fish-swim 6s infinite ease-in-out;
-  transition: transform 0.2s;
+  z-index: 3;
+  animation: fish-swim 8s infinite linear;
+  transition: filter 0.15s ease;
 }
 
 .aquarium-swimming-fish:hover {
-  transform: scale(1.25) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
 }
 
 .aquarium-swimming-fish .fish-sprite {
-  font-size: 26px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  font-size: 34px;
+  line-height: 1;
+  display: inline-block;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
 }
 
 .aquarium-swimming-fish .fish-name-tag {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 800;
   color: #ffffff;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 1px 5px;
-  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
   white-space: nowrap;
+  margin-top: 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 @keyframes fish-swim {
   0% {
-    left: -10%;
+    left: -15%;
     transform: translateY(0) scaleX(1);
   }
   48% {
-    transform: translateY(-8px) scaleX(1);
+    transform: translateY(-10px) scaleX(1);
   }
   50% {
     left: 105%;
-    transform: translateY(-8px) scaleX(-1);
+    transform: translateY(-10px) scaleX(-1);
   }
   98% {
-    transform: translateY(6px) scaleX(-1);
+    transform: translateY(10px) scaleX(-1);
   }
   100% {
-    left: -10%;
+    left: -15%;
     transform: translateY(0) scaleX(1);
   }
 }
