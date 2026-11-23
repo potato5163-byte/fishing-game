@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { FISH, REGIONS, RARITIES, MESSAGES } from './data.js';
+import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
 
@@ -8,13 +8,20 @@ export function renderCollection() {
   if (!screen) return;
 
   const collectedCount = Object.keys(state.collection || {}).length;
-  const percent = Math.round((collectedCount / 35) * 100);
+  const percent = Math.round((collectedCount / 100) * 100);
 
   screen.innerHTML = `
     <div class="color-block block-lime">
-      <div class="t-eyebrow">COLLECTION</div>
-      <div class="t-headline">도감</div>
-      <div class="t-subhead">달성률 ${collectedCount}/35 (${percent}%)</div>
+      <div class="t-eyebrow">COLLECTION · AQUARIUM</div>
+      <div class="color-block-header">
+        <div>
+          <div class="t-headline">수족관 도감</div>
+          <div class="t-subhead">달성률 ${collectedCount}/100 (${percent}%)</div>
+        </div>
+        <button id="btn-show-rates" class="btn-primary" style="height: 38px; font-size: 13px; padding: 0 var(--space-md); background: #000; color: #fff;">
+          📊 물고기 확률표
+        </button>
+      </div>
       <div class="collection-progress-bar">
         <div class="collection-progress-fill" style="width: ${percent}%;"></div>
       </div>
@@ -24,6 +31,12 @@ export function renderCollection() {
       ${REGIONS.map((region) => renderRegionSection(region)).join('')}
     </div>
   `;
+
+  // 확률표 모달 버튼 이벤트
+  const btnRates = document.getElementById('btn-show-rates');
+  if (btnRates) {
+    btnRates.addEventListener('click', showRatesModal);
+  }
 
   // 미발견 카드 및 발견 카드 클릭 이벤트
   const unknownCards = screen.querySelectorAll('.collection-card.is-unknown');
@@ -60,7 +73,7 @@ function renderRegionSection(region) {
       <div class="collection-region-header">
         <div class="t-card-title">
           ${region.name} ${!isUnlocked ? '🔒' : ''}
-          <span class="collection-region-count tabular-nums">${caughtInRegion}/5</span>
+          <span class="collection-region-count tabular-nums">${caughtInRegion}/10</span>
         </div>
         ${rewardBadge}
       </div>
@@ -78,22 +91,28 @@ function renderFishCard(fish) {
   if (!record) {
     return `
       <div class="collection-card is-unknown" data-fish-id="${fish.id}">
-        <div class="collection-card-emoji">❔</div>
+        <div class="collection-card-emoji-box" style="opacity: 0.35;">❔</div>
         <div class="collection-card-name t-body-sm">???</div>
       </div>
     `;
   }
 
   const rarity = RARITIES[fish.rarity] || RARITIES.common;
+  const cardClass = fish.rarity === 'mythic' ? 'rarity-mythic-card' : fish.rarity === 'legendary' ? 'rarity-legendary-card' : '';
+
   return `
-    <div class="collection-card is-known" data-fish-id="${fish.id}">
-      <div class="collection-card-emoji">${fish.emoji}</div>
-      <div class="collection-card-name t-body-sm">${fish.name}</div>
+    <div class="collection-card is-known ${cardClass}" data-fish-id="${fish.id}">
+      <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
+      <div class="collection-card-emoji-box">
+        <span>${fish.emoji}</span>
+      </div>
+      <div class="collection-card-name t-body-sm" style="font-weight: 700;">${fish.name}</div>
       <span class="badge-rarity rarity-${fish.rarity}">${rarity.name}</span>
     </div>
   `;
 }
 
+// 럭셔리 수족관 상세 모달
 function showFishDetailModal(fishId) {
   const fish = FISH.find((f) => f.id === fishId);
   const record = state.collection ? state.collection[fishId] : null;
@@ -114,36 +133,38 @@ function showFishDetailModal(fishId) {
 
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="modal-detail-scrim">
-      <div class="modal-dialog">
+      <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}">
         <div class="modal-content" style="padding: var(--space-xl) var(--space-lg); text-align: center;">
-          <div style="font-size: 56px; line-height: 1; margin-bottom: var(--space-xs);">${fish.emoji}</div>
-          <div class="t-display" style="font-size: 24px;">${fish.name}</div>
-          <div style="margin: 4px 0 var(--space-xs) 0;">
+          <div style="font-size: 64px; line-height: 1; margin-bottom: var(--space-xs); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));">
+            ${fish.emoji}
+          </div>
+          <div class="t-display" style="font-size: 26px; font-weight: 700;">${fish.name}</div>
+          <div style="margin: 6px 0 var(--space-xs) 0;">
             <span class="badge-rarity rarity-${fish.rarity}">${rarity.name}</span>
           </div>
-          <div class="t-body-sm" style="color: var(--color-ink); margin-bottom: var(--space-md); opacity: 0.8;">
+          <div class="t-body-sm" style="color: var(--color-ink); margin-bottom: var(--space-md); opacity: 0.85;">
             ${fish.desc}
           </div>
 
-          <div class="modal-info-list" style="text-align: left;">
+          <div class="modal-info-list" style="text-align: left; width: 100%;">
             <div class="modal-info-row">
-              <span class="t-body-sm">사는 곳</span>
+              <span class="t-body-sm">서식지</span>
               <span class="t-body-sm" style="font-weight: 600;">${region.name}</span>
             </div>
             <div class="modal-info-row">
-              <span class="t-body-sm">낚은 수</span>
+              <span class="t-body-sm">총 낚은 횟수</span>
               <span class="t-body-sm tabular-nums" style="font-weight: 600;">${record.count}마리</span>
             </div>
             <div class="modal-info-row">
-              <span class="t-body-sm">최대 크기</span>
-              <span class="t-body-sm tabular-nums" style="font-weight: 600;">${record.maxSize.toFixed(1)}cm</span>
+              <span class="t-body-sm">최대 기록 크기</span>
+              <span class="t-body-sm tabular-nums" style="font-weight: 700; color: var(--color-ink);">${record.maxSize.toFixed(1)}cm</span>
             </div>
             <div class="modal-info-row">
               <span class="t-body-sm">크기 범위</span>
               <span class="t-body-sm tabular-nums">${fish.minSize} ~ ${fish.maxSize}cm</span>
             </div>
             <div class="modal-info-row">
-              <span class="t-body-sm">처음 낚은 날</span>
+              <span class="t-body-sm">최초 발견일</span>
               <span class="t-body-sm tabular-nums">${dateStr}</span>
             </div>
           </div>
@@ -160,6 +181,83 @@ function showFishDetailModal(fishId) {
   });
 }
 
+// 실시간 물고기 확률표 모달
+export function showRatesModal() {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  const currentBait = BAITS[state.selectedBait] || BAITS.basic;
+  const currentRegion = REGIONS.find((r) => r.id === state.currentRegion) || REGIONS[0];
+  const regionFish = FISH.filter((f) => f.region === state.currentRegion);
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="modal-rates-scrim">
+      <div class="modal-dialog" style="max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-top-block block-lilac" style="padding: var(--space-md);">
+          <div class="t-eyebrow">DROP RATES</div>
+          <div class="t-headline" style="font-size: 20px;">실시간 출현 확률표</div>
+          <div class="t-subhead" style="font-size: 13px;">현재: ${currentRegion.name} · ${currentBait.name}</div>
+        </div>
+        
+        <div class="modal-content" style="padding: var(--space-md); overflow-y: auto; flex: 1;">
+          <div style="width: 100%; margin-bottom: var(--space-md);">
+            <div class="t-card-title" style="font-size: 14px; margin-bottom: var(--space-xs);">[미끼 등급 확률]</div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center;">
+              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
+                <div style="font-size: 11px;">일반</div>
+                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.common}%</div>
+              </div>
+              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
+                <div style="font-size: 11px;">희귀</div>
+                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.rare}%</div>
+              </div>
+              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
+                <div style="font-size: 11px;">영웅</div>
+                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.epic}%</div>
+              </div>
+              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
+                <div style="font-size: 11px;">전설</div>
+                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.legendary}%</div>
+              </div>
+              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
+                <div style="font-size: 11px; color: #FF007F; font-weight: 700;">신화</div>
+                <div style="font-weight: 800; font-size: 12px; color: #FF007F;">${currentBait.weights.mythic || 0}%</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="width: 100%;">
+            <div class="t-card-title" style="font-size: 14px; margin-bottom: var(--space-xs);">[현재 지역 어종 목록]</div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              ${regionFish.map((f) => {
+                const countOfRarity = regionFish.filter(rf => rf.rarity === f.rarity).length;
+                const exactRate = ((currentBait.weights[f.rarity] || 0) / countOfRarity).toFixed(1);
+                return `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: var(--color-surface-soft); border-radius: var(--radius-sm);">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span>${f.emoji}</span>
+                      <span class="t-body-sm" style="font-weight: 600;">${f.name}</span>
+                      <span class="badge-rarity rarity-${f.rarity}" style="font-size: 9px; padding: 1px 6px;">${RARITIES[f.rarity].name}</span>
+                    </div>
+                    <span class="t-body-sm tabular-nums" style="font-weight: 700;">${exactRate}%</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <button id="btn-close-rates" class="btn-primary modal-action-btn" style="margin-top: var(--space-md); width: 100%;">닫기</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const btnClose = document.getElementById('btn-close-rates');
+  btnClose.addEventListener('click', () => {
+    modalRoot.innerHTML = '';
+  });
+}
+
 export function showKingCelebrationModal() {
   const modalRoot = document.getElementById('modal-root');
   if (!modalRoot) return;
@@ -171,9 +269,9 @@ export function showKingCelebrationModal() {
           <div style="font-size: 72px; line-height: 1;">👑</div>
         </div>
         <div class="modal-content" style="padding: var(--space-lg); text-align: center;">
-          <div class="t-display" style="font-size: 26px; margin-bottom: var(--space-xs);">낚시왕 달성!</div>
+          <div class="t-display" style="font-size: 26px; margin-bottom: var(--space-xs);">전설의 낚시왕 달성!</div>
           <div class="t-body" style="margin-bottom: var(--space-lg);">
-            20종의 물고기를 모두 모았어요.<br />당신은 진정한 물결 낚시터의 전설입니다!
+            10개 지역 100종의 물고기를 모두 정복하셨습니다!<br />당신은 시공간을 초월한 진정한 바다의 신입니다!
           </div>
           <button id="btn-confirm-king" class="btn-primary modal-action-btn">확인</button>
         </div>

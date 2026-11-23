@@ -247,21 +247,37 @@ function triggerBite() {
   }, FISHING_CONFIG.BITE_WINDOW_SEC * 1000);
 }
 
-// 물고기 결정 규칙 (3장)
+// 물고기 결정 규칙
 function determineFish() {
   const bait = BAITS[state.selectedBait] || BAITS.basic;
-  let rarity = weightedPick(bait.weights);
+  let weights = { ...bait.weights };
+
+  // 행운의 부적 발동 시 전설/신화 확률 대폭 부스트
+  if (state.specialItems && state.specialItems.charm_luck > 0) {
+    weights.legendary = (weights.legendary || 0) * 2;
+    weights.mythic = (weights.mythic || 0) * 2.5;
+  }
+
+  let rarity = weightedPick(weights);
 
   // 디버그 옵션 체크
-  if (window.__forceLegendaryOnce) {
+  if (window.__forceMythicOnce) {
+    rarity = 'mythic';
+    window.__forceMythicOnce = false;
+  } else if (window.__forceLegendaryOnce) {
     rarity = 'legendary';
     window.__forceLegendaryOnce = false;
   }
 
   // 현재 지역 물고기 필터링
-  const availableFish = FISH.filter(
+  let availableFish = FISH.filter(
     (f) => f.region === state.currentRegion && f.rarity === rarity
   );
+
+  if (availableFish.length === 0) {
+    // 해당 등급이 없는 경우 그 지역의 가장 높은 등급 선택
+    availableFish = FISH.filter((f) => f.region === state.currentRegion);
+  }
 
   const selectedFish = availableFish.length > 0 ? randomChoice(availableFish) : FISH[0];
   const size = Math.round(randomRange(selectedFish.minSize, selectedFish.maxSize) * 10) / 10;
@@ -291,7 +307,17 @@ function hookFish() {
 // 2-6. 릴 미니게임 종료 콜백 (성공 / 실패)
 function handleReelFinish(result, fish) {
   if (result === 'success') {
-    if (fish.rarity === 'legendary') {
+    // 부적 횟수 차감
+    if (state.specialItems) {
+      if (state.specialItems.charm_luck > 0) state.specialItems.charm_luck--;
+      if (state.specialItems.hourglass_time > 0) state.specialItems.hourglass_time--;
+      if (state.specialItems.potion_zone > 0) state.specialItems.potion_zone--;
+    }
+
+    if (fish.rarity === 'mythic') {
+      playSound('legendary');
+      triggerMythicConfetti();
+    } else if (fish.rarity === 'legendary') {
       playSound('legendary');
       triggerConfetti();
     } else {
@@ -355,7 +381,9 @@ function showResultModal(fish, recordResult = {}) {
   if (!modalRoot) return;
 
   const blockClass =
-    fish.rarity === 'legendary'
+    fish.rarity === 'mythic'
+      ? 'block-mythic'
+      : fish.rarity === 'legendary'
       ? 'block-navy'
       : fish.rarity === 'epic'
         ? 'block-lilac'
@@ -370,9 +398,15 @@ function showResultModal(fish, recordResult = {}) {
     badgeHtml = '<span class="topbar-king-badge">최대 기록!</span>';
   }
 
+  const rarityName =
+    fish.rarity === 'mythic' ? '신화' :
+    fish.rarity === 'legendary' ? '전설' :
+    fish.rarity === 'epic' ? '영웅' :
+    fish.rarity === 'rare' ? '희귀' : '일반';
+
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="modal-result-scrim">
-      <div class="modal-dialog ${fish.rarity === 'legendary' ? 'is-legendary' : ''}">
+      <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}">
         <div class="modal-top-block ${blockClass}">
           <div class="modal-badge-group">
             ${badgeHtml}
@@ -382,7 +416,7 @@ function showResultModal(fish, recordResult = {}) {
         <div class="modal-content">
           <div class="t-display modal-fish-name">${fish.name}</div>
           <div style="margin-top: 4px;">
-            <span class="badge-rarity rarity-${fish.rarity}">${fish.rarity === 'legendary' ? '전설' : fish.rarity === 'epic' ? '영웅' : fish.rarity === 'rare' ? '희귀' : '일반'}</span>
+            <span class="badge-rarity rarity-${fish.rarity}">${rarityName}</span>
           </div>
           <div class="modal-info-list">
             <div class="modal-info-row">
@@ -475,6 +509,28 @@ export function initFishing() {
   }
   updateFishingIndicators();
   updateFishingScene();
+}
+
+function triggerMythicConfetti() {
+  if (typeof document === 'undefined') return;
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  const colors = ['#FF007F', '#7928CA', '#00DFD8', '#FFD166', '#FFFFFF'];
+
+  for (let i = 0; i < 70; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = Math.random() * 8 + 8 + 'px';
+    piece.style.height = Math.random() * 8 + 8 + 'px';
+    piece.style.animationDuration = Math.random() * 1.5 + 2 + 's';
+    piece.style.animationDelay = Math.random() * 0.3 + 's';
+    container.appendChild(piece);
+  }
+
+  document.body.appendChild(container);
+  setTimeout(() => container.remove(), 4000);
 }
 
 function triggerConfetti() {

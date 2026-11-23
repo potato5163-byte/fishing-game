@@ -4,6 +4,7 @@ import {
   equipRod,
   buyBait,
   buyBagUpgrade,
+  buySpecialItem,
 } from './state.js';
 import {
   RODS,
@@ -11,6 +12,7 @@ import {
   BAITS,
   BAIT_ORDER,
   BAG_UPGRADES,
+  SPECIAL_ITEMS,
   MESSAGES,
 } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
@@ -30,10 +32,11 @@ export function renderShop() {
       <div class="t-subhead">🪙 보유 ${formatGold(state.gold)}G</div>
     </div>
 
-    <!-- 상점 탭 토글 (알약 3개) -->
+    <!-- 상점 탭 토글 (알약 4개) -->
     <div class="shop-tab-group">
       <button class="shop-tab-pill ${activeShopTab === 'rod' ? 'is-active' : ''}" data-shoptab="rod">낚싯대</button>
       <button class="shop-tab-pill ${activeShopTab === 'bait' ? 'is-active' : ''}" data-shoptab="bait">미끼</button>
+      <button class="shop-tab-pill ${activeShopTab === 'special' ? 'is-active' : ''}" data-shoptab="special">특수 아이템</button>
       <button class="shop-tab-pill ${activeShopTab === 'bag' ? 'is-active' : ''}" data-shoptab="bag">가방</button>
     </div>
 
@@ -42,7 +45,9 @@ export function renderShop() {
       ? renderRodTab()
       : activeShopTab === 'bait'
         ? renderBaitTab()
-        : renderBagTab()
+        : activeShopTab === 'special'
+          ? renderSpecialTab()
+          : renderBagTab()
     }
     </div>
   `;
@@ -133,6 +138,51 @@ function renderBaitTab() {
   `;
 }
 
+function renderSpecialTab() {
+  const items = Object.values(SPECIAL_ITEMS);
+  return `
+    <div class="shop-list">
+      ${items.map((item) => {
+        let statusStr = '';
+        let btnDisabled = false;
+        let btnText = `구매 ${formatGold(item.price)}G`;
+
+        if (item.isPermanent) {
+          const owned = state.specialItems && state.specialItems.magnet_gold;
+          if (owned) {
+            statusStr = '<span class="collection-reward-tag is-claimed">영구 적용 중</span>';
+            btnDisabled = true;
+            btnText = '보유 중';
+          } else {
+            statusStr = '<span class="collection-reward-tag">영구 패시브</span>';
+          }
+        } else {
+          const count = (state.specialItems && state.specialItems[item.id]) || 0;
+          statusStr = `<span class="t-body-sm tabular-nums" style="font-weight: 700;">남은 횟수: ${count}회</span>`;
+        }
+
+        return `
+          <div class="shop-item-row">
+            <div class="shop-item-emoji">${item.emoji}</div>
+            <div class="shop-item-info">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="t-card-title">${item.name}</span>
+                ${statusStr}
+              </div>
+              <div class="t-body-sm">${item.desc}</div>
+            </div>
+            <div class="shop-item-action">
+              <button class="btn-primary btn-buy-special" data-item-id="${item.id}" style="height: 44px; padding: 0 var(--space-md); font-size: 14px;" ${btnDisabled ? 'disabled' : ''}>
+                ${btnText}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
 function renderBagTab() {
   const currentCap = state.bagCapacity;
   const upgrade = BAG_UPGRADES.find((u) => u.from === currentCap);
@@ -188,6 +238,24 @@ function bindShopEvents(screen) {
       showToast(formatMessage(MESSAGES.EQUIP_ROD, { rodName: rod.name }));
       updateFishingIndicators();
       renderShop();
+    });
+  });
+
+  // 특수 아이템 구매 이벤트
+  const buySpecialBtns = screen.querySelectorAll('.btn-buy-special');
+  buySpecialBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const itemId = btn.dataset.itemId;
+      const item = SPECIAL_ITEMS[itemId];
+      if (!item) return;
+
+      if (item.price >= 1000) {
+        showHighPriceConfirmModal(`${item.name}을(를) ${formatGold(item.price)}G에 살까요?`, () => {
+          executeBuySpecial(itemId);
+        });
+      } else {
+        executeBuySpecial(itemId);
+      }
     });
   });
 
@@ -258,6 +326,19 @@ function executeBuyBait(baitId, qty) {
 
   showToast(formatMessage(MESSAGES.BUY_ITEM, { itemName: `${bait.name} ${qty}개` }));
   updateFishingIndicators();
+  renderShop();
+}
+
+function executeBuySpecial(itemId) {
+  const item = SPECIAL_ITEMS[itemId];
+  const res = buySpecialItem(itemId);
+  if (!res.ok) {
+    if (res.error === 'E02') {
+      showToast(formatMessage(MESSAGES.E02, { price: formatGold(item.price), gold: formatGold(state.gold) }));
+    }
+    return;
+  }
+  showToast(`✨ ${item.name} 구매 완료!`);
   renderShop();
 }
 

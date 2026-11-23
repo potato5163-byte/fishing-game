@@ -1,6 +1,7 @@
 import { FISHING_CONFIG, RODS } from './data.js';
 import { clamp } from './utils.js';
 import { playSound } from './sound.js';
+import { state } from './state.js';
 
 let isReeling = false;
 let isHolding = false;
@@ -27,7 +28,14 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   isHolding = false;
 
   const rod = RODS[equippedRodId] || RODS.bamboo;
-  zoneH = FISHING_CONFIG.ZONE_BASE_HEIGHT + (rod.zoneBonus || 0);
+  let bonusH = rod.zoneBonus || 0;
+
+  // 거인의 비약 활성화 시 잡기 영역 1.5배 증가
+  if (state.specialItems && state.specialItems.potion_zone > 0) {
+    bonusH += 15;
+  }
+
+  zoneH = FISHING_CONFIG.ZONE_BASE_HEIGHT + bonusH;
   zoneY = 50 - zoneH / 2;
   zoneVel = 0;
 
@@ -36,7 +44,13 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   targetTimer = 0;
 
   progress = FISHING_CONFIG.PROGRESS_START;
-  timeLeft = FISHING_CONFIG.REEL_TIME_LIMIT_SEC;
+  let timeLimit = FISHING_CONFIG.REEL_TIME_LIMIT_SEC;
+
+  // 시간 정지 모래시계 부적 활성화 시 제한시간 +15초 연장
+  if (state.specialItems && state.specialItems.hourglass_time > 0) {
+    timeLimit += 15;
+  }
+  timeLeft = timeLimit;
 
   // DOM 초기화
   const panel = document.getElementById('reel-panel');

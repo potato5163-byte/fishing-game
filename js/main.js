@@ -15,6 +15,8 @@ import { formatGold } from './utils.js';
 import { toggleSound, isSoundEnabled, playSound } from './sound.js';
 import { cycleWeather, updateWeatherVisual } from './weather.js';
 
+import { showRatesModal } from './collection.js';
+
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-item');
   tabButtons.forEach((button) => {
@@ -30,6 +32,11 @@ function initTabs() {
 function initFishingInput() {
   const mainBtn = document.getElementById('btn-main-action');
   const reelPanel = document.getElementById('reel-panel');
+  const quickRatesBtn = document.getElementById('btn-quick-rates');
+
+  if (quickRatesBtn) {
+    quickRatesBtn.addEventListener('click', showRatesModal);
+  }
 
   if (mainBtn) {
     mainBtn.addEventListener('pointerdown', (e) => {

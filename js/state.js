@@ -19,6 +19,10 @@ export function createNewState() {
       worm: 0,
       shiny: 0,
       golden: 0,
+      rainbow: 0,
+      cosmic_bait: 0,
+      phoenix: 0,
+      celestial_star: 0,
     },
     selectedBait: START.bait,
     bagCapacity: START.bagCapacity,
@@ -26,6 +30,12 @@ export function createNewState() {
     collection: {},
     claimedRegionRewards: [],
     kingAchieved: false,
+    specialItems: {
+      charm_luck: 0,
+      hourglass_time: 0,
+      magnet_gold: false,
+      potion_zone: 0,
+    },
     stats: {
       totalCaught: 0,
       totalCasts: 0,
@@ -281,7 +291,12 @@ export function sellFish(uid) {
   if (index === -1) return 0;
 
   const [fish] = state.bag.splice(index, 1);
-  const amount = fish.price || 0;
+  let amount = fish.price || 0;
+
+  // 황금 자석 부적 보유 시 판매가 +30% 보너스
+  if (state.specialItems && state.specialItems.magnet_gold) {
+    amount = Math.round(amount * 1.3);
+  }
 
   state.gold += amount;
   state.stats.totalEarned = (state.stats.totalEarned || 0) + amount;
@@ -295,7 +310,12 @@ export function sellAllFish() {
   const count = state.bag.length;
   if (count === 0) return { count: 0, total: 0 };
 
-  const total = state.bag.reduce((sum, item) => sum + (item.price || 0), 0);
+  const hasMagnet = state.specialItems && state.specialItems.magnet_gold;
+  const total = state.bag.reduce((sum, item) => {
+    let price = item.price || 0;
+    return sum + (hasMagnet ? Math.round(price * 1.3) : price);
+  }, 0);
+
   state.bag = [];
   state.gold += total;
   state.stats.totalEarned = (state.stats.totalEarned || 0) + total;
@@ -387,13 +407,40 @@ export function claimRegionReward(regionId) {
 
 export function checkKingAchievement() {
   const totalCollected = Object.keys(state.collection || {}).length;
-  if (totalCollected >= 35 && !state.kingAchieved) {
+  if (totalCollected >= 100 && !state.kingAchieved) {
     state.kingAchieved = true;
     saveGame();
     updateTopbar();
     return true;
   }
   return false;
+}
+
+export function buySpecialItem(itemId) {
+  if (!state.specialItems) {
+    state.specialItems = { charm_luck: 0, hourglass_time: 0, magnet_gold: false, potion_zone: 0 };
+  }
+  const itemPrices = { charm_luck: 3000, hourglass_time: 5000, magnet_gold: 50000, potion_zone: 8000 };
+  const price = itemPrices[itemId] || 0;
+
+  if (state.gold < price) {
+    return { ok: false, error: 'E02' };
+  }
+
+  if (itemId === 'magnet_gold' && state.specialItems.magnet_gold) {
+    return { ok: false, error: 'ALREADY_OWNED' };
+  }
+
+  state.gold -= price;
+  if (itemId === 'magnet_gold') {
+    state.specialItems.magnet_gold = true;
+  } else {
+    state.specialItems[itemId] = (state.specialItems[itemId] || 0) + 5; // 5회 충전
+  }
+
+  saveGame();
+  updateTopbar();
+  return { ok: true };
 }
 
 // ==========================================

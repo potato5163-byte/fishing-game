@@ -30,6 +30,7 @@
   --rarity-rare: #8FB8FF;
   --rarity-epic: #C5B0F4;
   --rarity-legendary: #FFD166;
+  --rarity-mythic: #FF0055;
 
   /* 지역 배경 (게임 예외, 위 → 아래 그라데이션) */
   --region-lake-top: #A8DADC;   --region-lake-bottom: #457B9D;
@@ -39,6 +40,9 @@
   --region-glacier-top: #E0FBFC; --region-glacier-bottom: #3D5A80;
   --region-palace-top: #FDE2E4;  --region-palace-bottom: #9B5DE5;
   --region-nebula-top: #7209B7;  --region-nebula-bottom: #03045E;
+  --region-volcano-top: #FF5400; --region-volcano-bottom: #6A040F;
+  --region-timewarp-top: #480CA8; --region-timewarp-bottom: #3F37C9;
+  --region-sky_ocean-top: #FFB703; --region-sky_ocean-bottom: #023E8A;
 
   /* 간격 (8px 기준) */
   --space-hair: 1px;

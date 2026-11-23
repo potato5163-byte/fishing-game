@@ -271,6 +271,139 @@
 .badge-rarity.rarity-rare { background-color: var(--rarity-rare); }
 .badge-rarity.rarity-epic { background-color: var(--rarity-epic); }
 .badge-rarity.rarity-legendary { background-color: var(--rarity-legendary); }
+.badge-rarity.rarity-mythic {
+  background: linear-gradient(135deg, #FF007F, #7928CA, #00DFD8);
+  color: #FFFFFF !important;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+  animation: mythic-pulse 1.5s infinite alternate;
+}
+
+@keyframes mythic-pulse {
+  from { filter: drop-shadow(0 0 2px #FF007F); }
+  to { filter: drop-shadow(0 0 8px #00DFD8); }
+}
+
+.fishing-scene.region-volcano {
+  background: linear-gradient(to bottom, var(--region-volcano-top) 0%, var(--region-volcano-top) 45%, var(--region-volcano-bottom) 45%, var(--region-volcano-bottom) 100%);
+}
+.fishing-scene.region-timewarp {
+  background: linear-gradient(to bottom, var(--region-timewarp-top) 0%, var(--region-timewarp-top) 45%, var(--region-timewarp-bottom) 45%, var(--region-timewarp-bottom) 100%);
+}
+.fishing-scene.region-sky_ocean {
+  background: linear-gradient(to bottom, var(--region-sky_ocean-top) 0%, var(--region-sky_ocean-top) 45%, var(--region-sky_ocean-bottom) 45%, var(--region-sky_ocean-bottom) 100%);
+}
+
+.region-card.region-volcano {
+  background: linear-gradient(to bottom, var(--region-volcano-top), var(--region-volcano-bottom));
+}
+.region-card.region-timewarp {
+  background: linear-gradient(to bottom, var(--region-timewarp-top), var(--region-timewarp-bottom));
+}
+.region-card.region-sky_ocean {
+  background: linear-gradient(to bottom, var(--region-sky_ocean-top), var(--region-sky_ocean-bottom));
+}
+
+.deco-volcano {
+  position: absolute;
+  top: 48%;
+  left: 20%;
+  font-size: 24px;
+}
+.deco-timewarp {
+  position: absolute;
+  top: 30%;
+  right: 15%;
+  font-size: 26px;
+}
+.deco-sky_ocean {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  font-size: 28px;
+}
+
+/* 신화 모달 스타일 */
+.modal-dialog.is-mythic {
+  border: 4px solid #FF007F;
+  box-shadow: 0 0 30px rgba(255, 0, 127, 0.8);
+}
+
+.modal-top-block.block-mythic {
+  background: radial-gradient(circle, #7928CA 0%, #1A002C 100%);
+  color: #FFFFFF;
+}
+
+.is-mythic .modal-fish-emoji {
+  animation: mythic-rotate 2s ease-in-out infinite alternate;
+}
+
+@keyframes mythic-rotate {
+  0% { transform: scale(1) rotate(-8deg); filter: drop-shadow(0 0 10px #FF0055); }
+  100% { transform: scale(1.2) rotate(8deg); filter: drop-shadow(0 0 25px #00DFD8); }
+}
+
+/* ========================================================
+   도감 럭셔리 수족관 스타일 업그레이드
+======================================================== */
+.collection-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 110px;
+  cursor: pointer;
+  border: 1px solid var(--color-hairline);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.collection-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.collection-card.rarity-mythic-card {
+  border: 1.5px solid #FF007F;
+  background: linear-gradient(180deg, #FFFFFF 60%, rgba(255, 0, 127, 0.08) 100%);
+}
+
+.collection-card.rarity-legendary-card {
+  border: 1.5px solid #FFD166;
+  background: linear-gradient(180deg, #FFFFFF 60%, rgba(255, 209, 102, 0.12) 100%);
+}
+
+.collection-card-emoji-box {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  position: relative;
+}
+
+.rarity-mythic-card .collection-card-emoji-box {
+  background: linear-gradient(135deg, rgba(255,0,127,0.15), rgba(0,223,216,0.15));
+}
+
+.collection-card-count-badge {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-ink);
+  opacity: 0.6;
+}
 
 /* NEW! 배지 */
 .badge-new {

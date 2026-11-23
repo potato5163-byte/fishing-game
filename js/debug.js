@@ -41,6 +41,8 @@ function showDebugPanel() {
     </div>
     <div class="debug-body" id="debug-body">
       <button id="btn-debug-gold" class="debug-btn">+1,000G</button>
+      <button id="btn-debug-gold-mega" class="debug-btn" style="color: #FFD166;">+100,000G</button>
+      <button id="btn-debug-mythic" class="debug-btn" style="color: #FF007F; font-weight: 700;">다음 물고기 신화 확정</button>
       <button id="btn-debug-legend" class="debug-btn">다음 물고기 전설 확정</button>
       <button id="btn-debug-bite" class="debug-btn">입질 바로 오기: OFF</button>
       <button id="btn-debug-stats" class="debug-btn">등급 통계 (1,000회)</button>
@@ -54,6 +56,22 @@ function showDebugPanel() {
     addGold(1000);
     showToast('🪙 디버그: +1,000G 지급 완료');
   });
+
+  const btnGoldMega = document.getElementById('btn-debug-gold-mega');
+  if (btnGoldMega) {
+    btnGoldMega.addEventListener('click', () => {
+      addGold(100000);
+      showToast('💰 디버그: +100,000G 대량 지급 완료');
+    });
+  }
+
+  const btnMythic = document.getElementById('btn-debug-mythic');
+  if (btnMythic) {
+    btnMythic.addEventListener('click', () => {
+      window.__forceMythicOnce = true;
+      showToast('🔥 디버그: 다음 물고기가 [신화]로 확정됩니다.');
+    });
+  }
 
   const btnLegend = document.getElementById('btn-debug-legend');
   btnLegend.addEventListener('click', () => {
