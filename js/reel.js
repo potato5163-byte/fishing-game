@@ -26,6 +26,9 @@ let nextJumpCooldown = 4.0; // 다음 점프까지 쿨다운
 let isStunned = false;
 let stunTimer = 0;
 
+// 신규: 물고기 폭주 (RAGE) 모드 (영웅/전설/신화 물고기가 체력 40% 이하일 때 발동)
+let isRageMode = false;
+
 // 파이팅 진행도 및 제한시간
 let progress = 30; // 0 ~ 100 (100 도달 시 포획 성공)
 let timeLeft = 25;
@@ -230,6 +233,7 @@ export function startReelGame(fish, equippedRodId, onFinish) {
 
   isStunned = false;
   stunTimer = 0;
+  isRageMode = false;
 
   progress = 25; // 시작 진행도 25% (더 팽팽하게)
   let timeLimit = Math.max(16, 26 - diff * 2); // 고난도 물고기는 제한시간도 촉박 (16초~24초)
@@ -383,16 +387,30 @@ function updatePhysics(dt) {
     }
   }
 
-  // 7. 물고기 좌우 이동 물리 (스턴 중이면 멈춤)
+  // 7. 물고기 폭주(RAGE) 및 좌우 이동 물리
   if (!isStunned) {
+    // 영웅/전설/신화 물고기는 진행도 60% 이상(남은 거리 40% 이하)일 때 결사 항전 폭주(RAGE)!
+    const isHighRarity = ['epic', 'legendary', 'mythic'].includes(currentFish.rarity);
+    if (isHighRarity && progress >= 60 && !isRageMode) {
+      isRageMode = true;
+      playSound('qte_prompt');
+      const app = document.getElementById('app');
+      if (app) {
+        app.classList.remove('screen-shake');
+        void app.offsetWidth;
+        app.classList.add('screen-shake');
+      }
+    }
+
     fishTurnTimer -= dt;
     if (fishTurnTimer <= 0) {
       fishTargetX = 15 + Math.random() * 70;
-      fishTurnTimer = 1.0 + Math.random() * 1.5;
+      fishTurnTimer = isRageMode ? (0.4 + Math.random() * 0.6) : (0.8 + Math.random() * 1.0);
     }
 
     const dist = fishTargetX - fishX;
-    const step = fishSpeed * dt;
+    const currentSpeed = isRageMode ? fishSpeed * 1.35 : fishSpeed;
+    const step = currentSpeed * dt;
     if (Math.abs(dist) <= step) {
       fishX = fishTargetX;
     } else {
@@ -454,6 +472,12 @@ function updateReelDOM() {
       fish3D.classList.add('is-jumping');
     } else {
       fish3D.classList.remove('is-jumping');
+    }
+
+    if (isRageMode) {
+      fish3D.classList.add('is-rage-mode');
+    } else {
+      fish3D.classList.remove('is-rage-mode');
     }
   }
 

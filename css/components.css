@@ -415,6 +415,83 @@
   border-radius: var(--radius-pill);
 }
 
+/* 신화 등급 승리 컷씬 연출 */
+.mythic-victory-cutscene {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(30, 0, 50, 0.92) 0%, rgba(5, 5, 15, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: cutscene-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.4s ease;
+}
+
+.mythic-victory-cutscene.fade-out {
+  opacity: 0;
+}
+
+.mythic-cutscene-halo {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.6) 0%, rgba(168, 85, 247, 0.4) 50%, transparent 70%);
+  filter: blur(25px);
+  animation: halo-rotate 3s infinite linear;
+}
+
+.mythic-cutscene-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.mythic-cutscene-banner {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #f472b6;
+  text-shadow: 0 0 15px #f472b6;
+}
+
+.mythic-cutscene-fish {
+  font-size: 80px;
+  filter: drop-shadow(0 0 25px rgba(244, 114, 182, 0.8));
+  animation: fish-bounce 0.8s infinite alternate ease-in-out;
+}
+
+.mythic-cutscene-name {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.mythic-cutscene-sub {
+  font-size: 13px;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+@keyframes cutscene-in {
+  from { opacity: 0; transform: scale(1.15); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes halo-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fish-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+
 /* ========================================================
    낚시 화면 컴포넌트
 ======================================================== */
@@ -848,6 +925,17 @@
   filter: blur(2px);
   margin-top: -6px;
   transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* 물고기 폭주 (RAGE) 모드 */
+.reel-fish-3d.is-rage-mode .fish-avatar-emoji {
+  filter: drop-shadow(0 0 14px #ef4444) saturate(2);
+  animation: rage-shake 0.15s infinite alternate ease-in-out;
+}
+
+@keyframes rage-shake {
+  from { transform: scaleX(-1) translateY(-2px); }
+  to { transform: scaleX(-1) translateY(2px); }
 }
 
 /* 물고기 점프(JUMP) 상태 */

@@ -364,6 +364,7 @@ function handleReelFinish(result, fish) {
 
     if (fish.rarity === 'mythic') {
       playSound('legendary');
+      triggerMythicVictoryCutscene(fish);
       triggerMythicConfetti();
     } else if (fish.rarity === 'legendary') {
       playSound('legendary');
@@ -614,6 +615,26 @@ export function updateFeverUI() {
       scene.classList.remove('is-fever-active');
     }
   }
+}
+
+function triggerMythicVictoryCutscene(fish) {
+  if (typeof document === 'undefined') return;
+  const overlay = document.createElement('div');
+  overlay.className = 'mythic-victory-cutscene';
+  overlay.innerHTML = `
+    <div class="mythic-cutscene-halo"></div>
+    <div class="mythic-cutscene-content">
+      <div class="mythic-cutscene-banner">✨ MYTHIC CATCH!! ✨</div>
+      <div class="mythic-cutscene-fish">${fish.emoji}</div>
+      <div class="mythic-cutscene-name">${fish.name}</div>
+      <div class="mythic-cutscene-sub">바다의 신화가 손끝에 걸렸습니다!</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.remove(), 400);
+  }, 2200);
 }
 
 function triggerMythicConfetti() {

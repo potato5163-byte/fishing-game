@@ -33,8 +33,8 @@ export function updateTopbar() {
   }
 
   if (kingEl) {
-    const totalCollected = Object.keys(state.collection).length;
-    kingEl.hidden = !(state.kingAchieved || totalCollected >= 20);
+    const totalCollected = Object.keys(state.collection || {}).length;
+    kingEl.hidden = !(state.kingAchieved || totalCollected >= 100);
   }
 }
 
