@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium } from './state.js';
 import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
@@ -9,14 +9,17 @@ export function renderCollection() {
 
   const collectedCount = Object.keys(state.collection || {}).length;
   const percent = Math.round((collectedCount / 100) * 100);
+  const crownTotal = state.stats && state.stats.crownCount ? state.stats.crownCount : 0;
+  const pendingRevenue = getAquariumPendingGold();
+  const aquariumList = state.aquarium || [];
 
   screen.innerHTML = `
     <div class="color-block block-lime">
       <div class="t-eyebrow">COLLECTION · AQUARIUM</div>
       <div class="color-block-header">
         <div>
-          <div class="t-headline">수족관 도감</div>
-          <div class="t-subhead">달성률 ${collectedCount}/100 (${percent}%)</div>
+          <div class="t-headline">수족관 & 도감</div>
+          <div class="t-subhead">도감 ${collectedCount}/100 · 👑 황금 왕관 ${crownTotal}개</div>
         </div>
         <button id="btn-show-rates" class="btn-primary" style="height: 38px; font-size: 13px; padding: 0 var(--space-md); background: #000; color: #fff;">
           📊 물고기 확률표
@@ -27,10 +30,64 @@ export function renderCollection() {
       </div>
     </div>
 
+    <!-- 나만의 수족관 라이브 뷰 -->
+    <div class="aquarium-live-section">
+      <div class="aquarium-header">
+        <div class="t-card-title">🐟 내 아쿠아리움 (${aquariumList.length}/20)</div>
+        <button id="btn-collect-revenue" class="btn-primary btn-aquarium-claim" ${pendingRevenue <= 0 ? 'disabled' : ''}>
+          🪙 관람료 수령 (${formatGold(pendingRevenue)}G)
+        </button>
+      </div>
+      <div class="aquarium-tank" id="aquarium-tank">
+        ${
+          aquariumList.length === 0
+            ? `<div class="aquarium-empty-msg">가방에서 [🐠 수족관] 버튼을 눌러 물고기를 넣어보세요!<br>물고기가 헤엄치며 방치 관람료 골드를 생산합니다.</div>`
+            : aquariumList
+                .map((f, i) => {
+                  const animDelay = (i * 0.4) % 3;
+                  const animDuration = 4 + (i % 4);
+                  const topPos = 15 + ((i * 19) % 65);
+                  return `
+                  <div class="aquarium-swimming-fish" style="top: ${topPos}%; animation-delay: -${animDelay}s; animation-duration: ${animDuration}s;" data-aq-id="${f.id}" title="${f.name} (${f.size.toFixed(1)}cm) - 방출하려면 클릭">
+                    <span class="fish-sprite">${f.emoji}</span>
+                    <span class="fish-name-tag">${f.name}</span>
+                  </div>
+                `;
+                })
+                .join('')
+        }
+      </div>
+    </div>
+
     <div class="collection-body">
       ${REGIONS.map((region) => renderRegionSection(region)).join('')}
     </div>
   `;
+
+  // 관람료 수령 버튼
+  const btnCollect = document.getElementById('btn-collect-revenue');
+  if (btnCollect) {
+    btnCollect.addEventListener('click', () => {
+      const earned = collectAquariumRevenue();
+      if (earned > 0) {
+        showToast(`🪙 수족관 관람료 +${formatGold(earned)}G를 수령했습니다!`);
+        renderCollection();
+      }
+    });
+  }
+
+  // 수족관 물고기 클릭 시 방출 확인
+  const swimFishList = screen.querySelectorAll('.aquarium-swimming-fish');
+  swimFishList.forEach((el) => {
+    el.addEventListener('click', () => {
+      const aqId = el.dataset.aqId;
+      if (confirm('이 물고기를 자연으로 방출하시겠습니까?')) {
+        releaseFishFromAquarium(aqId);
+        showToast('물고기를 자연으로 돌려보냈습니다.');
+        renderCollection();
+      }
+    });
+  });
 
   // 확률표 모달 버튼 이벤트
   const btnRates = document.getElementById('btn-show-rates');
@@ -99,10 +156,12 @@ function renderFishCard(fish) {
 
   const rarity = RARITIES[fish.rarity] || RARITIES.common;
   const cardClass = fish.rarity === 'mythic' ? 'rarity-mythic-card' : fish.rarity === 'legendary' ? 'rarity-legendary-card' : '';
+  const crownBadge = record.crown ? '<span class="collection-crown-badge" title="최대 크기 95% 이상 황금 왕관!">👑</span>' : '';
 
   return `
     <div class="collection-card is-known ${cardClass}" data-fish-id="${fish.id}">
       <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
+      ${crownBadge}
       <div class="collection-card-emoji-box">
         <span>${fish.emoji}</span>
       </div>

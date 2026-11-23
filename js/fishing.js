@@ -15,7 +15,18 @@ import {
   formatMessage,
   clamp,
 } from './utils.js';
-import { state, setFishingActive, addFishToBag, recordCatch, checkRegionCompletion, claimRegionReward, checkKingAchievement } from './state.js';
+import {
+  state,
+  setFishingActive,
+  addFishToBag,
+  recordCatch,
+  checkRegionCompletion,
+  claimRegionReward,
+  checkKingAchievement,
+  addFeverGauge,
+  deactivateFever,
+  addGold,
+} from './state.js';
 import { showToast, updateTopbar } from './ui.js';
 import { startReelGame, setReelHolding, isReelingActive } from './reel.js';
 import { isInstantBiteEnabled } from './debug.js';
@@ -196,7 +207,10 @@ function stopCharging() {
 
   // 대기 시간 계산
   let waitSec = 4.0;
-  if (isInstantBiteEnabled()) {
+  if (state.isFeverActive) {
+    // 피버 중에는 초고속 입질! (0.6초)
+    waitSec = 0.6;
+  } else if (isInstantBiteEnabled()) {
     waitSec = 0.5;
   } else if (finalPower >= 90) {
     showToast(MESSAGES.PERFECT_CAST);
@@ -249,8 +263,35 @@ function triggerBite() {
 
 // 물고기 결정 규칙
 function determineFish() {
+  // 1. 보물상자 이벤트 체크 (7% 확률, 피버 중에는 15%)
+  const chestChance = state.isFeverActive ? 0.15 : 0.07;
+  if (Math.random() < chestChance) {
+    const isGoldChest = Math.random() < 0.3;
+    const goldReward = isGoldChest ? Math.round(randomRange(15000, 35000)) : Math.round(randomRange(3000, 8000));
+    pendingFish = {
+      id: isGoldChest ? 'chest_gold' : 'chest_silver',
+      name: isGoldChest ? '👑 황금 해적 보물상자' : '📦 낡은 바다 보물상자',
+      rarity: isGoldChest ? 'mythic' : 'legendary',
+      emoji: isGoldChest ? '👑' : '📦',
+      size: isGoldChest ? 99.9 : 50.0,
+      price: goldReward,
+      difficulty: isGoldChest ? 4 : 3,
+      isChest: true,
+      rewardGold: goldReward,
+    };
+    return;
+  }
+
   const bait = BAITS[state.selectedBait] || BAITS.basic;
   let weights = { ...bait.weights };
+
+  // 피버 타임 중에는 희귀/영웅/전설/신화 확률 대폭 상승!
+  if (state.isFeverActive) {
+    weights.rare = (weights.rare || 0) * 1.5;
+    weights.epic = (weights.epic || 0) * 2;
+    weights.legendary = (weights.legendary || 0) * 3;
+    weights.mythic = (weights.mythic || 0) * 4;
+  }
 
   // 행운의 부적 발동 시 전설/신화 확률 대폭 부스트
   if (state.specialItems && state.specialItems.charm_luck > 0) {
@@ -282,12 +323,19 @@ function determineFish() {
   const selectedFish = availableFish.length > 0 ? randomChoice(availableFish) : FISH[0];
   const size = Math.round(randomRange(selectedFish.minSize, selectedFish.maxSize) * 10) / 10;
   const ratio = (size - selectedFish.minSize) / (selectedFish.maxSize - selectedFish.minSize || 1);
-  const price = Math.round(selectedFish.basePrice * (0.8 + 0.4 * ratio));
+  let price = Math.round(selectedFish.basePrice * (0.8 + 0.4 * ratio));
+
+  // 95% 이상 초대형 크기(황금 왕관급)이면 판매가 1.5배 보너스!
+  const isCrownSize = size >= (selectedFish.minSize + (selectedFish.maxSize - selectedFish.minSize) * 0.95);
+  if (isCrownSize) {
+    price = Math.round(price * 1.5);
+  }
 
   pendingFish = {
     ...selectedFish,
     size,
     price,
+    isCrown: isCrownSize,
   };
 }
 
@@ -323,12 +371,24 @@ function handleReelFinish(result, fish) {
     } else {
       playSound('catch');
     }
+    // 피버 게이지 상승 (완벽 캐스팅 + 잡기 성공 시 +25)
+    addFeverGauge(20);
+
+    // 보물상자인 경우 바로 골드 지급
+    if (fish.isChest) {
+      addGold(fish.rewardGold);
+      state.stats.chestsFound = (state.stats.chestsFound || 0) + 1;
+      showResultModal(fish, { isChest: true });
+      return;
+    }
+
     // 가방 아이템 생성 및 추가 (docs/05 1-1)
     const bagItem = {
       uid: 'f_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
       fishId: fish.id,
       size: fish.size,
       price: fish.price,
+      isCrown: fish.isCrown,
       caughtAt: new Date().toISOString(),
     };
     addFishToBag(bagItem);
@@ -336,7 +396,7 @@ function handleReelFinish(result, fish) {
     // 도감 기록 갱신 (docs/06 2장)
     const recordResult = recordCatch(fish.id, fish.size);
 
-    // 결과 모달 노출 (NEW!, 최대 기록! 전달)
+    // 결과 모달 노출 (NEW!, 최대 기록!, 왕관! 전달)
     showResultModal(fish, recordResult);
   } else if (result === 'fail_escaped') {
     showFailModal(MESSAGES.E07);
@@ -392,7 +452,11 @@ function showResultModal(fish, recordResult = {}) {
           : 'block-cream';
 
   let badgeHtml = '';
-  if (recordResult.isNew) {
+  if (recordResult.isChest) {
+    badgeHtml = '<span class="badge-new" style="background: #eab308; color: #000;">보물 획득!</span>';
+  } else if (recordResult.isCrown) {
+    badgeHtml = '<span class="topbar-king-badge" style="background: #fbbf24; color: #000;">👑 황금 왕관 기록!</span>';
+  } else if (recordResult.isNew) {
     badgeHtml = '<span class="badge-new">NEW!</span>';
   } else if (recordResult.isRecord) {
     badgeHtml = '<span class="topbar-king-badge">최대 기록!</span>';
@@ -509,6 +573,47 @@ export function initFishing() {
   }
   updateFishingIndicators();
   updateFishingScene();
+  updateFeverUI();
+
+  // 피버 타이머 1초 인터벌
+  setInterval(() => {
+    if (state.isFeverActive) {
+      state.feverTimeLeft = Math.max(0, state.feverTimeLeft - 1);
+      state.feverGauge = Math.round((state.feverTimeLeft / 18) * 100);
+      if (state.feverTimeLeft <= 0) {
+        deactivateFever();
+        showToast('피버 버스트가 종료되었습니다.');
+      }
+      updateFeverUI();
+    }
+  }, 1000);
+}
+
+export function updateFeverUI() {
+  if (typeof document === 'undefined') return;
+  const fill = document.getElementById('fever-fill');
+  const pctText = document.getElementById('fever-percent');
+  const scene = document.getElementById('fishing-scene');
+
+  if (fill) {
+    fill.style.width = `${state.feverGauge || 0}%`;
+  }
+  if (pctText) {
+    if (state.isFeverActive) {
+      pctText.textContent = `🔥 ACTIVE (${Math.ceil(state.feverTimeLeft)}s)`;
+      pctText.style.color = '#e11d48';
+    } else {
+      pctText.textContent = `${Math.round(state.feverGauge || 0)}%`;
+      pctText.style.color = '#ea580c';
+    }
+  }
+  if (scene) {
+    if (state.isFeverActive) {
+      scene.classList.add('is-fever-active');
+    } else {
+      scene.classList.remove('is-fever-active');
+    }
+  }
 }
 
 function triggerMythicConfetti() {

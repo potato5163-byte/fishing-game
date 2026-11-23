@@ -1,4 +1,4 @@
-import { state, sellFish, sellAllFish } from './state.js';
+import { state, sellFish, sellAllFish, addFishToAquarium } from './state.js';
 import { FISH, RARITIES, MESSAGES } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
 import { showToast, switchTab } from './ui.js';
@@ -48,12 +48,16 @@ export function renderBag() {
                   <div class="bag-item-info">
                     <div style="display: flex; align-items: center; gap: 6px;">
                       <span class="t-card-title">${fishMeta.name}</span>
+                      ${item.isCrown ? '<span style="font-size: 13px;" title="황금 왕관 초대형 크기">👑</span>' : ''}
                       <span class="badge-rarity rarity-${fishMeta.rarity}">${rarityMeta.name}</span>
                     </div>
-                    <div class="t-body-sm tabular-nums">${item.size.toFixed(1)}cm</div>
+                    <div class="t-body-sm tabular-nums">${item.size.toFixed(1)}cm ${item.isCrown ? '<strong style="color: #ca8a04;">(1.5배 보너스!)</strong>' : ''}</div>
                   </div>
                   <div class="bag-item-price tabular-nums t-card-title">${formatGold(item.price)}G</div>
-                  <button class="btn-secondary btn-sell-one" data-uid="${item.uid}">팔기</button>
+                  <div style="display: flex; gap: 4px;">
+                    <button class="btn-secondary btn-aquarium-one" data-uid="${item.uid}" title="수족관에 넣기" style="padding: 0 8px; font-size: 12px; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">🐠 수족관</button>
+                    <button class="btn-secondary btn-sell-one" data-uid="${item.uid}">팔기</button>
+                  </div>
                 </div>
               `;
               })
@@ -95,6 +99,23 @@ export function renderBag() {
         })
       );
       renderBag();
+    });
+  });
+
+  const aquariumOneBtns = screen.querySelectorAll('.btn-aquarium-one');
+  aquariumOneBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const uid = btn.dataset.uid;
+      const index = state.bag.findIndex((item) => item.uid === uid);
+      if (index === -1) return;
+
+      const result = addFishToAquarium(index);
+      if (!result.ok) {
+        showToast(result.error);
+      } else {
+        showToast(`🐠 [${result.fish.name}]을(를) 수족관에 넣었습니다!`);
+        renderBag();
+      }
     });
   });
 }

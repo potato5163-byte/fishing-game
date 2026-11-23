@@ -36,14 +36,22 @@ export function createNewState() {
       magnet_gold: false,
       potion_zone: 0,
     },
+    // 신규 확장 기능 상태
+    aquarium: [], // 수족관에 넣은 물고기 목록 [{ id, fishId, name, emoji, size, rarity, addedAt }]
+    aquariumLastCollectedAt: Date.now(),
+    feverGauge: 0, // 0 ~ 100 피버 게이지
     stats: {
       totalCaught: 0,
       totalCasts: 0,
       totalEarned: 0,
+      chestsFound: 0,
+      crownCount: 0,
     },
     // 비영속 런타임 상태
     activeTab: 'fishing',
     isFishingActive: false,
+    isFeverActive: false,
+    feverTimeLeft: 0,
   };
 }
 
@@ -96,6 +104,10 @@ export function saveGame() {
     collection: state.collection,
     claimedRegionRewards: state.claimedRegionRewards,
     kingAchieved: state.kingAchieved,
+    specialItems: state.specialItems,
+    aquarium: state.aquarium || [],
+    aquariumLastCollectedAt: state.aquariumLastCollectedAt || Date.now(),
+    feverGauge: state.feverGauge || 0,
     stats: state.stats,
   };
 
@@ -354,15 +366,28 @@ export function recordCatch(fishId, size) {
   let isNew = false;
   let isRecord = false;
 
+  const fishDef = FISH.find((f) => f.id === fishId);
+  // 최대 크기의 95% 이상이면 황금 왕관(Crown) 부여!
+  const crownThreshold = fishDef ? fishDef.minSize + (fishDef.maxSize - fishDef.minSize) * 0.95 : 999999;
+  const isCrown = size >= crownThreshold;
+
   if (!existing) {
     isNew = true;
     state.collection[fishId] = {
       count: 1,
       maxSize: size,
+      crown: isCrown,
       firstCaughtAt: new Date().toISOString(),
     };
+    if (isCrown) {
+      state.stats.crownCount = (state.stats.crownCount || 0) + 1;
+    }
   } else {
     existing.count += 1;
+    if (isCrown && !existing.crown) {
+      existing.crown = true;
+      state.stats.crownCount = (state.stats.crownCount || 0) + 1;
+    }
     if (size > existing.maxSize) {
       existing.maxSize = size;
       isRecord = true;
@@ -371,7 +396,131 @@ export function recordCatch(fishId, size) {
 
   saveGame();
   updateTopbar();
-  return { isNew, isRecord };
+  return { isNew, isRecord, isCrown };
+}
+
+// ==========================================
+// 수족관 (Aquarium) 상태 관리 함수
+// ==========================================
+
+export function addFishToAquarium(bagIndex) {
+  if (!state.aquarium) state.aquarium = [];
+  if (state.aquarium.length >= 20) {
+    return { ok: false, error: '수족관이 가득 찼습니다! (최대 20마리)' };
+  }
+
+  if (bagIndex < 0 || bagIndex >= state.bag.length) {
+    return { ok: false, error: '존재하지 않는 물고기입니다.' };
+  }
+
+  const item = state.bag[bagIndex];
+  state.bag.splice(bagIndex, 1);
+
+  state.aquarium.push({
+    id: `aq_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    fishId: item.fishId,
+    name: item.name,
+    emoji: item.emoji,
+    size: item.size,
+    rarity: item.rarity,
+    price: item.price,
+    addedAt: Date.now(),
+  });
+
+  saveGame();
+  updateTopbar();
+  return { ok: true, fish: item };
+}
+
+export function releaseFishFromAquarium(aquariumId) {
+  if (!state.aquarium) return false;
+  const idx = state.aquarium.findIndex((f) => f.id === aquariumId);
+  if (idx === -1) return false;
+
+  state.aquarium.splice(idx, 1);
+  saveGame();
+  return true;
+}
+
+// 수족관 관람료(방치 수익) 계산 및 수령
+export function collectAquariumRevenue() {
+  if (!state.aquarium || state.aquarium.length === 0) {
+    return 0;
+  }
+
+  const now = Date.now();
+  const lastTime = state.aquariumLastCollectedAt || now;
+  const elapsedSec = Math.max(0, Math.floor((now - lastTime) / 1000));
+  state.aquariumLastCollectedAt = now;
+
+  // 물고기 1마리당 등급에 따른 초당 수익 계산
+  // common: 1G/min, rare: 3G/min, epic: 10G/min, legendary: 30G/min, mythic: 100G/min
+  const rarityPerMinute = {
+    common: 1,
+    rare: 3,
+    epic: 10,
+    legendary: 30,
+    mythic: 100,
+  };
+
+  let goldPerSec = 0;
+  state.aquarium.forEach((f) => {
+    const rate = rarityPerMinute[f.rarity] || 1;
+    goldPerSec += rate / 60;
+  });
+
+  const totalGold = Math.min(100000, Math.floor(goldPerSec * elapsedSec)); // 최대 10만G 상한
+  if (totalGold > 0) {
+    state.gold += totalGold;
+    state.stats.totalEarned = (state.stats.totalEarned || 0) + totalGold;
+    saveGame();
+    updateTopbar();
+  }
+  return totalGold;
+}
+
+export function getAquariumPendingGold() {
+  if (!state.aquarium || state.aquarium.length === 0) return 0;
+  const now = Date.now();
+  const lastTime = state.aquariumLastCollectedAt || now;
+  const elapsedSec = Math.max(0, Math.floor((now - lastTime) / 1000));
+
+  const rarityPerMinute = {
+    common: 1,
+    rare: 3,
+    epic: 10,
+    legendary: 30,
+    mythic: 100,
+  };
+
+  let goldPerSec = 0;
+  state.aquarium.forEach((f) => {
+    const rate = rarityPerMinute[f.rarity] || 1;
+    goldPerSec += rate / 60;
+  });
+
+  return Math.min(100000, Math.floor(goldPerSec * elapsedSec));
+}
+
+// 피버 게이지 충전
+export function addFeverGauge(amount) {
+  state.feverGauge = Math.min(100, (state.feverGauge || 0) + amount);
+  if (state.feverGauge >= 100 && !state.isFeverActive) {
+    activateFever();
+  }
+  return state.feverGauge;
+}
+
+export function activateFever() {
+  state.isFeverActive = true;
+  state.feverTimeLeft = 18; // 18초 피버 지속
+  state.feverGauge = 100;
+}
+
+export function deactivateFever() {
+  state.isFeverActive = false;
+  state.feverTimeLeft = 0;
+  state.feverGauge = 0;
 }
 
 export function checkRegionCompletion() {

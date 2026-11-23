@@ -678,7 +678,168 @@
   gap: var(--space-md);
 }
 
-/* 특수 커맨드 (QTE) 스타일 */
+/* 피버 게이지 바 및 피버 모드 시각효과 */
+.fever-gauge-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.fever-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ea580c;
+}
+
+.fever-bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-surface-soft);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fever-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #f97316, #e11d48, #fbbf24);
+  transition: width 0.2s ease;
+}
+
+.fishing-scene.is-fever-active {
+  animation: fever-glow 0.8s infinite alternate ease-in-out;
+  box-shadow: 0 0 25px rgba(234, 88, 12, 0.6) inset;
+}
+
+@keyframes fever-glow {
+  from { filter: brightness(1.05) saturate(1.2); }
+  to { filter: brightness(1.25) saturate(1.5); }
+}
+
+/* 수족관 라이브 뷰 섹션 */
+.aquarium-live-section {
+  background: #ffffff;
+  border-bottom: var(--space-hair) solid var(--color-hairline);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.aquarium-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-aquarium-claim {
+  height: 34px;
+  font-size: 12px;
+  padding: 0 12px;
+  background: #0284c7;
+  border-radius: var(--radius-pill);
+}
+
+.btn-aquarium-claim:disabled {
+  background: var(--color-hairline);
+  color: var(--color-subtext);
+}
+
+.aquarium-tank {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.25);
+  border: 2px solid #7dd3fc;
+}
+
+.aquarium-empty-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: var(--space-md);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.aquarium-swimming-fish {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  animation: fish-swim 6s infinite ease-in-out;
+  transition: transform 0.2s;
+}
+
+.aquarium-swimming-fish:hover {
+  transform: scale(1.25) !important;
+}
+
+.aquarium-swimming-fish .fish-sprite {
+  font-size: 26px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.aquarium-swimming-fish .fish-name-tag {
+  font-size: 10px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+@keyframes fish-swim {
+  0% {
+    left: -10%;
+    transform: translateY(0) scaleX(1);
+  }
+  48% {
+    transform: translateY(-8px) scaleX(1);
+  }
+  50% {
+    left: 105%;
+    transform: translateY(-8px) scaleX(-1);
+  }
+  98% {
+    transform: translateY(6px) scaleX(-1);
+  }
+  100% {
+    left: -10%;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
+.collection-crown-badge {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  animation: crown-bounce 1.5s infinite ease-in-out;
+}
+
+@keyframes crown-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
 .reel-qte-container {
   position: absolute;
   inset: var(--space-xs);
