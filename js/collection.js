@@ -250,72 +250,74 @@ function showFishDetailModal(fishId) {
   });
 }
 
-// 실시간 물고기 확률표 모달
+// 실시간 미끼 등급별 출현 확률표 모달 (도감 스포일러 완벽 방지)
 export function showRatesModal() {
   const modalRoot = document.getElementById('modal-root');
   if (!modalRoot) return;
 
   const currentBait = BAITS[state.selectedBait] || BAITS.basic;
   const currentRegion = REGIONS.find((r) => r.id === state.currentRegion) || REGIONS[0];
-  const regionFish = FISH.filter((f) => f.region === state.currentRegion);
 
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="modal-rates-scrim">
       <div class="modal-dialog" style="max-height: 85vh; display: flex; flex-direction: column;">
         <div class="modal-top-block block-lilac" style="padding: var(--space-md);">
           <div class="t-eyebrow">DROP RATES</div>
-          <div class="t-headline" style="font-size: 20px;">실시간 출현 확률표</div>
+          <div class="t-headline" style="font-size: 20px;">등급별 출현 확률표</div>
           <div class="t-subhead" style="font-size: 13px;">현재: ${currentRegion.name} · ${currentBait.name}</div>
         </div>
         
         <div class="modal-content" style="padding: var(--space-md); overflow-y: auto; flex: 1;">
           <div style="width: 100%; margin-bottom: var(--space-md);">
-            <div class="t-card-title" style="font-size: 14px; margin-bottom: var(--space-xs);">[미끼 등급 확률]</div>
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center;">
-              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
-                <div style="font-size: 11px;">일반</div>
-                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.common}%</div>
+            <div class="t-card-title" style="font-size: 14px; margin-bottom: 8px;">[미끼 등급별 확률]</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--color-surface-soft); border-radius: 8px; border: 1px solid var(--color-hairline);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-rarity rarity-common">일반</span>
+                  <span class="t-body-sm" style="font-weight: 700;">일반 등급 어종</span>
+                </div>
+                <span class="t-body tabular-nums" style="font-weight: 800; font-size: 15px;">${currentBait.weights.common}%</span>
               </div>
-              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
-                <div style="font-size: 11px;">희귀</div>
-                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.rare}%</div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--color-surface-soft); border-radius: 8px; border: 1px solid var(--color-hairline);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-rarity rarity-rare">희귀</span>
+                  <span class="t-body-sm" style="font-weight: 700;">희귀 등급 어종</span>
+                </div>
+                <span class="t-body tabular-nums" style="font-weight: 800; font-size: 15px; color: #0284c7;">${currentBait.weights.rare}%</span>
               </div>
-              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
-                <div style="font-size: 11px;">영웅</div>
-                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.epic}%</div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--color-surface-soft); border-radius: 8px; border: 1px solid var(--color-hairline);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-rarity rarity-epic">영웅</span>
+                  <span class="t-body-sm" style="font-weight: 700;">영웅 등급 어종</span>
+                </div>
+                <span class="t-body tabular-nums" style="font-weight: 800; font-size: 15px; color: #7c3aed;">${currentBait.weights.epic}%</span>
               </div>
-              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
-                <div style="font-size: 11px;">전설</div>
-                <div style="font-weight: 700; font-size: 12px;">${currentBait.weights.legendary}%</div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--color-surface-soft); border-radius: 8px; border: 1px solid var(--color-hairline);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-rarity rarity-legendary">전설</span>
+                  <span class="t-body-sm" style="font-weight: 700;">전설 등급 어종</span>
+                </div>
+                <span class="t-body tabular-nums" style="font-weight: 800; font-size: 15px; color: #ca8a04;">${currentBait.weights.legendary}%</span>
               </div>
-              <div style="background: var(--color-surface-soft); padding: 4px; border-radius: var(--radius-sm);">
-                <div style="font-size: 11px; color: #FF007F; font-weight: 700;">신화</div>
-                <div style="font-weight: 800; font-size: 12px; color: #FF007F;">${currentBait.weights.mythic || 0}%</div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: linear-gradient(90deg, rgba(255,0,127,0.1), rgba(0,223,216,0.1)); border-radius: 8px; border: 1px solid #f472b6;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-rarity rarity-mythic">신화</span>
+                  <span class="t-body-sm" style="font-weight: 800; color: #ec4899;">신화 등급 어종</span>
+                </div>
+                <span class="t-body tabular-nums" style="font-weight: 900; font-size: 16px; color: #ec4899;">${currentBait.weights.mythic || 0}%</span>
               </div>
             </div>
           </div>
 
-          <div style="width: 100%;">
-            <div class="t-card-title" style="font-size: 14px; margin-bottom: var(--space-xs);">[현재 지역 어종 목록]</div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              ${regionFish.map((f) => {
-                const countOfRarity = regionFish.filter(rf => rf.rarity === f.rarity).length;
-                const exactRate = ((currentBait.weights[f.rarity] || 0) / countOfRarity).toFixed(1);
-                return `
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: var(--color-surface-soft); border-radius: var(--radius-sm);">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                      <span>${f.emoji}</span>
-                      <span class="t-body-sm" style="font-weight: 600;">${f.name}</span>
-                      <span class="badge-rarity rarity-${f.rarity}" style="font-size: 9px; padding: 1px 6px;">${RARITIES[f.rarity].name}</span>
-                    </div>
-                    <span class="t-body-sm tabular-nums" style="font-weight: 700;">${exactRate}%</span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
+          <div style="font-size: 12px; color: var(--color-subtext); text-align: center; margin-top: 8px; line-height: 1.5;">
+            🔒 도감 수집의 기대감과 손맛을 위해 개별 물고기 이름은 직접 낚을 때까지 미공개 상태로 유지됩니다!
           </div>
 
-          <button id="btn-close-rates" class="btn-primary modal-action-btn" style="margin-top: var(--space-md); width: 100%;">닫기</button>
+          <button id="btn-close-rates" class="btn-primary modal-action-btn" style="margin-top: var(--space-md); width: 100%;">확인</button>
         </div>
       </div>
     </div>
