@@ -1,5 +1,6 @@
 import { FISHING_CONFIG, RODS } from './data.js';
 import { clamp } from './utils.js';
+import { playSound } from './sound.js';
 
 let isReeling = false;
 let isHolding = false;
@@ -102,6 +103,9 @@ function updatePhysics(dt) {
   // 2. 잡기 영역 가속도 & 위치
   if (isHolding) {
     zoneVel += FISHING_CONFIG.ZONE_UP_ACCEL * dt;
+    if (Math.random() < 0.2) {
+      playSound('reel_tick');
+    }
   } else {
     zoneVel -= FISHING_CONFIG.ZONE_GRAVITY * dt;
   }

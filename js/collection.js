@@ -8,13 +8,13 @@ export function renderCollection() {
   if (!screen) return;
 
   const collectedCount = Object.keys(state.collection || {}).length;
-  const percent = Math.round((collectedCount / 20) * 100);
+  const percent = Math.round((collectedCount / 35) * 100);
 
   screen.innerHTML = `
     <div class="color-block block-lime">
       <div class="t-eyebrow">COLLECTION</div>
       <div class="t-headline">도감</div>
-      <div class="t-subhead">달성률 ${collectedCount}/20 (${percent}%)</div>
+      <div class="t-subhead">달성률 ${collectedCount}/35 (${percent}%)</div>
       <div class="collection-progress-bar">
         <div class="collection-progress-fill" style="width: ${percent}%;"></div>
       </div>

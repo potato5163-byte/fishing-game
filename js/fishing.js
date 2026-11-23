@@ -20,6 +20,8 @@ import { showToast, updateTopbar } from './ui.js';
 import { startReelGame, setReelHolding, isReelingActive } from './reel.js';
 import { isInstantBiteEnabled } from './debug.js';
 import { showKingCelebrationModal } from './collection.js';
+import { playSound } from './sound.js';
+import { getCurrentWeather, updateWeatherVisual, cycleWeather, WEATHERS } from './weather.js';
 
 export const FishingState = {
   IDLE: 'IDLE',
@@ -180,6 +182,8 @@ function stopCharging() {
     chargeFrameId = null;
   }
 
+  playSound('cast');
+
   const finalPower = Math.round(chargePower);
 
   // 미끼 소모 (특수 미끼면 -1)
@@ -225,6 +229,15 @@ function triggerBite() {
   waitTimerId = null;
   determineFish();
   setState(FishingState.BITE);
+  playSound('bite');
+
+  // 화면 흔들림 효과
+  const app = document.getElementById('app');
+  if (app) {
+    app.classList.remove('screen-shake');
+    void app.offsetWidth;
+    app.classList.add('screen-shake');
+  }
 
   biteTimerId = setTimeout(() => {
     // 1.0초 초과 시 놓침 (E06)
@@ -278,6 +291,12 @@ function hookFish() {
 // 2-6. 릴 미니게임 종료 콜백 (성공 / 실패)
 function handleReelFinish(result, fish) {
   if (result === 'success') {
+    if (fish.rarity === 'legendary') {
+      playSound('legendary');
+      triggerConfetti();
+    } else {
+      playSound('catch');
+    }
     // 가방 아이템 생성 및 추가 (docs/05 1-1)
     const bagItem = {
       uid: 'f_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
@@ -458,6 +477,28 @@ export function initFishing() {
   updateFishingScene();
 }
 
+function triggerConfetti() {
+  if (typeof document === 'undefined') return;
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  const colors = ['#FFD166', '#FF3D8B', '#06D6A0', '#118AB2', '#9B5DE5', '#F15BB5'];
+
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.transform = `scale(${Math.random() * 0.8 + 0.5})`;
+    container.appendChild(piece);
+  }
+
+  document.body.appendChild(container);
+  setTimeout(() => {
+    container.remove();
+  }, 3000);
+}
+
 export function updateFishingScene() {
   if (typeof document === 'undefined') return;
   const scene = document.getElementById('fishing-scene');
@@ -489,9 +530,19 @@ export function updateFishingScene() {
       case 'abyss':
         decoHtml = '<span class="deco-item deco-abyss">✨ ✨ ✨</span>';
         break;
+      case 'glacier':
+        decoHtml = '<span class="deco-item deco-glacier">🧊 ❄️ 🧊</span>';
+        break;
+      case 'palace':
+        decoHtml = '<span class="deco-item deco-palace">🏯 🫧 🪸</span>';
+        break;
+      case 'nebula':
+        decoHtml = '<span class="deco-item deco-nebula">🪐 🛸 🌠</span>';
+        break;
     }
     decoContainer.innerHTML = decoHtml;
   }
+  updateWeatherVisual();
 }
 
 export function updateFishingIndicators() {

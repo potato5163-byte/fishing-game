@@ -12,6 +12,8 @@ import {
 import { setReelHolding } from './reel.js';
 import { initDebug } from './debug.js';
 import { formatGold } from './utils.js';
+import { toggleSound, isSoundEnabled, playSound } from './sound.js';
+import { cycleWeather, updateWeatherVisual } from './weather.js';
 
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-item');
@@ -111,6 +113,24 @@ function initSettings() {
   const settingsBtn = document.getElementById('btn-settings');
   if (settingsBtn) {
     settingsBtn.addEventListener('click', showSettingsModal);
+  }
+
+  const soundBtn = document.getElementById('btn-sound');
+  if (soundBtn) {
+    soundBtn.addEventListener('click', () => {
+      const enabled = toggleSound();
+      soundBtn.textContent = enabled ? '🔊' : '🔇';
+      if (enabled) playSound('gold');
+    });
+  }
+
+  const weatherBtn = document.getElementById('btn-weather');
+  if (weatherBtn) {
+    weatherBtn.addEventListener('click', () => {
+      const nextW = cycleWeather();
+      weatherBtn.textContent = `${nextW.emoji} ${nextW.name}`;
+      playSound('cast');
+    });
   }
 }
 

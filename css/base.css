@@ -36,6 +36,9 @@
   --region-river-top: #B7E4C7;  --region-river-bottom: #2D6A4F;
   --region-sea-top: #90E0EF;    --region-sea-bottom: #0077B6;
   --region-abyss-top: #3A0CA3;  --region-abyss-bottom: #0B0F2E;
+  --region-glacier-top: #E0FBFC; --region-glacier-bottom: #3D5A80;
+  --region-palace-top: #FDE2E4;  --region-palace-bottom: #9B5DE5;
+  --region-nebula-top: #7209B7;  --region-nebula-bottom: #03045E;
 
   /* 간격 (8px 기준) */
   --space-hair: 1px;

@@ -306,6 +306,115 @@
   background: linear-gradient(to bottom, var(--region-lake-top) 0%, var(--region-lake-top) 45%, var(--region-lake-bottom) 45%, var(--region-lake-bottom) 100%);
 }
 
+.fishing-scene.region-glacier {
+  background: linear-gradient(to bottom, var(--region-glacier-top) 0%, var(--region-glacier-top) 45%, var(--region-glacier-bottom) 45%, var(--region-glacier-bottom) 100%);
+}
+.fishing-scene.region-palace {
+  background: linear-gradient(to bottom, var(--region-palace-top) 0%, var(--region-palace-top) 45%, var(--region-palace-bottom) 45%, var(--region-palace-bottom) 100%);
+}
+.fishing-scene.region-nebula {
+  background: linear-gradient(to bottom, var(--region-nebula-top) 0%, var(--region-nebula-top) 45%, var(--region-nebula-bottom) 45%, var(--region-nebula-bottom) 100%);
+}
+
+.region-card.region-glacier {
+  background: linear-gradient(to bottom, var(--region-glacier-top), var(--region-glacier-bottom));
+}
+.region-card.region-palace {
+  background: linear-gradient(to bottom, var(--region-palace-top), var(--region-palace-bottom));
+}
+.region-card.region-nebula {
+  background: linear-gradient(to bottom, var(--region-nebula-top), var(--region-nebula-bottom));
+}
+
+/* 신규 장식 이모지 */
+.deco-glacier {
+  position: absolute;
+  top: 45%;
+  left: 15%;
+  font-size: 22px;
+}
+.deco-palace {
+  position: absolute;
+  top: 50%;
+  left: 18%;
+  font-size: 26px;
+}
+.deco-nebula {
+  position: absolute;
+  top: 25%;
+  left: 20%;
+  font-size: 24px;
+}
+
+/* 화면 흔들림 효과 (입질) */
+.screen-shake {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+/* 날씨 시각 효과 */
+.fishing-scene.weather-rainy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(105deg, rgba(255,255,255,0) 0, rgba(255,255,255,0) 8px, rgba(255,255,255,0.3) 9px, rgba(255,255,255,0) 10px);
+  animation: rain-fall 0.25s linear infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes rain-fall {
+  from { background-position: 0 0; }
+  to { background-position: -20px 60px; }
+}
+
+.fishing-scene.weather-foggy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(1px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.fishing-scene.weather-night::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 20, 0.45);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 컨페티 축하 파티클 */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confetti-fall 2.5s linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+
 .fishing-scene.region-river {
   background: linear-gradient(to bottom, var(--region-river-top) 0%, var(--region-river-top) 45%, var(--region-river-bottom) 45%, var(--region-river-bottom) 100%);
 }

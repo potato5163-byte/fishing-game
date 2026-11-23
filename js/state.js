@@ -387,7 +387,7 @@ export function claimRegionReward(regionId) {
 
 export function checkKingAchievement() {
   const totalCollected = Object.keys(state.collection || {}).length;
-  if (totalCollected >= 20 && !state.kingAchieved) {
+  if (totalCollected >= 35 && !state.kingAchieved) {
     state.kingAchieved = true;
     saveGame();
     updateTopbar();
