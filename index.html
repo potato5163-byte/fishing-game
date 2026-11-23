@@ -42,64 +42,91 @@
             <div id="fishing-bobber" class="fishing-bobber" hidden>🔴</div>
             <div id="fishing-bite-alert" class="fishing-bite-alert" hidden>❗</div>
 
-            <!-- 릴 감기 미니게임 오버레이 패널 (텐션 밀당 시스템) -->
-            <div id="reel-panel" class="reel-panel" hidden>
-              <div class="reel-track" id="reel-track">
-                <div id="reel-zone" class="reel-zone"></div>
-                <div id="reel-fish" class="reel-fish">🐟</div>
+            <!-- 3D 1인칭 수면 낚시 파이팅 뷰 (신규 그래픽 릴 배틀) -->
+            <div id="reel-panel" class="reel-panel-3d" hidden>
+              <!-- 3D 수면 원근 캔버스 / 배경 레이어 -->
+              <div class="reel-ocean-view" id="reel-ocean-view">
+                <!-- 원경 지평선 & 하늘 -->
+                <div class="reel-horizon-glow"></div>
+                <!-- 입체 파도 물결들 -->
+                <div class="reel-wave-layer wave-layer-back"></div>
+                <div class="reel-wave-layer wave-layer-mid"></div>
+                <div class="reel-wave-layer wave-layer-front"></div>
+
+                <!-- 낚싯줄 SVG (낚싯대 끝 -> 찌/물고기 연결선) -->
+                <svg class="reel-line-svg" id="reel-line-svg">
+                  <path id="reel-line-path" d="M 180 260 Q 180 180 180 120" stroke="rgba(255,255,255,0.75)" stroke-width="2" fill="none" />
+                </svg>
+
+                <!-- 조준 록온 링 (플레이어 낚싯대 방향) -->
+                <div id="reel-crosshair" class="reel-crosshair">
+                  <div class="crosshair-reticle"></div>
+                  <div class="crosshair-beam"></div>
+                  <span class="crosshair-label">AIM</span>
+                </div>
+
+                <!-- 수중 및 공중 물고기 오브젝트 (3D 입체) -->
+                <div id="reel-fish-3d" class="reel-fish-3d">
+                  <div class="fish-water-splash" id="fish-water-splash"></div>
+                  <div class="fish-avatar-wrap" id="fish-avatar-wrap">
+                    <span id="fish-avatar-emoji" class="fish-avatar-emoji">🐟</span>
+                    <span id="fish-avatar-shadow" class="fish-avatar-shadow"></span>
+                  </div>
+                  <div class="fish-jump-alert" id="fish-jump-alert" hidden>
+                    ⚡ SPACE 스매시!!
+                  </div>
+                </div>
+
+                <!-- 화면 하단 1인칭 낚싯대 손잡이 & 휨 그래픽 -->
+                <div id="first-person-rod" class="first-person-rod">
+                  <div class="rod-shaft"></div>
+                  <div class="rod-tip-glow" id="rod-tip-glow"></div>
+                </div>
+
+                <!-- 좌우 조작용 모바일 터치 패들 -->
+                <div class="reel-touch-zones">
+                  <div class="touch-zone-left" id="touch-left" title="좌측 조준">◀ 좌로 조준</div>
+                  <div class="touch-zone-center" id="touch-center">⚡ 스페이스 스매시</div>
+                  <div class="touch-zone-right" id="touch-right" title="우측 조준">우로 조준 ▶</div>
+                </div>
               </div>
-              <div class="reel-info-pane">
-                <!-- 상단 텐션 게이지 -->
-                <div class="tension-meter-wrapper">
-                  <div class="tension-labels">
-                    <span class="tension-title">LINE TENSION (줄 텐션)</span>
-                    <span id="tension-warning-text" class="tension-status">SAFE</span>
+
+              <!-- HUD 상태 오버레이 (상단/하단 정보) -->
+              <div class="reel-hud-overlay">
+                <!-- 상단: 남은 거리 및 체력 바 -->
+                <div class="reel-hud-top">
+                  <div class="reel-target-info">
+                    <span id="reel-target-name" class="reel-target-name">🐟 감성돔</span>
+                    <span id="reel-target-dist" class="reel-target-dist tabular-nums">남은 거리 50m</span>
                   </div>
-                  <div class="tension-bar-track">
-                    <div id="tension-fill" class="tension-bar-fill"></div>
+                  <div class="reel-hud-bar">
+                    <div id="reel-hud-progress-fill" class="reel-hud-fill"></div>
                   </div>
                 </div>
 
-                <!-- 진행도 -->
-                <div>
-                  <div class="t-body-sm" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span>끌어올림 진행도</span>
-                    <span id="reel-progress-text" class="tabular-nums" style="font-weight: 700;">30%</span>
-                  </div>
-                  <div class="reel-progress-bar">
-                    <div id="reel-progress-fill" class="reel-progress-fill"></div>
-                  </div>
+                <!-- 우측 상단 타이머 -->
+                <div class="reel-hud-timer">
+                  <span class="t-eyebrow" style="font-size: 10px; color: #cbd5e1;">TIME</span>
+                  <span id="reel-hud-time" class="tabular-nums">25s</span>
                 </div>
 
-                <!-- 하단 시간 및 낚싯대 강화 효과 -->
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <div class="t-body-sm" style="margin-bottom: 2px;">남은 시간</div>
-                    <div id="reel-time-text" class="t-card-title tabular-nums">25초</div>
+                <!-- 특수 커맨드(QTE) 오버레이 -->
+                <div id="reel-qte-container" class="reel-qte-container" hidden>
+                  <div class="reel-qte-banner">⚠️ 물고기의 맹렬한 저항! 특수 커맨드 입력!</div>
+                  <div id="reel-qte-prompt" class="reel-qte-keys"></div>
+                  <div class="reel-qte-timer-bar">
+                    <div id="reel-qte-timer-fill" class="reel-qte-timer-fill"></div>
                   </div>
-                  <div style="text-align: right;">
-                    <div class="t-body-sm" style="margin-bottom: 2px;">낚싯대 파워</div>
-                    <div id="reel-rod-power-text" class="t-body-sm" style="font-weight: 700; color: #0284c7;">+0강</div>
+                  <!-- 모바일 터치용 버튼 -->
+                  <div class="reel-qte-mobile-controls">
+                    <button type="button" class="qte-btn" data-key="ArrowUp">⬆️</button>
+                    <div class="qte-mobile-row">
+                      <button type="button" class="qte-btn" data-key="ArrowLeft">⬅️</button>
+                      <button type="button" class="qte-btn qte-btn-space" data-key="Space">⚡HIT</button>
+                      <button type="button" class="qte-btn" data-key="ArrowRight">➡️</button>
+                    </div>
+                    <button type="button" class="qte-btn" data-key="ArrowDown">⬇️</button>
                   </div>
-                </div>
-              </div>
-
-              <!-- 특수 커맨드(QTE) 오버레이 -->
-              <div id="reel-qte-container" class="reel-qte-container" hidden>
-                <div class="reel-qte-banner">⚠️ 물고기의 맹렬한 저항! 특수 커맨드 입력!</div>
-                <div id="reel-qte-prompt" class="reel-qte-keys"></div>
-                <div class="reel-qte-timer-bar">
-                  <div id="reel-qte-timer-fill" class="reel-qte-timer-fill"></div>
-                </div>
-                <!-- 모바일 터치용 버튼 -->
-                <div class="reel-qte-mobile-controls">
-                  <button type="button" class="qte-btn" data-key="ArrowUp">⬆️</button>
-                  <div class="qte-mobile-row">
-                    <button type="button" class="qte-btn" data-key="ArrowLeft">⬅️</button>
-                    <button type="button" class="qte-btn qte-btn-space" data-key="Space">⚡HIT</button>
-                    <button type="button" class="qte-btn" data-key="ArrowRight">➡️</button>
-                  </div>
-                  <button type="button" class="qte-btn" data-key="ArrowDown">⬇️</button>
                 </div>
               </div>
             </div>

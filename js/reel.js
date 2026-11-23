@@ -4,36 +4,44 @@ import { playSound } from './sound.js';
 import { state, getRodEnhanceLevel } from './state.js';
 
 let isReeling = false;
-let isHolding = false;
 let currentFish = null;
 let onFinishCallback = null;
 
-let fishY = 50;
-let targetY = 50;
-let targetTimer = 0;
+// 플레이어 조준선 위치 (X: 0 ~ 100%)
+let aimX = 50;
+let aimTargetX = 50;
+let aimMoveDir = 0; // -1: 좌, 0: 정지, 1: 우
 
-let zoneH = 25;
-let zoneY = 37.5;
-let zoneVel = 0;
+// 물고기 위치 (X: 0 ~ 100%, Y: 깊이/점프 높이)
+let fishX = 50;
+let fishTargetX = 50;
+let fishTurnTimer = 0;
+let fishSpeed = 35; // 난이도에 따른 속도
 
-// 텐션 시스템 물리 변수
-let tension = 20; // 0 ~ 100
-let tensionSnapTimer = 0; // 위험 텐션(90 이상) 지속 시 줄 끊어짐 카운트다운
+// 물고기 점프(JUMP) 시스템 변수
+let isFishJumping = false;
+let jumpTimer = 0;
+let jumpWindowTime = 1.3; // 스매시 칠 수 있는 시간 윈도우
+let nextJumpCooldown = 4.0; // 다음 점프까지 쿨다운
+let isStunned = false;
+let stunTimer = 0;
 
-let progress = 30;
+// 파이팅 진행도 및 제한시간
+let progress = 30; // 0 ~ 100 (100 도달 시 포획 성공)
 let timeLeft = 25;
 let lastFrameTime = 0;
 let animFrameId = null;
-let enhanceBonus = 0; // 현재 낚싯대 강화 레벨 (+0 ~ +10)
 
-// 특수 커맨드 (QTE) 상태 변수
+let currentRodData = null;
+let enhanceBonus = 0;
+
+// QTE 특수 커맨드 상태 변수
 let qteActive = false;
 let qteSequence = [];
 let qteIndex = 0;
 let qteTimer = 0;
 let qteMaxTime = 2.5;
 let qteTriggeredCount = 0;
-let qteStunTimer = 0; // 성공 시 물고기 스턴 시간
 
 const QTE_POSSIBLE_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
 const QTE_KEY_LABELS = {
@@ -57,13 +65,11 @@ export function handleQTEInput(key) {
     qteIndex++;
     updateQTEDOM();
 
-    // 모든 시퀀스 통과
     if (qteIndex >= qteSequence.length) {
       resolveQTE(true);
     }
     return true;
   } else {
-    // 오입력 시 시간 페널티 0.4초
     qteTimer = Math.max(0, qteTimer - 0.4);
     playSound('qte_fail');
     return true;
@@ -74,13 +80,8 @@ function triggerQTE() {
   qteActive = true;
   qteTriggeredCount++;
 
-  // 등급별 커맨드 수 및 제한 시간 차등화
-  // 영웅(Epic): 3키, 2.8초 (여유로움)
-  // 전설(Legendary): 5키, 2.2초 (빠르고 긴장감)
-  // 신화(Mythic): 6~7키, 1.8초 (초고난도 긴박한 리듬 연타!)
   let count = 3;
   let timeLimit = 2.8;
-
   if (currentFish.rarity === 'mythic') {
     count = 6;
     timeLimit = 1.8;
@@ -136,89 +137,127 @@ function resolveQTE(success) {
     container.hidden = true;
   }
 
-  const scene = document.getElementById('fishing-scene');
+  const oceanView = document.getElementById('reel-ocean-view');
 
   if (success) {
     playSound('qte_success');
-    // 성공 보상: 게이지 대폭 상승 (+20%) & 2.5초간 물고기 마비(스턴)
-    progress = clamp(progress + 20, 0, 100);
-    qteStunTimer = 2.5;
+    progress = clamp(progress + 22, 0, 100);
+    isStunned = true;
+    stunTimer = 3.0; // 3초 완전 무력화
 
-    if (scene) {
-      scene.classList.add('screen-shake');
-      setTimeout(() => scene.classList.remove('screen-shake'), 300);
+    if (oceanView) {
+      oceanView.classList.add('smash-flash');
+      setTimeout(() => oceanView.classList.remove('smash-flash'), 350);
     }
   } else {
     playSound('qte_fail');
-    // 실패 패널티: 게이지 감소 (-15%)
     progress = clamp(progress - 15, 0, 100);
 
-    if (scene) {
-      scene.classList.add('screen-shake');
-      setTimeout(() => scene.classList.remove('screen-shake'), 300);
+    const app = document.getElementById('app');
+    if (app) {
+      app.classList.remove('screen-shake');
+      void app.offsetWidth;
+      app.classList.add('screen-shake');
     }
   }
+}
+
+// 플레이어 조준 이동 제어 (-1: 좌, 0: 정지, 1: 우)
+export function setAimDirection(dir) {
+  aimMoveDir = dir;
+}
+
+// 플레이어 Space 스매시 시도 (점프 중일 때 타격!)
+export function trySmashAction() {
+  if (!isReeling) return false;
+
+  // 물고기가 점프 중일 때 스페이스바로 강타!
+  if (isFishJumping) {
+    isFishJumping = false;
+    jumpTimer = 0;
+
+    playSound('smash_hit');
+
+    // 스턴 적용 (낚싯대 제압력 + 강화 레벨에 비례)
+    const baseStun = currentRodData ? (currentRodData.stunDuration || 1.2) : 1.2;
+    stunTimer = baseStun + (enhanceBonus * 0.25);
+    isStunned = true;
+
+    // 진행도 급상승 (+15% ~ +25%)
+    const smashPower = 15 + (enhanceBonus * 1.5);
+    progress = clamp(progress + smashPower, 0, 100);
+
+    // 강타 플래시 & 화면 진동
+    const oceanView = document.getElementById('reel-ocean-view');
+    if (oceanView) {
+      oceanView.classList.add('smash-flash');
+      setTimeout(() => oceanView.classList.remove('smash-flash'), 350);
+    }
+
+    const jumpAlert = document.getElementById('fish-jump-alert');
+    if (jumpAlert) jumpAlert.hidden = true;
+
+    return true;
+  }
+  return false;
 }
 
 export function startReelGame(fish, equippedRodId, onFinish) {
   currentFish = fish;
   onFinishCallback = onFinish;
   isReeling = true;
-  isHolding = false;
 
+  currentRodData = RODS[equippedRodId] || RODS.bamboo;
   enhanceBonus = getRodEnhanceLevel(equippedRodId);
 
-  tension = 20;
-  tensionSnapTimer = 0;
+  aimX = 50;
+  aimTargetX = 50;
+  aimMoveDir = 0;
+
+  fishX = 50;
+  fishTargetX = 50;
+  fishTurnTimer = 1.0;
+
+  // 물고기 속도 설정 (난이도에 따라 차등)
+  const diff = fish.difficulty || 1;
+  fishSpeed = 25 + diff * 10;
+
+  isFishJumping = false;
+  jumpTimer = 0;
+  jumpWindowTime = Math.max(1.0, 1.6 - (diff * 0.1) + (enhanceBonus * 0.05));
+  nextJumpCooldown = 2.5 + Math.random() * 2.5;
+
+  isStunned = false;
+  stunTimer = 0;
+
+  progress = FISHING_CONFIG.PROGRESS_START;
+  let timeLimit = FISHING_CONFIG.REEL_TIME_LIMIT_SEC;
+  if (state.specialItems && state.specialItems.hourglass_time > 0) {
+    timeLimit += 15;
+  }
+  timeLeft = timeLimit;
 
   qteActive = false;
   qteSequence = [];
   qteIndex = 0;
   qteTimer = 0;
   qteTriggeredCount = 0;
-  qteStunTimer = 0;
 
-  const qteContainer = document.getElementById('reel-qte-container');
-  if (qteContainer) {
-    qteContainer.hidden = true;
-  }
-
-  const rod = RODS[equippedRodId] || RODS.bamboo;
-  // 강화 단계당 영역 +2% 및 텐션 버퍼 제공
-  let bonusH = (rod.zoneBonus || 0) + (enhanceBonus * 2);
-
-  // 거인의 비약 활성화 시 잡기 영역 1.5배 증가
-  if (state.specialItems && state.specialItems.potion_zone > 0) {
-    bonusH += 15;
-  }
-
-  zoneH = FISHING_CONFIG.ZONE_BASE_HEIGHT + bonusH;
-  zoneY = 50 - zoneH / 2;
-  zoneVel = 0;
-
-  fishY = 50;
-  targetY = 50;
-  targetTimer = 0;
-
-  progress = FISHING_CONFIG.PROGRESS_START;
-  let timeLimit = FISHING_CONFIG.REEL_TIME_LIMIT_SEC;
-
-  // 시간 정지 모래시계 부적 활성화 시 제한시간 +15초 연장
-  if (state.specialItems && state.specialItems.hourglass_time > 0) {
-    timeLimit += 15;
-  }
-  timeLeft = timeLimit;
-
-  // DOM 초기화
   const panel = document.getElementById('reel-panel');
   if (panel) {
     panel.hidden = false;
   }
 
-  const powerEl = document.getElementById('reel-rod-power-text');
-  if (powerEl) {
-    powerEl.textContent = `+${enhanceBonus}강 (${rod.name})`;
+  const nameEl = document.getElementById('reel-target-name');
+  if (nameEl) {
+    nameEl.textContent = `${fish.emoji} ${fish.name} (${fish.rarity.toUpperCase()})`;
   }
+
+  const qteContainer = document.getElementById('reel-qte-container');
+  if (qteContainer) qteContainer.hidden = true;
+
+  const jumpAlert = document.getElementById('fish-jump-alert');
+  if (jumpAlert) jumpAlert.hidden = true;
 
   updateReelDOM();
   lastFrameTime = performance.now();
@@ -226,7 +265,10 @@ export function startReelGame(fish, equippedRodId, onFinish) {
 }
 
 export function setReelHolding(holding) {
-  isHolding = holding;
+  // 스페이스바가 눌렸을 때 점프 중이면 스매시 타격, 아니면 기본 당김
+  if (holding) {
+    trySmashAction();
+  }
 }
 
 export function isReelingActive() {
@@ -244,25 +286,22 @@ function gameLoop(currentTime) {
 
   let dt = (currentTime - lastFrameTime) / 1000;
   lastFrameTime = currentTime;
-
-  if (dt > FISHING_CONFIG.MAX_DT) {
-    dt = FISHING_CONFIG.MAX_DT;
-  }
+  if (dt > FISHING_CONFIG.MAX_DT) dt = FISHING_CONFIG.MAX_DT;
 
   updatePhysics(dt);
   updateReelDOM();
 
-  // 종료 조건 검사
+  // 승리 / 패배 검사
   if (progress >= 100) {
     finishGame('success');
     return;
   }
   if (progress <= 0) {
-    finishGame('fail_escaped'); // E07
+    finishGame('fail_escaped');
     return;
   }
   if (timeLeft <= 0) {
-    finishGame('fail_timeout'); // E08
+    finishGame('fail_timeout');
     return;
   }
 
@@ -270,9 +309,7 @@ function gameLoop(currentTime) {
 }
 
 function updatePhysics(dt) {
-  const diffSettings = FISHING_CONFIG.DIFFICULTY[currentFish.difficulty] || FISHING_CONFIG.DIFFICULTY[1];
-
-  // 1. 제한 시간 감소 (QTE 활성화 중에는 전체 시간도 일시 슬로우/유지)
+  // 1. 제한시간 감소
   if (!qteActive) {
     timeLeft -= dt;
     if (timeLeft < 0) timeLeft = 0;
@@ -283,55 +320,18 @@ function updatePhysics(dt) {
     qteTimer -= dt;
     updateQTEDOM();
     if (qteTimer <= 0) {
-      resolveQTE(false); // 시간 초과 실패
+      resolveQTE(false);
     }
-    return; // QTE 중에는 일반 물리 이동 일시 정지 (긴박한 QTE에 집중)
+    return;
   }
 
-  // 3. 줄 텐션(Tension) 물리 계산
-  // 릴을 누르고 있으면 텐션이 빠르게 오르고, 놓으면 서서히 풀림
-  // 낚싯대 강화가 높을수록 텐션 상승을 억제하고 안정화 빠름
-  const rod = RODS[window.__currentRodId || 'bamboo'] || RODS.bamboo;
-  const enhanceResist = enhanceBonus * 0.04; // 1강당 4% 텐션 저항
-  const inZone = fishY >= zoneY && fishY <= zoneY + zoneH;
-
-  if (isHolding) {
-    // 물고기가 잡기 영역 안에 있으면 텐션이 안정적으로 오르고, 밖에서 날뛸 땐 텐션 급증!
-    const tensionRiseSpeed = inZone ? 32 : 55;
-    tension += (tensionRiseSpeed * (1 - enhanceResist)) * dt;
-  } else {
-    // 릴을 놓으면 텐션이 자연스럽게 풀림
-    tension -= (45 + enhanceBonus * 2) * dt;
-  }
-  tension = clamp(tension, 0, 100);
-
-  // 텐션이 88% 이상인 DANGER 구간에서 지속 시 줄 끊어짐 위기!
-  if (tension >= 88) {
-    tensionSnapTimer += dt;
-    if (tensionSnapTimer >= (1.8 + enhanceBonus * 0.15)) {
-      // 줄 끊어짐 발생! (실패)
-      finishGame('fail_escaped');
-      playSound('qte_fail');
-      return;
-    }
-  } else {
-    tensionSnapTimer = Math.max(0, tensionSnapTimer - dt * 2);
-  }
-
-  // QTE 트리거 체크: 영웅/전설/신화 등급
-  // 영웅: 1회 발생 (45~65% 구간)
-  // 전설: 최대 2회 발생 (1차: 35~55%, 2차: 65~85%)
-  // 신화: 최대 2회 발생 (1차: 30~50%, 2차: 60~85%)
+  // 3. QTE 발동 체크 (영웅/전설/신화)
   const isHighRarity = ['epic', 'legendary', 'mythic'].includes(currentFish.rarity);
   const maxQteCount = currentFish.rarity === 'epic' ? 1 : 2;
-
   if (isHighRarity && qteTriggeredCount < maxQteCount) {
     let shouldTrigger = false;
-    if (qteTriggeredCount === 0 && progress >= 35 && progress <= 65) {
-      shouldTrigger = true;
-    } else if (qteTriggeredCount === 1 && progress >= 68 && progress <= 88) {
-      shouldTrigger = true;
-    }
+    if (qteTriggeredCount === 0 && progress >= 40 && progress <= 65) shouldTrigger = true;
+    else if (qteTriggeredCount === 1 && progress >= 70 && progress <= 88) shouldTrigger = true;
 
     if (shouldTrigger) {
       triggerQTE();
@@ -339,140 +339,164 @@ function updatePhysics(dt) {
     }
   }
 
-  // 3. 물고기 스턴 타이머
-  if (qteStunTimer > 0) {
-    qteStunTimer -= dt;
-  }
+  // 4. 조준선(Aim) 이동 (좌우 입력)
+  // 낚싯대 강화에 따라 회전 조준 속도 상승
+  const aimSpeed = 80 + (enhanceBonus * 5);
+  aimX += aimMoveDir * aimSpeed * dt;
+  aimX = clamp(aimX, 10, 90);
 
-  // 4. 잡기 영역 가속도 & 위치
-  if (isHolding) {
-    zoneVel += FISHING_CONFIG.ZONE_UP_ACCEL * dt;
-    if (Math.random() < 0.2) {
-      playSound('reel_tick');
+  // 5. 스턴 처리
+  if (isStunned) {
+    stunTimer -= dt;
+    if (stunTimer <= 0) {
+      isStunned = false;
     }
-  } else {
-    zoneVel -= FISHING_CONFIG.ZONE_GRAVITY * dt;
-  }
-  zoneVel = clamp(zoneVel, -FISHING_CONFIG.ZONE_MAX_SPEED, FISHING_CONFIG.ZONE_MAX_SPEED);
-  zoneY += zoneVel * dt;
-
-  if (zoneY < 0) {
-    zoneY = 0;
-    zoneVel = 0;
-  } else if (zoneY > 100 - zoneH) {
-    zoneY = 100 - zoneH;
-    zoneVel = 0;
   }
 
-  // 5. 물고기 이동 (스턴 중이면 가만히 정지해 있음!)
-  if (qteStunTimer <= 0) {
-    targetTimer -= dt;
-    if (targetTimer <= 0) {
-      targetY = Math.random() * 100;
-      targetTimer = diffSettings.targetIntervalSec;
-    }
-
-    const dist = targetY - fishY;
-    const step = diffSettings.fishSpeed * dt;
-    if (Math.abs(dist) <= step) {
-      fishY = targetY;
+  // 6. 물고기 점프(JUMP) 주기 처리
+  if (!isStunned) {
+    if (!isFishJumping) {
+      nextJumpCooldown -= dt;
+      if (nextJumpCooldown <= 0) {
+        // 물고기 점프 발동!
+        isFishJumping = true;
+        jumpTimer = jumpWindowTime;
+        playSound('fish_jump');
+      }
     } else {
-      fishY += Math.sign(dist) * step;
+      jumpTimer -= dt;
+      if (jumpTimer <= 0) {
+        // 점프 기회 놓침 (바늘털이 발생: 진행도 -12%)
+        isFishJumping = false;
+        nextJumpCooldown = 3.5 + Math.random() * 3.0;
+        progress = clamp(progress - 12, 0, 100);
+        playSound('qte_fail');
+      }
     }
-    fishY = clamp(fishY, 0, 100);
   }
 
-  // 6. 진행도 증감 (텐션 최적 구간 40~80%에서 끌어올림 효율 극대화!)
-  if (inZone) {
-    let tensionBonus = 1.0;
-    if (tension >= 40 && tension <= 80) {
-      tensionBonus = 1.35; // PERFECT 텐션 밀당 보너스!
-    } else if (tension >= 88) {
-      tensionBonus = 0.5; // 위험 텐션에서는 효율 급감
+  // 7. 물고기 좌우 이동 물리 (스턴 중이면 멈춤)
+  if (!isStunned) {
+    fishTurnTimer -= dt;
+    if (fishTurnTimer <= 0) {
+      fishTargetX = 15 + Math.random() * 70;
+      fishTurnTimer = 1.0 + Math.random() * 1.5;
     }
-    const mult = (rod.reelMultiplier || 1.0) * (1 + enhanceBonus * 0.05);
-    progress += FISHING_CONFIG.PROGRESS_GAIN * mult * tensionBonus * dt;
+
+    const dist = fishTargetX - fishX;
+    const step = fishSpeed * dt;
+    if (Math.abs(dist) <= step) {
+      fishX = fishTargetX;
+    } else {
+      fishX += Math.sign(dist) * step;
+    }
+    fishX = clamp(fishX, 15, 85);
+  }
+
+  // 8. 록온 판정 및 진행도 증감
+  // 낚싯대 조준 반경 너비 (기본 26 ~ 최대 75)
+  const rodWidth = (currentRodData ? currentRodData.trackingWidth : 26) + (enhanceBonus * 2.5);
+  const halfWidth = rodWidth / 2;
+  const isLockedOn = Math.abs(fishX - aimX) <= halfWidth;
+
+  const reelMult = (currentRodData ? currentRodData.reelMultiplier : 1.0) * (1 + enhanceBonus * 0.05);
+
+  if (isLockedOn) {
+    // 록온 상태: 물고기를 당겨옴!
+    // 스턴 중이면 1.8배 초고속 감기!
+    const stunBonus = isStunned ? 1.8 : 1.0;
+    progress += FISHING_CONFIG.PROGRESS_GAIN * reelMult * stunBonus * dt;
   } else {
-    // 밖 (스턴 중일 때는 패널티 절반)
-    const penalty = qteStunTimer > 0 ? diffSettings.progressLoss * 0.5 : diffSettings.progressLoss;
-    progress -= penalty * dt;
+    // 조준을 벗어나면 물고기가 도망치며 진행도 감소
+    const lossSpeed = isStunned ? 3.0 : 12.0;
+    progress -= lossSpeed * dt;
   }
   progress = clamp(progress, 0, 100);
 }
 
 function updateReelDOM() {
-  const fishEl = document.getElementById('reel-fish');
-  const zoneEl = document.getElementById('reel-zone');
-  const progressFill = document.getElementById('reel-progress-fill');
-  const progressText = document.getElementById('reel-progress-text');
-  const timeText = document.getElementById('reel-time-text');
-  const tensionFill = document.getElementById('tension-fill');
-  const tensionStatus = document.getElementById('tension-warning-text');
+  const crosshair = document.getElementById('reel-crosshair');
+  const fish3D = document.getElementById('reel-fish-3d');
+  const fishEmoji = document.getElementById('fish-avatar-emoji');
+  const linePath = document.getElementById('reel-line-path');
+  const jumpAlert = document.getElementById('fish-jump-alert');
+  const progressFill = document.getElementById('reel-hud-progress-fill');
+  const distText = document.getElementById('reel-target-dist');
+  const timeText = document.getElementById('reel-hud-time');
+  const firstPersonRod = document.getElementById('first-person-rod');
 
-  if (tensionFill) {
-    tensionFill.style.width = `${tension}%`;
-  }
+  // 1. 조준선 위치
+  if (crosshair) {
+    crosshair.style.left = `${aimX}%`;
 
-  if (tensionStatus) {
-    if (tension >= 88) {
-      tensionStatus.textContent = 'DANGER! (끊어짐 위기)';
-      tensionStatus.className = 'tension-status is-danger';
-    } else if (tension >= 65) {
-      tensionStatus.textContent = 'WARNING (높음)';
-      tensionStatus.className = 'tension-status is-warning';
-    } else if (tension >= 35) {
-      tensionStatus.textContent = 'PERFECT (최적 텐션)';
-      tensionStatus.className = 'tension-status';
-      tensionStatus.style.color = '#3b82f6';
+    const rodWidth = (currentRodData ? currentRodData.trackingWidth : 26) + (enhanceBonus * 2.5);
+    const isLockedOn = Math.abs(fishX - aimX) <= (rodWidth / 2);
+    if (isLockedOn) {
+      crosshair.classList.add('is-locked');
     } else {
-      tensionStatus.textContent = 'SAFE (느슨함)';
-      tensionStatus.className = 'tension-status';
-      tensionStatus.style.color = '#10b981';
+      crosshair.classList.remove('is-locked');
     }
   }
 
-  if (fishEl) {
-    // 바닥이 0이므로 bottom: fishY%
-    fishEl.style.bottom = `${fishY}%`;
-    if (qteStunTimer > 0) {
-      fishEl.textContent = '💫'; // 기절 상태 표시
+  // 2. 3D 물고기 위치 & 점프 상태
+  if (fish3D) {
+    fish3D.style.left = `${fishX}%`;
+
+    if (isFishJumping) {
+      fish3D.classList.add('is-jumping');
     } else {
-      fishEl.textContent = currentFish ? currentFish.emoji : '🐟';
+      fish3D.classList.remove('is-jumping');
     }
   }
 
-  if (zoneEl) {
-    zoneEl.style.bottom = `${zoneY}%`;
-    zoneEl.style.height = `${zoneH}%`;
-
-    const inZone = fishY >= zoneY && fishY <= zoneY + zoneH;
-    if (inZone) {
-      zoneEl.classList.add('is-hooked');
+  if (fishEmoji) {
+    if (isStunned) {
+      fishEmoji.textContent = '💫';
     } else {
-      zoneEl.classList.remove('is-hooked');
+      fishEmoji.textContent = currentFish ? currentFish.emoji : '🐟';
     }
+    // 물고기 진행 방향에 따라 좌우 반전
+    fishEmoji.style.transform = fishTargetX > fishX ? 'scaleX(1)' : 'scaleX(-1)';
   }
 
+  if (jumpAlert) {
+    jumpAlert.hidden = !isFishJumping;
+  }
+
+  // 3. 낚싯줄 SVG 실시간 연결선 (낚싯대 끝 -> 물고기)
+  if (linePath) {
+    const rodEndX = (aimX * 3.6); // 대략적인 좌표 매핑
+    const fishCoordX = (fishX * 3.6);
+    const fishCoordY = isFishJumping ? 80 : 160;
+    linePath.setAttribute('d', `M 280 320 Q ${(rodEndX + fishCoordX) / 2} 240 ${fishCoordX} ${fishCoordY}`);
+    linePath.setAttribute('stroke', isFishJumping ? '#ef4444' : 'rgba(255,255,255,0.7)');
+    linePath.setAttribute('stroke-width', isFishJumping ? '3' : '2');
+  }
+
+  // 4. 1인칭 낚싯대 기울기 피드백
+  if (firstPersonRod) {
+    const rodAngle = -15 + (aimX - 50) * 0.4;
+    firstPersonRod.style.transform = `rotate(${rodAngle}deg)`;
+  }
+
+  // 5. 진행도 및 HUD 정보
   if (progressFill) {
     progressFill.style.width = `${progress}%`;
   }
-  if (progressText) {
-    progressText.textContent = `${Math.round(progress)}%`;
+  if (distText) {
+    const remainingMeters = Math.max(0, Math.round((100 - progress) * 0.8));
+    distText.textContent = `거리 ${remainingMeters}m`;
   }
   if (timeText) {
-    timeText.textContent = `${Math.ceil(timeLeft)}초`;
+    timeText.textContent = `${Math.ceil(timeLeft)}s`;
   }
 }
 
 function finishGame(result) {
   isReeling = false;
-  isHolding = false;
   qteActive = false;
-
-  const qteContainer = document.getElementById('reel-qte-container');
-  if (qteContainer) {
-    qteContainer.hidden = true;
-  }
+  isFishJumping = false;
+  isStunned = false;
 
   if (animFrameId) {
     cancelAnimationFrame(animFrameId);

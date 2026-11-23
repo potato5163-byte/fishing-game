@@ -110,7 +110,7 @@ function renderRodTab() {
               </div>
               <div class="t-body-sm">${rod.desc}</div>
               <div class="t-body-sm" style="color: var(--color-ink); opacity: 0.85;">
-                영역 +${rod.zoneBonus + enhanceLvl * 2}% · 파워 ×${(rod.reelMultiplier * (1 + enhanceLvl * 0.05)).toFixed(2)} · 텐션 저항 +${enhanceLvl * 4}%
+                🎯 조준각 ${(rod.trackingWidth + enhanceLvl * 2.5).toFixed(0)}° · ⚡ 스매시 기절 ${(rod.stunDuration + enhanceLvl * 0.25).toFixed(1)}초 · 💨 감기속도 ×${(rod.reelMultiplier * (1 + enhanceLvl * 0.05)).toFixed(2)}
               </div>
             </div>
             <div class="shop-item-action" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">

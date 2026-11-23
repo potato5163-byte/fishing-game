@@ -669,7 +669,388 @@
   100% { transform: translate(-50%, -50%) scale(1.2); }
 }
 
-/* 텐션 미터 게이지 */
+/* ========================================================
+   3D 1인칭 수면 낚시 파이팅 뷰 (고퀄리티 그래픽)
+======================================================== */
+
+.reel-panel-3d {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 60%, #020617 100%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.reel-panel-3d[hidden] {
+  display: none !important;
+}
+
+.reel-ocean-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: 600px;
+}
+
+.reel-horizon-glow {
+  position: absolute;
+  top: 15%;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.4) 0%, transparent 100%);
+  filter: blur(8px);
+}
+
+.reel-wave-layer {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  background-repeat: repeat-x;
+  pointer-events: none;
+}
+
+.wave-layer-back {
+  top: 30%;
+  height: 60px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(14, 165, 233, 0.35) 0%, transparent 70%);
+  background-size: 80px 40px;
+  animation: wave-drift 8s linear infinite alternate;
+}
+
+.wave-layer-mid {
+  top: 45%;
+  height: 90px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(3, 105, 161, 0.5) 0%, transparent 70%);
+  background-size: 110px 50px;
+  animation: wave-drift 5s linear infinite alternate-reverse;
+}
+
+.wave-layer-front {
+  top: 60%;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(2, 132, 199, 0.4) 0%, #082f49 100%);
+}
+
+@keyframes wave-drift {
+  from { transform: translateX(0) scaleY(1); }
+  to { transform: translateX(40px) scaleY(1.15); }
+}
+
+/* 낚싯줄 SVG */
+.reel-line-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 조준 록온 링 */
+.reel-crosshair {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+  transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.crosshair-reticle {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(56, 189, 248, 0.7);
+  border-radius: 50%;
+  animation: reticle-spin 10s linear infinite;
+}
+
+.crosshair-beam {
+  position: absolute;
+  inset: 15px;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-radius: 50%;
+}
+
+.crosshair-label {
+  position: absolute;
+  top: -18px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #38bdf8;
+  letter-spacing: 1px;
+}
+
+.reel-crosshair.is-locked .crosshair-reticle {
+  border-color: #22c55e;
+  border-style: solid;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  animation-duration: 2s;
+}
+
+.reel-crosshair.is-locked .crosshair-label {
+  color: #22c55e;
+  content: 'LOCKED!';
+}
+
+@keyframes reticle-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 3D 물고기 객체 */
+.reel-fish-3d {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.1s ease-out, top 0.15s ease-out;
+}
+
+.fish-avatar-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fish-avatar-emoji {
+  font-size: 42px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  display: inline-block;
+  transform: scaleX(-1);
+  transition: transform 0.15s ease;
+}
+
+.fish-avatar-shadow {
+  width: 40px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  filter: blur(2px);
+  margin-top: -6px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* 물고기 점프(JUMP) 상태 */
+.reel-fish-3d.is-jumping .fish-avatar-wrap {
+  transform: translateY(-70px) scale(1.4);
+}
+
+.reel-fish-3d.is-jumping .fish-avatar-shadow {
+  transform: scale(0.4);
+  opacity: 0.15;
+}
+
+.fish-jump-alert {
+  position: absolute;
+  top: -95px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+  white-space: nowrap;
+  animation: jump-badge-pulse 0.25s infinite alternate ease-in-out;
+  z-index: 10;
+}
+
+@keyframes jump-badge-pulse {
+  from { transform: scale(1); filter: brightness(1); }
+  to { transform: scale(1.18); filter: brightness(1.3); }
+}
+
+.fish-water-splash {
+  position: absolute;
+  bottom: 0;
+  width: 50px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  opacity: 0.7;
+  animation: splash-ripple 1s infinite linear;
+}
+
+@keyframes splash-ripple {
+  0% { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* 1인칭 낚싯대 */
+.first-person-rod {
+  position: absolute;
+  bottom: -20px;
+  right: 15%;
+  width: 140px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 8;
+  transform-origin: bottom right;
+  transform: rotate(-15deg);
+  transition: transform 0.1s ease-out;
+}
+
+.rod-shaft {
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(90deg, #334155, #64748b, #1e293b);
+  border-radius: 5px;
+  transform: rotate(35deg);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.rod-tip-glow {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  width: 12px;
+  height: 12px;
+  background: #38bdf8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #38bdf8;
+}
+
+/* 모바일 조작 터치 패들 */
+.reel-touch-zones {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  z-index: 9;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.65) 100%);
+}
+
+.touch-zone-left,
+.touch-zone-right,
+.touch-zone-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.touch-zone-left {
+  flex: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.touch-zone-center {
+  flex: 1.2;
+  background: rgba(234, 88, 12, 0.4);
+  color: #fed7aa;
+}
+
+.touch-zone-right {
+  flex: 1;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.touch-zone-left:active,
+.touch-zone-right:active {
+  background: rgba(56, 189, 248, 0.3);
+}
+
+.touch-zone-center:active {
+  background: rgba(234, 88, 12, 0.8);
+}
+
+/* HUD 오버레이 */
+.reel-hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.reel-hud-top {
+  flex: 1;
+  max-width: 65%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reel-target-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.reel-hud-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.reel-hud-fill {
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #38bdf8);
+  transition: width 0.08s linear;
+}
+
+.reel-hud-timer {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+/* 스매시 타격 플래시 */
+.smash-flash {
+  animation: smash-screen-flash 0.35s ease-out;
+}
+
+@keyframes smash-screen-flash {
+  0% { filter: brightness(2.2) contrast(1.4); }
+  100% { filter: brightness(1) contrast(1); }
+}
 .tension-meter-wrapper {
   background: var(--color-surface-soft);
   border: 1px solid var(--color-hairline);

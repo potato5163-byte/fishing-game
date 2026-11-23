@@ -9,7 +9,7 @@ import {
   updateFishingIndicators,
   updateFishingScene,
 } from './fishing.js';
-import { setReelHolding, isQTEActive, handleQTEInput } from './reel.js';
+import { setReelHolding, isQTEActive, handleQTEInput, setAimDirection, trySmashAction } from './reel.js';
 import { initDebug } from './debug.js';
 import { formatGold } from './utils.js';
 import { toggleSound, isSoundEnabled, playSound } from './sound.js';
@@ -80,7 +80,7 @@ function initFishingInput() {
     });
   }
 
-  // Space 키보드 처리
+  // Space 및 방향키 키보드 처리
   window.addEventListener('keydown', (e) => {
     // QTE 활성화 상태일 때 방향키 및 Space 커맨드 처리
     if (isQTEActive()) {
@@ -89,6 +89,13 @@ function initFishingInput() {
         handleQTEInput(e.code);
         return;
       }
+    }
+
+    // 낚시 파이팅 중 좌우 방향키로 낚싯대 조준 이동
+    if (e.code === 'ArrowLeft') {
+      setAimDirection(-1);
+    } else if (e.code === 'ArrowRight') {
+      setAimDirection(1);
     }
 
     if (e.code === 'Space') {
@@ -114,6 +121,20 @@ function initFishingInput() {
     }
   });
 
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      setAimDirection(0);
+    }
+
+    if (e.code === 'Space') {
+      if (document.activeElement && document.activeElement.tagName === 'SELECT') {
+        return;
+      }
+      e.preventDefault();
+      handleMainActionRelease();
+    }
+  });
+
   // QTE 모바일 버튼 터치 이벤트 리스너 바인딩
   const qteMobileBtns = document.querySelectorAll('.qte-btn');
   qteMobileBtns.forEach((btn) => {
@@ -127,15 +148,27 @@ function initFishingInput() {
     });
   });
 
-  window.addEventListener('keyup', (e) => {
-    if (e.code === 'Space') {
-      if (document.activeElement && document.activeElement.tagName === 'SELECT') {
-        return;
-      }
+  // 모바일 터치 조준 패들 바인딩
+  const touchLeft = document.getElementById('touch-left');
+  const touchRight = document.getElementById('touch-right');
+  const touchCenter = document.getElementById('touch-center');
+
+  if (touchLeft) {
+    touchLeft.addEventListener('pointerdown', (e) => { e.preventDefault(); setAimDirection(-1); });
+    touchLeft.addEventListener('pointerup', (e) => { e.preventDefault(); setAimDirection(0); });
+    touchLeft.addEventListener('pointerleave', () => setAimDirection(0));
+  }
+  if (touchRight) {
+    touchRight.addEventListener('pointerdown', (e) => { e.preventDefault(); setAimDirection(1); });
+    touchRight.addEventListener('pointerup', (e) => { e.preventDefault(); setAimDirection(0); });
+    touchRight.addEventListener('pointerleave', () => setAimDirection(0));
+  }
+  if (touchCenter) {
+    touchCenter.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      handleMainActionRelease();
-    }
-  });
+      trySmashAction();
+    });
+  }
 }
 
 function initSettings() {

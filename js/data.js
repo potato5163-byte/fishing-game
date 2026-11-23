@@ -76,18 +76,58 @@ export const BAITS = {
 export const BAIT_MAX = 999;
 export const BAIT_ORDER = ['basic', 'worm', 'shiny', 'golden', 'rainbow', 'cosmic_bait', 'phoenix', 'celestial_star'];
 
-// 낚싯대 10종
+// 낚싯대 10종 (신규 능력치: 조준 너비, 제압력/스턴초, 릴링 파워)
 export const RODS = {
-  bamboo: { id: 'bamboo', name: '대나무 낚싯대', emoji: '🎋', price: 0, zoneBonus: 0, reelMultiplier: 1.0, desc: '처음 받는 낚싯대' },
-  carbon: { id: 'carbon', name: '카본 낚싯대', emoji: '🎣', price: 300, zoneBonus: 5, reelMultiplier: 1.10, desc: '가볍고 튼튼해요' },
-  pro: { id: 'pro', name: '프로 낚싯대', emoji: '🪝', price: 1500, zoneBonus: 10, reelMultiplier: 1.20, desc: '프로 낚시꾼의 선택' },
-  legend: { id: 'legend', name: '전설의 낚싯대', emoji: '🔱', price: 6000, zoneBonus: 15, reelMultiplier: 1.35, desc: '바다의 신이 쓰던 낚싯대' },
-  titanium: { id: 'titanium', name: '티타늄 낚싯대', emoji: '⚡', price: 20000, zoneBonus: 20, reelMultiplier: 1.50, desc: '극지방의 한파도 견디는 신소재' },
-  dragon: { id: 'dragon', name: '용비늘 낚싯대', emoji: '🐉', price: 80000, zoneBonus: 25, reelMultiplier: 1.70, desc: '용궁의 신비한 힘이 깃든 낚싯대' },
-  cosmic: { id: 'cosmic', name: '은하의 성채 낚싯대', emoji: '🌌', price: 300000, zoneBonus: 30, reelMultiplier: 1.90, desc: '별을 낚아 올릴 수 있는 성채' },
-  magma: { id: 'magma', name: '용암의 창 낚싯대', emoji: '🌋', price: 1000000, zoneBonus: 35, reelMultiplier: 2.10, desc: '끓는 불길도 얼려버리는 화염창' },
-  timewarp_rod: { id: 'timewarp_rod', name: '시간 역행 낚싯대', emoji: '⏳', price: 3500000, zoneBonus: 40, reelMultiplier: 2.35, desc: '물고기의 움직임을 느리게 만드는 시공의 낚싯대' },
-  celestial_god: { id: 'celestial_god', name: '천상신의 황금 낚싯대', emoji: '👑', price: 10000000, zoneBonus: 50, reelMultiplier: 2.70, desc: '우주 만물을 낚아 올리는 신의 권능' },
+  bamboo: {
+    id: 'bamboo', name: '대나무 낚싯대', emoji: '🎋', price: 0,
+    trackingWidth: 26, stunDuration: 1.2, reelMultiplier: 1.0,
+    desc: '기본적인 대나무 낚싯대. 조준과 스매시 기초용',
+  },
+  carbon: {
+    id: 'carbon', name: '카본 낚싯대', emoji: '🎣', price: 300,
+    trackingWidth: 30, stunDuration: 1.5, reelMultiplier: 1.15,
+    desc: '가볍고 탄성이 좋아 좌우 반응 속도가 빨라요',
+  },
+  pro: {
+    id: 'pro', name: '프로 낚싯대', emoji: '🪝', price: 1500,
+    trackingWidth: 35, stunDuration: 1.8, reelMultiplier: 1.30,
+    desc: '넓은 조준 반경과 강한 스매시 제압력을 자랑합니다',
+  },
+  legend: {
+    id: 'legend', name: '전설의 낚싯대', emoji: '🔱', price: 6000,
+    trackingWidth: 40, stunDuration: 2.2, reelMultiplier: 1.50,
+    desc: '바다의 신이 남긴 삼지창의 힘. 점프한 물고기를 강력히 제압',
+  },
+  titanium: {
+    id: 'titanium', name: '티타늄 낚싯대', emoji: '⚡', price: 20000,
+    trackingWidth: 45, stunDuration: 2.6, reelMultiplier: 1.70,
+    desc: '전기 충격파를 발생시켜 점프 스매시 시 물고기 2.6초 기절',
+  },
+  dragon: {
+    id: 'dragon', name: '용비늘 낚싯대', emoji: '🐉', price: 80000,
+    trackingWidth: 50, stunDuration: 3.0, reelMultiplier: 1.95,
+    desc: '용궁의 여의주 기운으로 화면 절반을 커버하는 넓은 조준각',
+  },
+  cosmic: {
+    id: 'cosmic', name: '은하의 성채 낚싯대', emoji: '🌌', price: 300000,
+    trackingWidth: 55, stunDuration: 3.5, reelMultiplier: 2.25,
+    desc: '중력장을 펼쳐 물고기의 좌우 이동을 봉쇄합니다',
+  },
+  magma: {
+    id: 'magma', name: '용암의 창 낚싯대', emoji: '🌋', price: 1000000,
+    trackingWidth: 60, stunDuration: 4.0, reelMultiplier: 2.60,
+    desc: '불꽃 스매시로 단 한 번의 강타에 물고기를 완벽 무력화',
+  },
+  timewarp_rod: {
+    id: 'timewarp_rod', name: '시간 역행 낚싯대', emoji: '⏳', price: 3500000,
+    trackingWidth: 65, stunDuration: 4.5, reelMultiplier: 3.00,
+    desc: '시공간을 왜곡하여 물고기의 점프 타이밍을 매우 느리게 만듦',
+  },
+  celestial_god: {
+    id: 'celestial_god', name: '천상신의 황금 낚싯대', emoji: '👑', price: 10000000,
+    trackingWidth: 75, stunDuration: 5.5, reelMultiplier: 3.60,
+    desc: '우주 전체를 가두는 신의 결계. 스매시 성공 시 즉시 35% 끌어당김!',
+  },
 };
 
 export const ROD_ORDER = ['bamboo', 'carbon', 'pro', 'legend', 'titanium', 'dragon', 'cosmic', 'magma', 'timewarp_rod', 'celestial_god'];

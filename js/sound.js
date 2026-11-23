@@ -171,6 +171,50 @@ export function playSound(type) {
       break;
     }
 
+    case 'smash_hit': {
+      // 점프 물고기 강타 스매시 효과음! (묵직한 폭발타격음)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(220, now);
+      osc1.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+      gain1.gain.setValueAtTime(0.4, now);
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.3);
+
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(800, now);
+      osc2.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+      gain2.gain.setValueAtTime(0.25, now);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now);
+      osc2.stop(now + 0.2);
+      break;
+    }
+
+    case 'fish_jump': {
+      // 물고기 수면 도약 물보라 사운드
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(250, now);
+      osc.frequency.exponentialRampToValueAtTime(650, now + 0.2);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+      break;
+    }
+
     case 'qte_success': {
       // QTE 전체 완료 강타 및 제압 사운드
       [440, 554.37, 659.25, 880].forEach((freq, i) => {
