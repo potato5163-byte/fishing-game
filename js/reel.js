@@ -21,11 +21,147 @@ let timeLeft = 25;
 let lastFrameTime = 0;
 let animFrameId = null;
 
+// 특수 커맨드 (QTE) 상태 변수
+let qteActive = false;
+let qteSequence = [];
+let qteIndex = 0;
+let qteTimer = 0;
+let qteMaxTime = 2.5;
+let qteTriggeredCount = 0;
+let qteStunTimer = 0; // 성공 시 물고기 스턴 시간
+
+const QTE_POSSIBLE_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+const QTE_KEY_LABELS = {
+  ArrowUp: '⬆️',
+  ArrowDown: '⬇️',
+  ArrowLeft: '⬅️',
+  ArrowRight: '➡️',
+  Space: 'SPACE',
+};
+
+export function isQTEActive() {
+  return qteActive;
+}
+
+export function handleQTEInput(key) {
+  if (!qteActive) return false;
+
+  const expectedKey = qteSequence[qteIndex];
+  if (key === expectedKey) {
+    playSound('qte_hit');
+    qteIndex++;
+    updateQTEDOM();
+
+    // 모든 시퀀스 통과
+    if (qteIndex >= qteSequence.length) {
+      resolveQTE(true);
+    }
+    return true;
+  } else {
+    // 오입력 시 시간 페널티 0.4초
+    qteTimer = Math.max(0, qteTimer - 0.4);
+    playSound('qte_fail');
+    return true;
+  }
+}
+
+function triggerQTE() {
+  qteActive = true;
+  qteTriggeredCount++;
+
+  // 난이도에 따른 커맨드 길이: epic(3), legendary(3~4), mythic(4)
+  let count = 3;
+  if (currentFish.rarity === 'mythic') count = 4;
+  else if (currentFish.rarity === 'legendary') count = 3;
+
+  qteSequence = [];
+  for (let i = 0; i < count; i++) {
+    const randomKey = QTE_POSSIBLE_KEYS[Math.floor(Math.random() * QTE_POSSIBLE_KEYS.length)];
+    qteSequence.push(randomKey);
+  }
+
+  qteIndex = 0;
+  qteMaxTime = currentFish.rarity === 'mythic' ? 2.5 : 2.8;
+  qteTimer = qteMaxTime;
+
+  playSound('qte_prompt');
+
+  const container = document.getElementById('reel-qte-container');
+  if (container) {
+    container.hidden = false;
+  }
+  updateQTEDOM();
+}
+
+function updateQTEDOM() {
+  const promptEl = document.getElementById('reel-qte-prompt');
+  const timerFill = document.getElementById('reel-qte-timer-fill');
+
+  if (promptEl) {
+    promptEl.innerHTML = qteSequence
+      .map((k, idx) => {
+        let cls = 'qte-key-badge';
+        if (idx < qteIndex) cls += ' cleared';
+        else if (idx === qteIndex) cls += ' current';
+        return `<span class="${cls}">${QTE_KEY_LABELS[k] || k}</span>`;
+      })
+      .join('');
+  }
+
+  if (timerFill) {
+    const pct = Math.max(0, Math.min(100, (qteTimer / qteMaxTime) * 100));
+    timerFill.style.width = `${pct}%`;
+  }
+}
+
+function resolveQTE(success) {
+  qteActive = false;
+  const container = document.getElementById('reel-qte-container');
+  if (container) {
+    container.hidden = true;
+  }
+
+  const scene = document.getElementById('fishing-scene');
+
+  if (success) {
+    playSound('qte_success');
+    // 성공 보상: 게이지 대폭 상승 (+20%) & 2.5초간 물고기 마비(스턴)
+    progress = clamp(progress + 20, 0, 100);
+    qteStunTimer = 2.5;
+
+    if (scene) {
+      scene.classList.add('screen-shake');
+      setTimeout(() => scene.classList.remove('screen-shake'), 300);
+    }
+  } else {
+    playSound('qte_fail');
+    // 실패 패널티: 게이지 감소 (-15%)
+    progress = clamp(progress - 15, 0, 100);
+
+    if (scene) {
+      scene.classList.add('screen-shake');
+      setTimeout(() => scene.classList.remove('screen-shake'), 300);
+    }
+  }
+}
+
 export function startReelGame(fish, equippedRodId, onFinish) {
   currentFish = fish;
   onFinishCallback = onFinish;
   isReeling = true;
   isHolding = false;
+
+  qteActive = false;
+  qteSequence = [];
+  qteIndex = 0;
+  qteTimer = 0;
+  qteTriggeredCount = 0;
+  qteStunTimer = 0;
+
+  const qteContainer = document.getElementById('reel-qte-container');
+  if (qteContainer) {
+    qteContainer.hidden = true;
+  }
 
   const rod = RODS[equippedRodId] || RODS.bamboo;
   let bonusH = rod.zoneBonus || 0;
@@ -110,11 +246,35 @@ function gameLoop(currentTime) {
 function updatePhysics(dt) {
   const diffSettings = FISHING_CONFIG.DIFFICULTY[currentFish.difficulty] || FISHING_CONFIG.DIFFICULTY[1];
 
-  // 1. 제한 시간 감소
-  timeLeft -= dt;
-  if (timeLeft < 0) timeLeft = 0;
+  // 1. 제한 시간 감소 (QTE 활성화 중에는 전체 시간도 일시 슬로우/유지)
+  if (!qteActive) {
+    timeLeft -= dt;
+    if (timeLeft < 0) timeLeft = 0;
+  }
 
-  // 2. 잡기 영역 가속도 & 위치
+  // 2. QTE 처리
+  if (qteActive) {
+    qteTimer -= dt;
+    updateQTEDOM();
+    if (qteTimer <= 0) {
+      resolveQTE(false); // 시간 초과 실패
+    }
+    return; // QTE 중에는 일반 물리 이동 일시 정지 (긴박한 QTE에 집중)
+  }
+
+  // QTE 트리거 체크: 영웅/전설/신화 등급이고 35% ~ 65% 진행도 사이에서 1회 발생
+  const isHighRarity = ['epic', 'legendary', 'mythic'].includes(currentFish.rarity);
+  if (isHighRarity && qteTriggeredCount === 0 && progress >= 40 && progress <= 70) {
+    triggerQTE();
+    return;
+  }
+
+  // 3. 물고기 스턴 타이머
+  if (qteStunTimer > 0) {
+    qteStunTimer -= dt;
+  }
+
+  // 4. 잡기 영역 가속도 & 위치
   if (isHolding) {
     zoneVel += FISHING_CONFIG.ZONE_UP_ACCEL * dt;
     if (Math.random() < 0.2) {
@@ -134,23 +294,25 @@ function updatePhysics(dt) {
     zoneVel = 0;
   }
 
-  // 3. 물고기 목표 위치 및 이동
-  targetTimer -= dt;
-  if (targetTimer <= 0) {
-    targetY = Math.random() * 100;
-    targetTimer = diffSettings.targetIntervalSec;
+  // 5. 물고기 이동 (스턴 중이면 가만히 정지해 있음!)
+  if (qteStunTimer <= 0) {
+    targetTimer -= dt;
+    if (targetTimer <= 0) {
+      targetY = Math.random() * 100;
+      targetTimer = diffSettings.targetIntervalSec;
+    }
+
+    const dist = targetY - fishY;
+    const step = diffSettings.fishSpeed * dt;
+    if (Math.abs(dist) <= step) {
+      fishY = targetY;
+    } else {
+      fishY += Math.sign(dist) * step;
+    }
+    fishY = clamp(fishY, 0, 100);
   }
 
-  const dist = targetY - fishY;
-  const step = diffSettings.fishSpeed * dt;
-  if (Math.abs(dist) <= step) {
-    fishY = targetY;
-  } else {
-    fishY += Math.sign(dist) * step;
-  }
-  fishY = clamp(fishY, 0, 100);
-
-  // 4. 진행도 증감
+  // 6. 진행도 증감
   const inZone = fishY >= zoneY && fishY <= zoneY + zoneH;
   if (inZone) {
     // 잡기 영역 안
@@ -158,8 +320,9 @@ function updatePhysics(dt) {
     const mult = rod.reelMultiplier || 1.0;
     progress += FISHING_CONFIG.PROGRESS_GAIN * mult * dt;
   } else {
-    // 밖
-    progress -= diffSettings.progressLoss * dt;
+    // 밖 (스턴 중일 때는 패널티 절반)
+    const penalty = qteStunTimer > 0 ? diffSettings.progressLoss * 0.5 : diffSettings.progressLoss;
+    progress -= penalty * dt;
   }
   progress = clamp(progress, 0, 100);
 }
@@ -174,6 +337,11 @@ function updateReelDOM() {
   if (fishEl) {
     // 바닥이 0이므로 bottom: fishY%
     fishEl.style.bottom = `${fishY}%`;
+    if (qteStunTimer > 0) {
+      fishEl.textContent = '💫'; // 기절 상태 표시
+    } else {
+      fishEl.textContent = currentFish ? currentFish.emoji : '🐟';
+    }
   }
 
   if (zoneEl) {
@@ -202,6 +370,13 @@ function updateReelDOM() {
 function finishGame(result) {
   isReeling = false;
   isHolding = false;
+  qteActive = false;
+
+  const qteContainer = document.getElementById('reel-qte-container');
+  if (qteContainer) {
+    qteContainer.hidden = true;
+  }
+
   if (animFrameId) {
     cancelAnimationFrame(animFrameId);
     animFrameId = null;

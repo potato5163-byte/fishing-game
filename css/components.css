@@ -678,6 +678,136 @@
   gap: var(--space-md);
 }
 
+/* 특수 커맨드 (QTE) 스타일 */
+.reel-qte-container {
+  position: absolute;
+  inset: var(--space-xs);
+  background: rgba(18, 20, 24, 0.95);
+  border: 2px solid #ef4444;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  z-index: 10;
+  animation: qte-pulse 1s infinite alternate ease-in-out;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
+}
+
+.reel-qte-container[hidden] {
+  display: none !important;
+}
+
+@keyframes qte-pulse {
+  from { border-color: #ef4444; }
+  to { border-color: #fbbf24; }
+}
+
+.reel-qte-banner {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fbbf24;
+  text-align: center;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.reel-qte-keys {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.qte-key-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  background: #27272a;
+  color: #fff;
+  border: 2px solid #52525b;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 900;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  transition: all 0.15s ease;
+}
+
+.qte-key-badge.current {
+  border-color: #3b82f6;
+  background: #1e3a8a;
+  transform: scale(1.15);
+  box-shadow: 0 0 12px #3b82f6;
+}
+
+.qte-key-badge.cleared {
+  border-color: #22c55e;
+  background: #14532d;
+  color: #86efac;
+  opacity: 0.6;
+}
+
+.reel-qte-timer-bar {
+  width: 90%;
+  height: 6px;
+  background: #3f3f46;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.reel-qte-timer-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #ef4444, #fbbf24);
+  transition: width 0.05s linear;
+}
+
+.reel-qte-mobile-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.qte-mobile-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.qte-btn {
+  background: #3f3f46;
+  color: #fff;
+  border: 1px solid #71717a;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.qte-btn:active {
+  background: #2563eb;
+  transform: scale(0.95);
+}
+
+.qte-btn-space {
+  padding: 5px 14px;
+  background: #ca8a04;
+  border-color: #eab308;
+  font-size: 13px;
+}
+
+
 .reel-progress-bar {
   width: 100%;
   height: 12px;

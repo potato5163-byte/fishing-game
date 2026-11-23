@@ -9,7 +9,7 @@ import {
   updateFishingIndicators,
   updateFishingScene,
 } from './fishing.js';
-import { setReelHolding } from './reel.js';
+import { setReelHolding, isQTEActive, handleQTEInput } from './reel.js';
 import { initDebug } from './debug.js';
 import { formatGold } from './utils.js';
 import { toggleSound, isSoundEnabled, playSound } from './sound.js';
@@ -82,6 +82,15 @@ function initFishingInput() {
 
   // Space 키보드 처리
   window.addEventListener('keydown', (e) => {
+    // QTE 활성화 상태일 때 방향키 및 Space 커맨드 처리
+    if (isQTEActive()) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+        e.preventDefault();
+        handleQTEInput(e.code);
+        return;
+      }
+    }
+
     if (e.code === 'Space') {
       // select 엘리먼트에 포커스가 있으면 Space 기본 동작 유지
       if (document.activeElement && document.activeElement.tagName === 'SELECT') {
@@ -103,6 +112,19 @@ function initFishingInput() {
         closeModal();
       }
     }
+  });
+
+  // QTE 모바일 버튼 터치 이벤트 리스너 바인딩
+  const qteMobileBtns = document.querySelectorAll('.qte-btn');
+  qteMobileBtns.forEach((btn) => {
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      if (key && isQTEActive()) {
+        handleQTEInput(key);
+      }
+    });
   });
 
   window.addEventListener('keyup', (e) => {
