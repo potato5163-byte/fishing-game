@@ -41,6 +41,12 @@ export function createNewState() {
     aquarium: [], // 수족관에 넣은 물고기 목록 [{ id, fishId, name, emoji, size, rarity, addedAt }]
     aquariumLastCollectedAt: Date.now(),
     feverGauge: 0, // 0 ~ 100 피버 게이지
+    // 일일 의뢰 (데일리 퀘스트)
+    dailyQuests: [
+      { id: 'q1', title: '물고기 5마리 낚기', current: 0, target: 5, reward: 5000, completed: false },
+      { id: 'q2', title: '점프 스매시 2회 성공', current: 0, target: 2, reward: 8000, completed: false },
+      { id: 'q3', title: '희귀 이상 물고기 1마리 낚기', current: 0, target: 1, reward: 12000, completed: false },
+    ],
     stats: {
       totalCaught: 0,
       totalCasts: 0,
@@ -67,7 +73,43 @@ export function setFishingActive(active) {
 }
 
 // ==========================================
-// 7단계 저장 및 불러오기 (docs/08)
+// 저장 코드 내보내기 및 다른 기기에서 가져오기 (Cloudless Sync)
+// ==========================================
+
+export function exportSaveCode() {
+  saveGame();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return '';
+  // Base64 인코딩으로 안전하게 변환
+  try {
+    return btoa(encodeURIComponent(raw));
+  } catch (e) {
+    return '';
+  }
+}
+
+export function importSaveCode(code) {
+  if (!code || typeof code !== 'string') {
+    return { ok: false, error: '유효하지 않은 저장 코드입니다.' };
+  }
+  try {
+    const raw = decodeURIComponent(atob(code.trim()));
+    const parsed = JSON.parse(raw);
+    if (!validateSavedData(parsed)) {
+      return { ok: false, error: '저장 코드 데이터가 손상되었거나 올바르지 않습니다.' };
+    }
+    sanitizeSavedData(parsed);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    Object.assign(state, createNewState(), parsed, {
+      activeTab: 'fishing',
+      isFishingActive: false,
+    });
+    updateTopbar();
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: '저장 코드를 해석할 수 없습니다. 복사한 코드를 다시 확인해 주세요.' };
+  }
+}
 // ==========================================
 
 export function checkStorageAvailability() {
@@ -110,6 +152,7 @@ export function saveGame() {
     aquarium: state.aquarium || [],
     aquariumLastCollectedAt: state.aquariumLastCollectedAt || Date.now(),
     feverGauge: state.feverGauge || 0,
+    dailyQuests: state.dailyQuests || [],
     stats: state.stats,
   };
 
@@ -351,8 +394,30 @@ export function spendGold(amount) {
 
 export function addGold(amount) {
   state.gold += amount;
+  state.stats.totalEarned = (state.stats.totalEarned || 0) + amount;
   saveGame();
   updateTopbar();
+}
+
+export function updateDailyQuestProgress(type, amount = 1) {
+  if (!state.dailyQuests) return;
+  state.dailyQuests.forEach((q) => {
+    if (q.completed) return;
+    if (type === 'catch' && q.id === 'q1') {
+      q.current = Math.min(q.target, q.current + amount);
+    } else if (type === 'smash' && q.id === 'q2') {
+      q.current = Math.min(q.target, q.current + amount);
+    } else if (type === 'rare_catch' && q.id === 'q3') {
+      q.current = Math.min(q.target, q.current + amount);
+    }
+    if (q.current >= q.target && !q.completed) {
+      q.completed = true;
+      state.gold += q.reward;
+      showToast(`📜 의뢰 완료: [${q.title}] 달성! (+${q.reward}G)`);
+      updateTopbar();
+    }
+  });
+  saveGame();
 }
 
 // ==========================================

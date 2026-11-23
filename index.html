@@ -17,6 +17,7 @@
       </div>
       <div id="topbar-region" class="topbar-center">📍 잔잔한 호수</div>
       <div class="topbar-right">
+        <button id="btn-daily-quest" class="btn-icon" aria-label="일일 의뢰" title="일일 퀘스트" style="font-size: 14px; width: auto; padding: 0 10px; border-radius: var(--radius-pill); background: #fef08a; color: #854d0e; font-weight: 800;">📜 의뢰</button>
         <button id="btn-weather" class="btn-icon" aria-label="날씨" style="font-size: 14px; width: auto; padding: 0 10px; border-radius: var(--radius-pill);">☀️ 맑음</button>
         <button id="btn-sound" class="btn-icon" aria-label="사운드">🔊</button>
         <span id="topbar-bag" class="topbar-bag">🎒 0/20</span>
@@ -138,11 +139,14 @@
               낚싯대를 던져보세요
             </div>
 
-            <!-- 알약 2개: 미끼 선택 + 낚싯대 표시 + 확률표 버튼 -->
+            <!-- 알약 3개: 미끼 선택 + 즉시충전 + 낚싯대 표시 + 확률표 버튼 -->
             <div class="fishing-pills">
               <select id="fishing-bait-select" class="pill-select" aria-label="미끼 선택">
                 <option value="basic">🍞 기본 미끼 (∞)</option>
               </select>
+              <button id="btn-quick-buy-bait" class="pill-static" style="cursor: pointer; background: #0284c7; color: #fff; font-weight: 700;" title="현재 선택된 미끼 10개 즉시 구매">
+                +10개 충전
+              </button>
               <div id="fishing-rod-indicator" class="pill-static">
                 🎋 대나무 낚싯대
               </div>

@@ -1,5 +1,5 @@
 import { updateTopbar, switchTab } from './ui.js';
-import { state, loadGame, resetGame } from './state.js';
+import { state, loadGame, resetGame, exportSaveCode, importSaveCode } from './state.js';
 import {
   handleMainActionPress,
   handleMainActionRelease,
@@ -33,6 +33,26 @@ function initFishingInput() {
   const mainBtn = document.getElementById('btn-main-action');
   const reelPanel = document.getElementById('reel-panel');
   const quickRatesBtn = document.getElementById('btn-quick-rates');
+  const quickBaitBtn = document.getElementById('btn-quick-buy-bait');
+
+  if (quickBaitBtn) {
+    quickBaitBtn.addEventListener('click', () => {
+      const baitId = state.selectedBait || 'basic';
+      if (baitId === 'basic') {
+        showToast('기본 미끼는 무제한입니다!');
+        return;
+      }
+      import('./state.js').then((s) => {
+        const res = s.buyBait(baitId, 10);
+        if (res.ok) {
+          showToast(`🍞 미끼 10개를 즉시 구매했습니다!`);
+          updateFishingIndicators();
+        } else {
+          showToast('골드가 부족하거나 최대 소지량을 초과했습니다.');
+        }
+      });
+    });
+  }
 
   if (quickRatesBtn) {
     quickRatesBtn.addEventListener('click', showRatesModal);
@@ -208,7 +228,51 @@ function initFishingInput() {
   }
 }
 
+function showDailyQuestModal() {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  const quests = state.dailyQuests || [];
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="modal-quest-scrim">
+      <div class="modal-dialog">
+        <div class="modal-top-block block-lime" style="padding: var(--space-lg) var(--space-md);">
+          <div class="t-eyebrow">DAILY MISSION</div>
+          <div class="t-headline">📜 오늘의 낚시 의뢰소</div>
+        </div>
+        <div class="modal-content" style="padding: var(--space-md); width: 100%;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${quests.map((q) => `
+              <div style="padding: 10px; background: var(--color-surface-soft); border-radius: 8px; border: 1px solid var(--color-hairline); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 13px;">${q.title}</div>
+                  <div style="font-size: 11px; color: var(--color-subtext);">진행도: ${q.current}/${q.target} · 보상: ${formatGold(q.reward)}G</div>
+                </div>
+                <div>
+                  ${q.completed ? '<span style="color: #10b981; font-weight: 900; font-size: 13px;">✅ 완료!</span>' : '<span style="color: #ea580c; font-weight: 700; font-size: 12px;">진행 중</span>'}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <button id="btn-close-quest" class="btn-primary modal-action-btn" style="margin-top: var(--space-md);">확인</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const btnClose = document.getElementById('btn-close-quest');
+  if (btnClose) {
+    btnClose.addEventListener('click', () => { modalRoot.innerHTML = ''; });
+  }
+}
+
 function initSettings() {
+  const questBtn = document.getElementById('btn-daily-quest');
+  if (questBtn) {
+    questBtn.addEventListener('click', showDailyQuestModal);
+  }
+
   const settingsBtn = document.getElementById('btn-settings');
   if (settingsBtn) {
     settingsBtn.addEventListener('click', showSettingsModal);
@@ -264,6 +328,22 @@ function showSettingsModal() {
             </div>
           </div>
 
+          <!-- 기기 간 저장 데이터 이동 (클라우드리스 동기화) -->
+          <div style="margin-top: var(--space-md); padding: var(--space-sm); background: var(--color-surface-soft); border-radius: var(--radius-sm); border: 1px solid var(--color-hairline);">
+            <div class="t-card-title" style="font-size: 13px; margin-bottom: 4px;">📲 기기 간 저장 코드 동기화</div>
+            <div class="t-body-sm" style="font-size: 11px; margin-bottom: 8px; color: var(--color-subtext);">
+              코드를 복사하여 다른 PC나 휴대폰에서 그대로 이어할 수 있습니다.
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button id="btn-export-code" class="btn-primary" style="flex: 1; height: 36px; font-size: 12px; background: #0284c7;">
+                📋 저장코드 복사
+              </button>
+              <button id="btn-import-code" class="btn-secondary" style="flex: 1; height: 36px; font-size: 12px;">
+                📥 코드 불러오기
+              </button>
+            </div>
+          </div>
+
           <button id="btn-reset-data" class="btn-danger-outline" style="width: 100%; margin-top: var(--space-sm);">
             데이터 초기화
           </button>
@@ -277,6 +357,39 @@ function showSettingsModal() {
 
   const btnClose = document.getElementById('btn-close-settings');
   const btnReset = document.getElementById('btn-reset-data');
+  const btnExport = document.getElementById('btn-export-code');
+  const btnImport = document.getElementById('btn-import-code');
+
+  if (btnExport) {
+    btnExport.addEventListener('click', () => {
+      const code = exportSaveCode();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('📋 저장 코드가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+          prompt('아래 저장 코드를 복사하세요:', code);
+        });
+      } else {
+        prompt('아래 저장 코드를 복사하세요:', code);
+      }
+    });
+  }
+
+  if (btnImport) {
+    btnImport.addEventListener('click', () => {
+      const code = prompt('다른 기기에서 복사한 저장 코드를 붙여넣으세요:');
+      if (code) {
+        const res = importSaveCode(code);
+        if (res.ok) {
+          showToast('🎉 저장 데이터를 성공적으로 불러왔습니다!');
+          modalRoot.innerHTML = '';
+          switchTab('fishing');
+        } else {
+          showToast(res.error);
+        }
+      }
+    });
+  }
 
   btnClose.addEventListener('click', () => {
     modalRoot.innerHTML = '';

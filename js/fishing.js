@@ -397,6 +397,14 @@ function handleReelFinish(result, fish) {
     // 도감 기록 갱신 (docs/06 2장)
     const recordResult = recordCatch(fish.id, fish.size);
 
+    // 퀘스트 진행도 갱신
+    import('./state.js').then((s) => {
+      s.updateDailyQuestProgress('catch', 1);
+      if (['rare', 'epic', 'legendary', 'mythic'].includes(fish.rarity)) {
+        s.updateDailyQuestProgress('rare_catch', 1);
+      }
+    });
+
     // 결과 모달 노출 (NEW!, 최대 기록!, 왕관! 전달)
     showResultModal(fish, recordResult);
   } else if (result === 'fail_escaped') {

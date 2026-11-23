@@ -210,6 +210,9 @@ export function trySmashAction() {
     const jumpAlert = document.getElementById('fish-jump-alert');
     if (jumpAlert) jumpAlert.hidden = true;
 
+    // 점프 스매시 퀘스트 카운트
+    state.dailyQuests && import('./state.js').then((s) => s.updateDailyQuestProgress('smash', 1));
+
     return true;
   }
   return false;

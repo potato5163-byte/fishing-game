@@ -3,12 +3,30 @@ import { FISH, RARITIES, MESSAGES } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
 import { showToast, switchTab } from './ui.js';
 
+let bagFilterRarity = 'all'; // 'all', 'common', 'rare', 'epic', 'legendary', 'mythic'
+let bagSortBy = 'latest'; // 'latest', 'price', 'size'
+
 export function renderBag() {
   const screen = document.getElementById('screen-bag');
   if (!screen) return;
 
   const count = state.bag.length;
   const totalValue = state.bag.reduce((sum, item) => sum + (item.price || 0), 0);
+
+  // 필터링 및 정렬 적용
+  let filteredItems = [...state.bag];
+  if (bagFilterRarity !== 'all') {
+    filteredItems = filteredItems.filter((item) => {
+      const meta = FISH.find((f) => f.id === item.fishId) || FISH[0];
+      return meta.rarity === bagFilterRarity;
+    });
+  }
+
+  if (bagSortBy === 'price') {
+    filteredItems.sort((a, b) => (b.price || 0) - (a.price || 0));
+  } else if (bagSortBy === 'size') {
+    filteredItems.sort((a, b) => (b.size || 0) - (a.size || 0));
+  }
 
   screen.innerHTML = `
     <div class="color-block block-mint">
@@ -29,6 +47,23 @@ export function renderBag() {
       </div>
     </div>
 
+    <!-- 가방 필터 & 정렬 바 -->
+    <div class="bag-filter-bar" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid var(--color-hairline); gap: 6px; overflow-x: auto;">
+      <div style="display: flex; gap: 4px; overflow-x: auto;">
+        <button class="shop-tab-pill ${bagFilterRarity === 'all' ? 'is-active' : ''} btn-bag-filter" data-rarity="all">전체</button>
+        <button class="shop-tab-pill ${bagFilterRarity === 'common' ? 'is-active' : ''} btn-bag-filter" data-rarity="common">일반</button>
+        <button class="shop-tab-pill ${bagFilterRarity === 'rare' ? 'is-active' : ''} btn-bag-filter" data-rarity="rare">희귀</button>
+        <button class="shop-tab-pill ${bagFilterRarity === 'epic' ? 'is-active' : ''} btn-bag-filter" data-rarity="epic">영웅</button>
+        <button class="shop-tab-pill ${bagFilterRarity === 'legendary' ? 'is-active' : ''} btn-bag-filter" data-rarity="legendary">전설</button>
+        <button class="shop-tab-pill ${bagFilterRarity === 'mythic' ? 'is-active' : ''} btn-bag-filter" data-rarity="mythic">신화</button>
+      </div>
+      <select id="bag-sort-select" class="pill-select" style="font-size: 12px; height: 32px; padding: 0 8px;">
+        <option value="latest" ${bagSortBy === 'latest' ? 'selected' : ''}>최신순</option>
+        <option value="price" ${bagSortBy === 'price' ? 'selected' : ''}>가격 높은순</option>
+        <option value="size" ${bagSortBy === 'size' ? 'selected' : ''}>크기 큰순</option>
+      </select>
+    </div>
+
     <div class="bag-list-container" id="bag-list">
       ${
         count === 0
@@ -43,7 +78,7 @@ export function renderBag() {
         `
           : `
           <div class="bag-items">
-            ${state.bag
+            ${filteredItems
               .map((item) => {
                 const fishMeta = FISH.find((f) => f.id === item.fishId) || FISH[0];
                 const rarityMeta = RARITIES[fishMeta.rarity] || RARITIES.common;
@@ -72,6 +107,24 @@ export function renderBag() {
       }
     </div>
   `;
+
+  // 필터 버튼 이벤트
+  const filterBtns = screen.querySelectorAll('.btn-bag-filter');
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      bagFilterRarity = btn.dataset.rarity;
+      renderBag();
+    });
+  });
+
+  // 정렬 선택 이벤트
+  const sortSelect = document.getElementById('bag-sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      bagSortBy = e.target.value;
+      renderBag();
+    });
+  }
 
   // 이벤트 바인딩
   const btnGotoFishing = document.getElementById('btn-goto-fishing');
