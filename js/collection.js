@@ -167,16 +167,29 @@ function renderFishCard(fish) {
   const rarity = RARITIES[fish.rarity] || RARITIES.common;
   const cardClass = fish.rarity === 'mythic' ? 'rarity-mythic-card' : fish.rarity === 'legendary' ? 'rarity-legendary-card' : '';
   const crownBadge = record.crown ? '<span class="collection-crown-badge" title="최대 크기 95% 이상 황금 왕관!">👑</span>' : '';
+  const themeClass = `theme-${fish.region || 'lake'}`;
+
+  // 어종 카테고리 태그 식별
+  const familyTag =
+    ['whale_shark', 'greenland_shark', 'sturgeon', 'magma_shark', 'galaxy_whale', 'white_whale'].includes(fish.id) ? '거대수' :
+    ['squid', 'giant_octopus', 'vampire_squid', 'inferno_octopus'].includes(fish.id) ? '두족류' :
+    ['glacier_crab', 'pearl_clam', 'ember_crab', 'mantis_shrimp'].includes(fish.id) ? '갑각/조개' :
+    ['eel', 'gulper_eel', 'snakehead', 'lava_eel', 'blackhole_eel'].includes(fish.id) ? '장어/포식' :
+    ['star_fish', 'plasma_jelly', 'supernova_fish', 'starlight_squid'].includes(fish.id) ? '성운 생명체' :
+    ['blue_dragon', 'pulsar_beast', 'cosmic_leviathan', 'salamander_king'].includes(fish.id) ? '환상종' :
+    ['minnow', 'crucian', 'bluegill', 'dace', 'pale_chub', 'icefish'].includes(fish.id) ? '소형 담수어' :
+    '어류';
 
   return `
     <div class="collection-card is-known ${cardClass}" data-fish-id="${fish.id}">
       <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
       ${crownBadge}
-      <div class="collection-card-emoji-box">
+      <div class="collection-card-emoji-box ${themeClass}">
         <span>${fish.emoji}</span>
       </div>
       <div class="collection-card-name t-body-sm" style="font-weight: 700;">${fish.name}</div>
-      <span class="badge-rarity rarity-${fish.rarity}">${rarity.name}</span>
+      <span class="fish-family-tag">${familyTag}</span>
+      <span class="badge-rarity rarity-${fish.rarity}" style="margin-top: 2px;">${rarity.name}</span>
     </div>
   `;
 }

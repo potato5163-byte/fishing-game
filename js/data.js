@@ -327,6 +327,19 @@ export const MESSAGES = {
   RESET_GAME: '🔄 처음부터 다시 시작해요',
 };
 
+// 해양 쓰레기 및 정화 센터 보상 정의
+export const TRASH_ITEMS = [
+  { id: 'old_boot', name: '오래된 장화', emoji: '🥾', point: 10, desc: '누군가 버린 낡은 고무장화' },
+  { id: 'rusty_can', name: '찌그러진 깡통', emoji: '🥫', point: 8, desc: '바다에 떠돌던 통조림 캔' },
+  { id: 'torn_net', name: '찢어진 폐그물', emoji: '🕸️', point: 15, desc: '산호초를 위협하던 플라스틱 그물' },
+  { id: 'plastic_bottle', name: '페트병', emoji: '🍾', point: 12, desc: '바다거북이를 괴롭히던 플라스틱 병' },
+];
+
+export const ECO_SHOP = {
+  eco_rod: { id: 'eco_rod', name: '자연의 수호자 에코 낚싯대', emoji: '🌿', reqPoint: 50, desc: '해양 쓰레기 50개를 정화하여 얻은 청정 대나무 낚싯대. 조준각 +10° 보너스!' },
+  eco_bait: { id: 'eco_bait', name: '생분해 친환경 미끼 (20개)', emoji: '🌱', reqPoint: 20, desc: '바다를 오염시키지 않는 천연 효모 미끼' },
+};
+
 // 미끼 확률 합 검증 및 물고기 100종 전수 검사
 function validateData() {
   if (FISH.length !== 100) {

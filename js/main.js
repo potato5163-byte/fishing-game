@@ -1,5 +1,5 @@
 import { updateTopbar, switchTab } from './ui.js';
-import { state, loadGame, resetGame, exportSaveCode, importSaveCode } from './state.js';
+import { state, loadGame, resetGame, exportSaveCode, importSaveCode, toggleSpeedMode, exchangeEcoReward } from './state.js';
 import {
   handleMainActionPress,
   handleMainActionRelease,
@@ -328,6 +328,36 @@ function showSettingsModal() {
             </div>
           </div>
 
+          <!-- 스피드 파밍 모드 토글 -->
+          <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: var(--color-surface-soft); border-radius: var(--radius-sm); border: 1px solid var(--color-hairline); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="t-card-title" style="font-size: 13px;">⚡ 스피드 파밍 모드</div>
+              <div class="t-body-sm" style="font-size: 11px; color: var(--color-subtext);">물고기 결과창을 1.2초 후 자동으로 닫습니다.</div>
+            </div>
+            <button id="btn-toggle-speed-mode" class="btn-secondary" style="height: 32px; padding: 0 12px; font-size: 12px; font-weight: 700; ${state.speedMode ? 'background: #10b981; color: #fff; border: none;' : ''}">
+              ${state.speedMode ? 'ON 🟢' : 'OFF ⚪'}
+            </button>
+          </div>
+
+          <!-- 해양 환경 정화 마일리지 센터 -->
+          <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: #ecfdf5; border-radius: var(--radius-sm); border: 1px solid #a7f3d0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <div class="t-card-title" style="font-size: 13px; color: #065f46;">🌱 환경 정화 마일리지 센터</div>
+              <span style="font-size: 12px; font-weight: 800; color: #047857;" class="tabular-nums">${state.ecoPoints || 0} P</span>
+            </div>
+            <div class="t-body-sm" style="font-size: 11px; color: #047857; margin-bottom: 8px;">
+              낚시 중 건져올린 바다 쓰레기 마일리지로 친환경 보상을 교환하세요.
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button id="btn-eco-rod" class="btn-primary" style="flex: 1; height: 32px; font-size: 11px; background: #059669;" ${state.hasEcoRod ? 'disabled' : ''}>
+                ${state.hasEcoRod ? '🌿 에코 낚싯대 (보유중)' : '🌿 에코 낚싯대 (50P)'}
+              </button>
+              <button id="btn-eco-bait" class="btn-secondary" style="flex: 1; height: 32px; font-size: 11px;">
+                🌱 에코 미끼 20개 (20P)
+              </button>
+            </div>
+          </div>
+
           <!-- 기기 간 저장 데이터 이동 (클라우드리스 동기화) -->
           <div style="margin-top: var(--space-md); padding: var(--space-sm); background: var(--color-surface-soft); border-radius: var(--radius-sm); border: 1px solid var(--color-hairline);">
             <div class="t-card-title" style="font-size: 13px; margin-bottom: 4px;">📲 기기 간 저장 코드 동기화</div>
@@ -359,6 +389,41 @@ function showSettingsModal() {
   const btnReset = document.getElementById('btn-reset-data');
   const btnExport = document.getElementById('btn-export-code');
   const btnImport = document.getElementById('btn-import-code');
+  const btnToggleSpeed = document.getElementById('btn-toggle-speed-mode');
+  const btnEcoRod = document.getElementById('btn-eco-rod');
+  const btnEcoBait = document.getElementById('btn-eco-bait');
+
+  if (btnToggleSpeed) {
+    btnToggleSpeed.addEventListener('click', () => {
+      const isSpeed = toggleSpeedMode();
+      showToast(isSpeed ? '⚡ 스피드 파밍 모드가 켜졌습니다!' : '스피드 파밍 모드가 꺼졌습니다.');
+      showSettingsModal();
+    });
+  }
+
+  if (btnEcoRod) {
+    btnEcoRod.addEventListener('click', () => {
+      const res = exchangeEcoReward('eco_rod');
+      if (res.ok) {
+        showToast('🌿 [자연의 수호자 에코 낚싯대]를 획득했습니다! (조준각 영구 보너스)');
+        showSettingsModal();
+      } else {
+        showToast(res.error);
+      }
+    });
+  }
+
+  if (btnEcoBait) {
+    btnEcoBait.addEventListener('click', () => {
+      const res = exchangeEcoReward('eco_bait');
+      if (res.ok) {
+        showToast('🌱 생분해 친환경 미끼 20개를 수령했습니다!');
+        showSettingsModal();
+      } else {
+        showToast(res.error);
+      }
+    });
+  }
 
   if (btnExport) {
     btnExport.addEventListener('click', () => {

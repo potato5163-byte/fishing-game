@@ -1,4 +1,4 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
 
 const STORAGE_KEY = 'mulgyeol-fishing-save';
@@ -41,6 +41,9 @@ export function createNewState() {
     aquarium: [], // 수족관에 넣은 물고기 목록 [{ id, fishId, name, emoji, size, rarity, addedAt }]
     aquariumLastCollectedAt: Date.now(),
     feverGauge: 0, // 0 ~ 100 피버 게이지
+    speedMode: false, // 스피드 파밍 모드 (결과창 자동 닫기)
+    ecoPoints: 0, // 해양 쓰레기 정화 마일리지 포인트
+    hasEcoRod: false, // 에코 낚싯대 보유 여부
     // 일일 의뢰 (데일리 퀘스트)
     dailyQuests: [
       { id: 'q1', title: '물고기 5마리 낚기', current: 0, target: 5, reward: 5000, completed: false },
@@ -152,6 +155,9 @@ export function saveGame() {
     aquarium: state.aquarium || [],
     aquariumLastCollectedAt: state.aquariumLastCollectedAt || Date.now(),
     feverGauge: state.feverGauge || 0,
+    speedMode: state.speedMode || false,
+    ecoPoints: state.ecoPoints || 0,
+    hasEcoRod: state.hasEcoRod || false,
     dailyQuests: state.dailyQuests || [],
     stats: state.stats,
   };
@@ -866,3 +872,39 @@ export function moveRegion(regionId) {
     updateTopbar();
   }
 }
+
+// 스피드 모드 토글 (결과창 자동 닫기)
+export function toggleSpeedMode() {
+  state.speedMode = !state.speedMode;
+  saveGame();
+  return state.speedMode;
+}
+
+// 에코 포인트 추가
+export function addEcoPoints(pts) {
+  state.ecoPoints = (state.ecoPoints || 0) + pts;
+  saveGame();
+  return state.ecoPoints;
+}
+
+// 에코 상점 교환
+export function exchangeEcoReward(rewardId) {
+  const item = ECO_SHOP[rewardId];
+  if (!item) return { ok: false, error: '존재하지 않는 상품입니다.' };
+  if ((state.ecoPoints || 0) < item.reqPoint) {
+    return { ok: false, error: `에코 포인트가 부족합니다. (보유: ${state.ecoPoints || 0}P / 필요: ${item.reqPoint}P)` };
+  }
+
+  state.ecoPoints -= item.reqPoint;
+  if (rewardId === 'eco_rod') {
+    // 낚싯대 조준각 보너스 영구 추가
+    state.hasEcoRod = true;
+  } else if (rewardId === 'eco_bait') {
+    // 고급 미끼 +20개 지급
+    state.baits.worm = (state.baits.worm || 0) + 20;
+  }
+
+  saveGame();
+  return { ok: true, name: item.name };
+}
+

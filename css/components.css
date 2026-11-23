@@ -379,6 +379,76 @@
   background: linear-gradient(180deg, #FFFFFF 60%, rgba(255, 209, 102, 0.12) 100%);
 }
 
+/* 지역 테마별 물고기 이모지 박스 & 카드 비주얼 차별화 */
+.theme-lake {
+  background: radial-gradient(circle, #e0f2fe 0%, #bae6fd 100%);
+  border: 1.5px solid #38bdf8;
+  color: #0369a1;
+}
+.theme-river {
+  background: radial-gradient(circle, #ccfbf1 0%, #99f6e4 100%);
+  border: 1.5px solid #2dd4bf;
+  color: #0f766e;
+}
+.theme-sea {
+  background: radial-gradient(circle, #dbeafe 0%, #bfdbfe 100%);
+  border: 1.5px solid #60a5fa;
+  color: #1d4ed8;
+}
+.theme-abyss {
+  background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+  border: 1.5px solid #06b6d4;
+  color: #22d3ee;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+.theme-glacier {
+  background: radial-gradient(circle, #f0fdfa 0%, #cffafe 100%);
+  border: 1.5px solid #a5f3fc;
+  color: #0891b2;
+  box-shadow: 0 0 8px rgba(165, 243, 252, 0.5);
+}
+.theme-palace {
+  background: radial-gradient(circle, #fef3c7 0%, #fde68a 100%);
+  border: 1.5px solid #f59e0b;
+  color: #b45309;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+.theme-nebula {
+  background: radial-gradient(circle, #312e81 0%, #1e1b4b 100%);
+  border: 1.5px solid #a855f7;
+  color: #c084fc;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+.theme-volcano {
+  background: radial-gradient(circle, #450a0a 0%, #1c1917 100%);
+  border: 1.5px solid #ef4444;
+  color: #f87171;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+.theme-timewarp {
+  background: radial-gradient(circle, #3b0764 0%, #172554 100%);
+  border: 1.5px solid #ec4899;
+  color: #f472b6;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+}
+.theme-sky_ocean {
+  background: radial-gradient(circle, #fffbeb 0%, #fef08a 100%);
+  border: 1.5px solid #eab308;
+  color: #a16207;
+  box-shadow: 0 0 14px rgba(234, 179, 8, 0.5);
+}
+
+.fish-family-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  opacity: 0.8;
+  margin-top: -2px;
+}
+
 .collection-card-emoji-box {
   width: 52px;
   height: 52px;

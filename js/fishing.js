@@ -6,6 +6,7 @@ import {
   FISH,
   MESSAGES,
   REGIONS,
+  TRASH_ITEMS,
 } from './data.js';
 import {
   randomRange,
@@ -263,6 +264,24 @@ function triggerBite() {
 
 // 물고기 결정 규칙
 function determineFish() {
+  // 0. 해양 쓰레기 낚기 체크 (5% 확률, 피버 중에는 쓰레기 대신 고기!)
+  if (!state.isFeverActive && Math.random() < 0.05) {
+    const trash = randomChoice(TRASH_ITEMS);
+    pendingFish = {
+      id: trash.id,
+      name: trash.name,
+      rarity: 'common',
+      emoji: trash.emoji,
+      size: 15.0,
+      price: 10,
+      difficulty: 1,
+      isTrash: true,
+      ecoPoint: trash.point,
+      desc: trash.desc,
+    };
+    return;
+  }
+
   // 1. 보물상자 이벤트 체크 (7% 확률, 피버 중에는 15%)
   const chestChance = state.isFeverActive ? 0.15 : 0.07;
   if (Math.random() < chestChance) {
@@ -383,6 +402,14 @@ function handleReelFinish(result, fish) {
       return;
     }
 
+    if (fish.isTrash) {
+      import('./state.js').then((s) => {
+        s.addEcoPoints(fish.ecoPoint);
+      });
+      showResultModal(fish, { isTrash: true });
+      return;
+    }
+
     // 가방 아이템 생성 및 추가 (docs/05 1-1)
     const bagItem = {
       uid: 'f_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
@@ -463,6 +490,8 @@ function showResultModal(fish, recordResult = {}) {
   let badgeHtml = '';
   if (recordResult.isChest) {
     badgeHtml = '<span class="badge-new" style="background: #eab308; color: #000;">보물 획득!</span>';
+  } else if (recordResult.isTrash) {
+    badgeHtml = `<span class="badge-new" style="background: #10b981; color: #fff;">에코 포인트 +${fish.ecoPoint}P</span>`;
   } else if (recordResult.isCrown) {
     badgeHtml = '<span class="topbar-king-badge" style="background: #fbbf24; color: #000;">👑 황금 왕관 기록!</span>';
   } else if (recordResult.isNew) {
@@ -472,15 +501,42 @@ function showResultModal(fish, recordResult = {}) {
   }
 
   const rarityName =
+    fish.isTrash ? '해양 쓰레기' :
     fish.rarity === 'mythic' ? '신화' :
     fish.rarity === 'legendary' ? '전설' :
     fish.rarity === 'epic' ? '영웅' :
     fish.rarity === 'rare' ? '희귀' : '일반';
 
+  const infoListHtml = fish.isTrash
+    ? `
+      <div class="modal-info-list">
+        <div class="modal-info-row">
+          <span class="t-body">설명</span>
+          <span class="t-card-title">${fish.desc || '바다에서 건져 올린 쓰레기'}</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="t-body">환경 정화 보상</span>
+          <span class="t-card-title tabular-nums" style="color: #10b981; font-weight: 700;">+${fish.ecoPoint} 에코 포인트</span>
+        </div>
+      </div>
+    `
+    : `
+      <div class="modal-info-list">
+        <div class="modal-info-row">
+          <span class="t-body">크기</span>
+          <span class="t-card-title tabular-nums">${fish.size.toFixed(1)}cm</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="t-body">판매가</span>
+          <span class="t-card-title tabular-nums">${formatGold(fish.price)}G</span>
+        </div>
+      </div>
+    `;
+
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="modal-result-scrim">
       <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}">
-        <div class="modal-top-block ${blockClass}">
+        <div class="modal-top-block ${fish.isTrash ? 'block-mint' : blockClass}">
           <div class="modal-badge-group">
             ${badgeHtml}
           </div>
@@ -489,18 +545,9 @@ function showResultModal(fish, recordResult = {}) {
         <div class="modal-content">
           <div class="t-display modal-fish-name">${fish.name}</div>
           <div style="margin-top: 4px;">
-            <span class="badge-rarity rarity-${fish.rarity}">${rarityName}</span>
+            <span class="badge-rarity ${fish.isTrash ? 'rarity-common' : 'rarity-' + fish.rarity}" style="${fish.isTrash ? 'background: #059669; color: #fff;' : ''}">${rarityName}</span>
           </div>
-          <div class="modal-info-list">
-            <div class="modal-info-row">
-              <span class="t-body">크기</span>
-              <span class="t-card-title tabular-nums">${fish.size.toFixed(1)}cm</span>
-            </div>
-            <div class="modal-info-row">
-              <span class="t-body">판매가</span>
-              <span class="t-card-title tabular-nums">${formatGold(fish.price)}G</span>
-            </div>
-          </div>
+          ${infoListHtml}
           <button id="btn-modal-confirm" class="btn-primary modal-action-btn">확인 (Space)</button>
         </div>
       </div>
@@ -511,6 +558,15 @@ function showResultModal(fish, recordResult = {}) {
   if (btnConfirm) {
     btnConfirm.addEventListener('click', closeModal);
     btnConfirm.focus();
+  }
+
+  // 스피드 파밍 모드 활성화 시 1.2초 후 자동 닫기
+  if (state.speedMode) {
+    setTimeout(() => {
+      if (currentState === FishingState.RESULT) {
+        closeModal();
+      }
+    }, 1200);
   }
 }
 
@@ -539,6 +595,15 @@ function showFailModal(message) {
   if (btnConfirm) {
     btnConfirm.addEventListener('click', closeModal);
     btnConfirm.focus();
+  }
+
+  // 스피드 파밍 모드 활성화 시 1.2초 후 자동 닫기
+  if (state.speedMode) {
+    setTimeout(() => {
+      if (currentState === FishingState.RESULT) {
+        closeModal();
+      }
+    }, 1200);
   }
 }
 
