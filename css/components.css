@@ -1,0 +1,1049 @@
+/* typography classes */
+.t-display {
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1.10;
+  letter-spacing: -0.64px;
+}
+
+.t-headline {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.24px;
+}
+
+.t-subhead {
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.40;
+  letter-spacing: -0.17px;
+}
+
+.t-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.t-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.15px;
+}
+
+.t-body-sm {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.1px;
+}
+
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.30;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.t-caption {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.00;
+  letter-spacing: 0.4px;
+}
+
+/* 상단바 구성 요소 */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.topbar-gold {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.topbar-king-badge {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.topbar-bag {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.topbar-bag.is-full {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: transform 0.1s ease;
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* 하단 탭 버튼 */
+.tab-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  color: var(--color-ink);
+  transition: opacity 0.2s ease;
+}
+
+.tab-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tab-emoji {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.tab-item.is-active .tab-pill {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+}
+
+.tabbar.is-disabled .tab-item:not(.is-active) {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 색 블록 (Color block section) */
+.color-block {
+  margin: var(--space-md) var(--space-md) 0 var(--space-md);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+}
+
+.color-block.block-mint { background-color: var(--block-mint); color: var(--color-ink); }
+.color-block.block-lime { background-color: var(--block-lime); color: var(--color-ink); }
+.color-block.block-lilac { background-color: var(--block-lilac); color: var(--color-ink); }
+.color-block.block-cream { background-color: var(--block-cream); color: var(--color-ink); }
+.color-block.block-pink { background-color: var(--block-pink); color: var(--color-ink); }
+.color-block.block-navy {
+  background-color: var(--block-navy);
+  color: var(--color-inverse-ink);
+}
+
+.color-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* 버튼 스타일 */
+.btn-primary {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  border-radius: var(--radius-pill);
+  height: 48px;
+  padding: 0 var(--space-lg);
+  font-size: 16px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary-main {
+  height: 60px;
+  font-size: 18px;
+  font-weight: 700;
+  width: 100%;
+}
+
+.btn-secondary {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  height: 44px;
+  padding: 0 var(--space-md);
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  background-color: var(--color-surface-soft);
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 등급 배지 */
+.badge-rarity {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.badge-rarity.rarity-common { background-color: var(--rarity-common); }
+.badge-rarity.rarity-rare { background-color: var(--rarity-rare); }
+.badge-rarity.rarity-epic { background-color: var(--rarity-epic); }
+.badge-rarity.rarity-legendary { background-color: var(--rarity-legendary); }
+
+/* NEW! 배지 */
+.badge-new {
+  background-color: var(--color-accent-magenta);
+  color: var(--color-inverse-ink);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+}
+
+/* ========================================================
+   낚시 화면 컴포넌트
+======================================================== */
+
+.fishing-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-md);
+  gap: var(--space-md);
+}
+
+/* 낚시 장면 */
+.fishing-scene {
+  position: relative;
+  min-height: 260px;
+  height: 55%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, var(--region-lake-top) 0%, var(--region-lake-top) 45%, var(--region-lake-bottom) 45%, var(--region-lake-bottom) 100%);
+}
+
+.fishing-scene.region-river {
+  background: linear-gradient(to bottom, var(--region-river-top) 0%, var(--region-river-top) 45%, var(--region-river-bottom) 45%, var(--region-river-bottom) 100%);
+}
+.fishing-scene.region-sea {
+  background: linear-gradient(to bottom, var(--region-sea-top) 0%, var(--region-sea-top) 45%, var(--region-sea-bottom) 45%, var(--region-sea-bottom) 100%);
+}
+.fishing-scene.region-abyss {
+  background: linear-gradient(to bottom, var(--region-abyss-top) 0%, var(--region-abyss-top) 45%, var(--region-abyss-bottom) 45%, var(--region-abyss-bottom) 100%);
+}
+
+.fishing-scene-eyebrow {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  color: var(--color-inverse-ink);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.fishing-water-surface {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.fishing-rod-visual {
+  position: absolute;
+  top: 25%;
+  right: 15%;
+  font-size: 40px;
+  transform: rotate(-15deg);
+  z-index: 2;
+}
+
+.fishing-bobber {
+  position: absolute;
+  top: 45%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  z-index: 3;
+}
+
+.fishing-bobber.is-biting {
+  animation: bobber-shake 0.1s infinite alternate;
+}
+
+@keyframes bobber-shake {
+  0% { transform: translate(-50%, -50%) translateY(-4px); }
+  100% { transform: translate(-50%, -50%) translateY(4px); }
+}
+
+.fishing-bite-alert {
+  position: absolute;
+  top: 25%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: var(--color-danger);
+  font-weight: 900;
+  z-index: 4;
+  animation: bite-bounce 0.25s infinite alternate;
+}
+
+@keyframes bite-bounce {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* 릴 미니게임 패널 (낚시 장면 위 덮개) */
+.reel-panel {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-lg);
+  display: flex;
+  padding: var(--space-md);
+  gap: var(--space-md);
+  z-index: 5;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.reel-panel[hidden] {
+  display: none !important;
+}
+
+.reel-track {
+  width: 64px;
+  height: 100%;
+  background-color: var(--color-surface-soft);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  position: relative;
+  overflow: hidden;
+}
+
+.reel-zone {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: rgba(30, 166, 74, 0.35);
+  border-radius: var(--radius-pill);
+  transition: border 0.1s ease;
+}
+
+.reel-zone.is-hooked {
+  border: 2px solid var(--color-success);
+}
+
+.reel-fish {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.reel-info-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.reel-progress-bar {
+  width: 100%;
+  height: 12px;
+  background-color: var(--color-surface-soft);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.reel-progress-fill {
+  height: 100%;
+  width: 30%;
+  background-color: var(--color-ink);
+  transition: width 0.05s linear;
+}
+
+/* 조작 및 상태 영역 */
+.fishing-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.fishing-status-text {
+  min-height: 24px;
+  text-align: center;
+}
+
+.fishing-pills {
+  display: flex;
+  gap: var(--space-xs);
+  width: 100%;
+  justify-content: center;
+}
+
+.pill-select, .pill-static {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-soft);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  height: 38px;
+  padding: 0 var(--space-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.pill-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 캐스팅 힘 게이지 */
+.charge-bar-container {
+  width: 100%;
+  height: 12px;
+  background-color: var(--color-surface-soft);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  position: relative;
+  overflow: hidden;
+}
+
+.charge-perfect-zone {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 10%; /* 90~100 */
+  height: 100%;
+  background-color: var(--color-success);
+  opacity: 0.4;
+}
+
+.charge-fill {
+  height: 100%;
+  width: 0%;
+  background-color: var(--color-ink);
+}
+
+/* ========================================================
+   모달 공통 (결과 모달, 실패 모달)
+======================================================== */
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  z-index: 1000;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-canvas);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-dialog.is-legendary {
+  border: 3px solid var(--rarity-legendary);
+}
+
+.modal-top-block {
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.modal-fish-emoji {
+  font-size: 72px;
+  line-height: 1;
+}
+
+.is-legendary .modal-fish-emoji {
+  animation: legend-sparkle 0.8s ease-in-out;
+}
+
+@keyframes legend-sparkle {
+  0% { transform: scale(0.8) rotate(-10deg); filter: brightness(1.5); }
+  50% { transform: scale(1.15) rotate(10deg); filter: drop-shadow(0 0 10px gold); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.modal-content {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  background-color: var(--color-canvas);
+}
+
+.modal-fish-name {
+  text-align: center;
+}
+
+.modal-info-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-sm) 0;
+}
+
+.modal-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+  border-bottom: var(--space-hair) solid var(--color-hairline-soft);
+}
+
+.modal-action-btn {
+  width: 100%;
+  margin-top: var(--space-xs);
+}
+
+/* 토스트 단일 인스턴스 (새 토스트 시 즉시 교체) */
+.toast {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: var(--shadow-float);
+  animation: toast-in 0.2s ease forwards;
+  pointer-events: auto;
+}
+
+/* ========================================================
+   애니메이션 및 prefers-reduced-motion (docs/02 7장)
+======================================================== */
+.fishing-bobber {
+  animation: bobber-float 2s ease-in-out infinite;
+}
+
+@keyframes bobber-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-4px); }
+}
+
+.fishing-water-surface {
+  animation: water-wave 8s linear infinite;
+}
+
+@keyframes water-wave {
+  0% { transform: translateY(-50%) translateX(0); }
+  50% { transform: translateY(-50%) translateX(-4px); }
+  100% { transform: translateY(-50%) translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing-bobber,
+  .fishing-bobber.is-biting,
+  .fishing-bite-alert,
+  .fishing-water-surface,
+  .is-legendary .modal-fish-emoji,
+  .toast {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-height: 640px) {
+  .fishing-scene {
+    min-height: 220px !important;
+  }
+}
+
+/* 위험 버튼 */
+.btn-danger-outline {
+  height: 44px;
+  background-color: var(--color-canvas);
+  border: var(--space-hair) solid var(--color-danger);
+  color: var(--color-danger);
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+}
+
+.btn-danger-outline:active {
+  transform: scale(0.98);
+}
+
+.btn-danger-solid {
+  height: 44px;
+  background-color: var(--color-danger);
+  color: var(--color-inverse-ink);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+}
+
+.btn-danger-solid:active {
+  transform: scale(0.98);
+}
+
+/* ========================================================
+   가방 화면 컴포넌트
+======================================================== */
+.bag-list-container {
+  padding: var(--space-md);
+  flex: 1;
+}
+
+.bag-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xxl) var(--space-md);
+}
+
+.bag-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.bag-item-row {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--space-hair) solid var(--color-hairline-soft);
+  gap: var(--space-sm);
+}
+
+.bag-item-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.bag-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bag-item-price {
+  margin-right: var(--space-xs);
+}
+
+.btn-sell-one {
+  height: 36px;
+  padding: 0 var(--space-sm);
+  font-size: 13px;
+}
+
+/* 장식 이모지 */
+.fishing-deco-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.deco-lake {
+  position: absolute;
+  top: 48%;
+  left: 10%;
+  font-size: 20px;
+}
+
+.deco-river {
+  position: absolute;
+  top: 48%;
+  left: 12%;
+  font-size: 20px;
+}
+
+.deco-sea {
+  position: absolute;
+  top: 15%;
+  right: 25%;
+  font-size: 28px;
+}
+
+.deco-abyss {
+  position: absolute;
+  top: 60%;
+  left: 20%;
+  font-size: 18px;
+  opacity: 0.5;
+}
+
+/* ========================================================
+   지역 화면 컴포넌트
+======================================================== */
+.regions-list {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.region-card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  position: relative;
+  overflow: hidden;
+}
+
+.region-card.region-lake {
+  background: linear-gradient(to bottom, var(--region-lake-top), var(--region-lake-bottom));
+}
+.region-card.region-river {
+  background: linear-gradient(to bottom, var(--region-river-top), var(--region-river-bottom));
+}
+.region-card.region-sea {
+  background: linear-gradient(to bottom, var(--region-sea-top), var(--region-sea-bottom));
+}
+.region-card.region-abyss {
+  background: linear-gradient(to bottom, var(--region-abyss-top), var(--region-abyss-bottom));
+}
+
+.region-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.region-card-action {
+  align-self: flex-end;
+  margin-top: var(--space-md);
+}
+.shop-tab-group {
+  display: flex;
+  padding: var(--space-md) var(--space-md) 0 var(--space-md);
+  gap: var(--space-xs);
+}
+
+.shop-tab-pill {
+  flex: 1;
+  height: 44px;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  border: var(--space-hair) solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.shop-tab-pill.is-active {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  border-color: var(--color-ink);
+}
+
+.shop-content-pane {
+  padding: var(--space-md);
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-item-row {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: var(--space-hair) solid var(--color-hairline-soft);
+  gap: var(--space-sm);
+}
+
+.shop-item-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.shop-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-item-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.collection-progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-pill);
+  margin-top: var(--space-xs);
+  overflow: hidden;
+}
+
+.collection-progress-fill {
+  height: 100%;
+  background-color: var(--color-ink);
+  transition: width 0.3s ease;
+}
+
+.collection-body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.collection-region-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.collection-region-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.collection-region-count {
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.collection-reward-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink);
+  background-color: var(--color-surface-soft);
+  border: var(--space-hair) solid var(--color-hairline);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.collection-reward-tag.is-claimed {
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  border: none;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+}
+
+@media (min-width: 400px) {
+  .collection-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.collection-card {
+  background-color: var(--color-surface-soft);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 90px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.collection-card:active {
+  transform: scale(0.96);
+}
+
+.collection-card.is-unknown {
+  border: var(--space-hair) dashed var(--color-hairline);
+  opacity: 0.6;
+}
+
+.collection-card-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.collection-card-name {
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.debug-panel {
+  position: fixed;
+  right: var(--space-md);
+  bottom: calc(var(--tabbar-height) + var(--space-md));
+  background-color: var(--color-ink);
+  color: var(--color-inverse-ink);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: 13px;
+  max-width: 200px;
+}
+
+.debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+}
+
+.debug-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.debug-btn {
+  background-color: var(--color-surface-soft);
+  color: var(--color-ink);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.debug-btn:active {
+  background-color: var(--color-hairline);
+}
+
+.debug-btn-sm {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--color-inverse-ink);
+  border-radius: var(--radius-xs);
+  padding: 2px 6px;
+  font-size: 11px;
+}

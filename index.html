@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>물결 낚시터</title>
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header id="topbar" class="topbar">
+      <div class="topbar-left">
+        <span id="topbar-gold" class="topbar-gold">🪙 100G</span>
+        <span id="topbar-king" class="topbar-king-badge" hidden>👑 낚시왕</span>
+      </div>
+      <div id="topbar-region" class="topbar-center">📍 잔잔한 호수</div>
+      <div class="topbar-right">
+        <span id="topbar-bag" class="topbar-bag">🎒 0/20</span>
+        <button id="btn-settings" class="btn-icon" aria-label="설정">⚙️</button>
+      </div>
+    </header>
+
+    <main class="screens">
+      <!-- 낚시 화면 -->
+      <section id="screen-fishing" class="screen is-active">
+        <div class="fishing-container">
+          <!-- 낚시 장면 -->
+          <div class="fishing-scene" id="fishing-scene">
+            <div class="fishing-scene-eyebrow t-eyebrow" id="fishing-eyebrow">FISHING · 잔잔한 호수</div>
+            <div id="fishing-deco-container" class="fishing-deco-container">
+              <span class="deco-item deco-lake">🌿 🌿</span>
+            </div>
+            <div class="fishing-rod-visual">🎣</div>
+            <!-- 물결 SVG -->
+            <svg class="fishing-water-surface" viewBox="0 0 100 10" preserveAspectRatio="none">
+              <path d="M0,5 Q25,0 50,5 T100,5 L100,10 L0,10 Z" fill="rgba(255,255,255,0.2)"/>
+            </svg>
+            <div id="fishing-bobber" class="fishing-bobber" hidden>🔴</div>
+            <div id="fishing-bite-alert" class="fishing-bite-alert" hidden>❗</div>
+
+            <!-- 릴 감기 미니게임 오버레이 패널 -->
+            <div id="reel-panel" class="reel-panel" hidden>
+              <div class="reel-track" id="reel-track">
+                <div id="reel-zone" class="reel-zone"></div>
+                <div id="reel-fish" class="reel-fish">🐟</div>
+              </div>
+              <div class="reel-info-pane">
+                <div>
+                  <div class="t-body-sm" style="margin-bottom: 4px;">진행도</div>
+                  <div class="reel-progress-bar">
+                    <div id="reel-progress-fill" class="reel-progress-fill"></div>
+                  </div>
+                  <div id="reel-progress-text" class="t-card-title tabular-nums" style="margin-top: 4px;">30%</div>
+                </div>
+                <div>
+                  <div class="t-body-sm" style="margin-bottom: 4px;">남은 시간</div>
+                  <div id="reel-time-text" class="t-card-title tabular-nums">25초</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상태 문구 -->
+          <div class="fishing-controls">
+            <div id="fishing-status-text" class="t-body fishing-status-text" aria-live="polite">
+              낚싯대를 던져보세요
+            </div>
+
+            <!-- 알약 2개: 미끼 선택 + 낚싯대 표시 -->
+            <div class="fishing-pills">
+              <select id="fishing-bait-select" class="pill-select" aria-label="미끼 선택">
+                <option value="basic">🍞 기본 미끼 (∞)</option>
+              </select>
+              <div id="fishing-rod-indicator" class="pill-static">
+                🎋 대나무 낚싯대
+              </div>
+            </div>
+
+            <!-- 캐스팅 힘 게이지 -->
+            <div id="charge-bar-container" class="charge-bar-container" hidden>
+              <div class="charge-perfect-zone"></div>
+              <div id="charge-fill" class="charge-fill"></div>
+            </div>
+
+            <!-- 메인 버튼 -->
+            <button id="btn-main-action" class="btn-primary btn-primary-main">
+              <span id="btn-main-action-text">낚싯대 던지기 (Space)</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 가방 화면: 3단계에서 채움 -->
+      <section id="screen-bag" class="screen" hidden>
+        <div class="color-block block-mint">
+          <div class="t-eyebrow">BAG</div>
+          <div class="t-headline">가방</div>
+          <div class="t-subhead">0마리 · 총 0G</div>
+        </div>
+      </section>
+
+      <!-- 도감 화면: 4단계에서 채움 -->
+      <section id="screen-collection" class="screen" hidden>
+        <div class="color-block block-lime">
+          <div class="t-eyebrow">COLLECTION</div>
+          <div class="t-headline">도감</div>
+          <div class="t-subhead">달성률 0/20 (0%)</div>
+        </div>
+      </section>
+
+      <!-- 상점 화면: 5단계에서 채움 -->
+      <section id="screen-shop" class="screen" hidden>
+        <div class="color-block block-lilac">
+          <div class="t-eyebrow">SHOP</div>
+          <div class="t-headline">상점</div>
+          <div class="t-subhead">🪙 보유 100G</div>
+        </div>
+      </section>
+
+      <!-- 지역 화면: 6단계에서 채움 -->
+      <section id="screen-regions" class="screen" hidden>
+        <div class="color-block block-cream">
+          <div class="t-eyebrow">MAP</div>
+          <div class="t-headline">지역</div>
+          <div class="t-subhead">해금 1/4</div>
+        </div>
+      </section>
+    </main>
+
+    <nav id="tabbar" class="tabbar">
+      <button class="tab-item is-active" data-tab="fishing" aria-label="낚시">
+        <div class="tab-pill">
+          <span class="tab-emoji">🎣</span>
+          <span class="tab-label">낚시</span>
+        </div>
+      </button>
+      <button class="tab-item" data-tab="bag" aria-label="가방">
+        <div class="tab-pill">
+          <span class="tab-emoji">🎒</span>
+          <span class="tab-label">가방</span>
+        </div>
+      </button>
+      <button class="tab-item" data-tab="collection" aria-label="도감">
+        <div class="tab-pill">
+          <span class="tab-emoji">📖</span>
+          <span class="tab-label">도감</span>
+        </div>
+      </button>
+      <button class="tab-item" data-tab="shop" aria-label="상점">
+        <div class="tab-pill">
+          <span class="tab-emoji">🏪</span>
+          <span class="tab-label">상점</span>
+        </div>
+      </button>
+      <button class="tab-item" data-tab="regions" aria-label="지역">
+        <div class="tab-pill">
+          <span class="tab-emoji">🗺️</span>
+          <span class="tab-label">지역</span>
+        </div>
+      </button>
+    </nav>
+  </div>
+
+  <div id="toast-root" aria-live="polite"></div>
+  <div id="modal-root"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
