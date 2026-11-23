@@ -218,20 +218,21 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   fishTargetX = 50;
   fishTurnTimer = 1.0;
 
-  // 물고기 속도 설정 (난이도에 따라 차등)
+  // 물고기 속도 대폭 상향 (난이도 1~5: 기존 35~75 -> 55~135로 폭풍 질주!)
   const diff = fish.difficulty || 1;
-  fishSpeed = 25 + diff * 10;
+  fishSpeed = 45 + diff * 18;
 
   isFishJumping = false;
   jumpTimer = 0;
-  jumpWindowTime = Math.max(1.0, 1.6 - (diff * 0.1) + (enhanceBonus * 0.05));
-  nextJumpCooldown = 2.5 + Math.random() * 2.5;
+  // 점프 판정 시간 빡빡하게: 기본 0.95초 (난이도 높으면 0.7초)
+  jumpWindowTime = Math.max(0.65, 1.05 - (diff * 0.08) + (enhanceBonus * 0.04));
+  nextJumpCooldown = 2.0 + Math.random() * 2.0;
 
   isStunned = false;
   stunTimer = 0;
 
-  progress = FISHING_CONFIG.PROGRESS_START;
-  let timeLimit = FISHING_CONFIG.REEL_TIME_LIMIT_SEC;
+  progress = 25; // 시작 진행도 25% (더 팽팽하게)
+  let timeLimit = Math.max(16, 26 - diff * 2); // 고난도 물고기는 제한시간도 촉박 (16초~24초)
   if (state.specialItems && state.specialItems.hourglass_time > 0) {
     timeLimit += 15;
   }
@@ -366,11 +367,18 @@ function updatePhysics(dt) {
     } else {
       jumpTimer -= dt;
       if (jumpTimer <= 0) {
-        // 점프 기회 놓침 (바늘털이 발생: 진행도 -12%)
+        // 점프 기회 놓침 (바늘털이 발생: 진행도 -20% 큰 타격!)
         isFishJumping = false;
-        nextJumpCooldown = 3.5 + Math.random() * 3.0;
-        progress = clamp(progress - 12, 0, 100);
+        nextJumpCooldown = 2.5 + Math.random() * 2.0;
+        progress = clamp(progress - 20, 0, 100);
         playSound('qte_fail');
+
+        const app = document.getElementById('app');
+        if (app) {
+          app.classList.remove('screen-shake');
+          void app.offsetWidth;
+          app.classList.add('screen-shake');
+        }
       }
     }
   }
@@ -394,8 +402,8 @@ function updatePhysics(dt) {
   }
 
   // 8. 록온 판정 및 진행도 증감
-  // 낚싯대 조준 반경 너비 (기본 26 ~ 최대 75)
-  const rodWidth = (currentRodData ? currentRodData.trackingWidth : 26) + (enhanceBonus * 2.5);
+  // 낚싯대 조준 반경 너비 (정밀 조준 요구: 기본 너비를 타이트하게 조절)
+  const rodWidth = (currentRodData ? currentRodData.trackingWidth : 20) + (enhanceBonus * 1.8);
   const halfWidth = rodWidth / 2;
   const isLockedOn = Math.abs(fishX - aimX) <= halfWidth;
 
@@ -403,12 +411,12 @@ function updatePhysics(dt) {
 
   if (isLockedOn) {
     // 록온 상태: 물고기를 당겨옴!
-    // 스턴 중이면 1.8배 초고속 감기!
-    const stunBonus = isStunned ? 1.8 : 1.0;
-    progress += FISHING_CONFIG.PROGRESS_GAIN * reelMult * stunBonus * dt;
+    const stunBonus = isStunned ? 1.6 : 1.0;
+    // 당김 속도도 긴장감 있게 적정선 유지
+    progress += 10.5 * reelMult * stunBonus * dt;
   } else {
-    // 조준을 벗어나면 물고기가 도망치며 진행도 감소
-    const lossSpeed = isStunned ? 3.0 : 12.0;
+    // 조준을 벗어나면 물고기가 미친 듯이 도망침! (탈출 패널티 -18%/s)
+    const lossSpeed = isStunned ? 2.0 : (16.0 + (currentFish.difficulty || 1) * 3);
     progress -= lossSpeed * dt;
   }
   progress = clamp(progress, 0, 100);

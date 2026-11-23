@@ -1327,19 +1327,19 @@
 
 .reel-qte-container {
   position: absolute;
-  inset: var(--space-xs);
-  background: rgba(18, 20, 24, 0.95);
-  border: 2px solid #ef4444;
-  border-radius: var(--radius-md);
+  inset: 0;
+  background: rgba(10, 15, 26, 0.96);
+  border: 3px solid #ef4444;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm);
-  z-index: 10;
-  animation: qte-pulse 1s infinite alternate ease-in-out;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
+  gap: 8px;
+  padding: var(--space-md);
+  z-index: 100;
+  animation: qte-pulse 0.8s infinite alternate ease-in-out;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6) inset;
 }
 
 .reel-qte-container[hidden] {

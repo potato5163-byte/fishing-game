@@ -296,4 +296,6 @@ function init() {
   switchTab(state.activeTab);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', init);
+}

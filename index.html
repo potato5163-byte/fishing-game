@@ -109,24 +109,24 @@
                   <span class="t-eyebrow" style="font-size: 10px; color: #cbd5e1;">TIME</span>
                   <span id="reel-hud-time" class="tabular-nums">25s</span>
                 </div>
+              </div>
 
-                <!-- 특수 커맨드(QTE) 오버레이 -->
-                <div id="reel-qte-container" class="reel-qte-container" hidden>
-                  <div class="reel-qte-banner">⚠️ 물고기의 맹렬한 저항! 특수 커맨드 입력!</div>
-                  <div id="reel-qte-prompt" class="reel-qte-keys"></div>
-                  <div class="reel-qte-timer-bar">
-                    <div id="reel-qte-timer-fill" class="reel-qte-timer-fill"></div>
+              <!-- 특수 커맨드(QTE) 오버레이 (3D 패널 중앙 전체 덮개로 잘림 방지) -->
+              <div id="reel-qte-container" class="reel-qte-container" hidden>
+                <div class="reel-qte-banner">⚠️ 물고기의 맹렬한 저항! 특수 커맨드 입력!</div>
+                <div id="reel-qte-prompt" class="reel-qte-keys"></div>
+                <div class="reel-qte-timer-bar">
+                  <div id="reel-qte-timer-fill" class="reel-qte-timer-fill"></div>
+                </div>
+                <!-- 모바일 터치용 버튼 -->
+                <div class="reel-qte-mobile-controls">
+                  <button type="button" class="qte-btn" data-key="ArrowUp">⬆️</button>
+                  <div class="qte-mobile-row">
+                    <button type="button" class="qte-btn" data-key="ArrowLeft">⬅️</button>
+                    <button type="button" class="qte-btn qte-btn-space" data-key="Space">⚡HIT</button>
+                    <button type="button" class="qte-btn" data-key="ArrowRight">➡️</button>
                   </div>
-                  <!-- 모바일 터치용 버튼 -->
-                  <div class="reel-qte-mobile-controls">
-                    <button type="button" class="qte-btn" data-key="ArrowUp">⬆️</button>
-                    <div class="qte-mobile-row">
-                      <button type="button" class="qte-btn" data-key="ArrowLeft">⬅️</button>
-                      <button type="button" class="qte-btn qte-btn-space" data-key="Space">⚡HIT</button>
-                      <button type="button" class="qte-btn" data-key="ArrowRight">➡️</button>
-                    </div>
-                    <button type="button" class="qte-btn" data-key="ArrowDown">⬇️</button>
-                  </div>
+                  <button type="button" class="qte-btn" data-key="ArrowDown">⬇️</button>
                 </div>
               </div>
             </div>
