@@ -69,10 +69,20 @@ function triggerQTE() {
   qteActive = true;
   qteTriggeredCount++;
 
-  // 난이도에 따른 커맨드 길이: epic(3), legendary(3~4), mythic(4)
+  // 등급별 커맨드 수 및 제한 시간 차등화
+  // 영웅(Epic): 3키, 2.8초 (여유로움)
+  // 전설(Legendary): 5키, 2.2초 (빠르고 긴장감)
+  // 신화(Mythic): 6~7키, 1.8초 (초고난도 긴박한 리듬 연타!)
   let count = 3;
-  if (currentFish.rarity === 'mythic') count = 4;
-  else if (currentFish.rarity === 'legendary') count = 3;
+  let timeLimit = 2.8;
+
+  if (currentFish.rarity === 'mythic') {
+    count = 6;
+    timeLimit = 1.8;
+  } else if (currentFish.rarity === 'legendary') {
+    count = 5;
+    timeLimit = 2.2;
+  }
 
   qteSequence = [];
   for (let i = 0; i < count; i++) {
@@ -81,7 +91,7 @@ function triggerQTE() {
   }
 
   qteIndex = 0;
-  qteMaxTime = currentFish.rarity === 'mythic' ? 2.5 : 2.8;
+  qteMaxTime = timeLimit;
   qteTimer = qteMaxTime;
 
   playSound('qte_prompt');
@@ -262,11 +272,25 @@ function updatePhysics(dt) {
     return; // QTE 중에는 일반 물리 이동 일시 정지 (긴박한 QTE에 집중)
   }
 
-  // QTE 트리거 체크: 영웅/전설/신화 등급이고 35% ~ 65% 진행도 사이에서 1회 발생
+  // QTE 트리거 체크: 영웅/전설/신화 등급
+  // 영웅: 1회 발생 (45~65% 구간)
+  // 전설: 최대 2회 발생 (1차: 35~55%, 2차: 65~85%)
+  // 신화: 최대 2회 발생 (1차: 30~50%, 2차: 60~85%)
   const isHighRarity = ['epic', 'legendary', 'mythic'].includes(currentFish.rarity);
-  if (isHighRarity && qteTriggeredCount === 0 && progress >= 40 && progress <= 70) {
-    triggerQTE();
-    return;
+  const maxQteCount = currentFish.rarity === 'epic' ? 1 : 2;
+
+  if (isHighRarity && qteTriggeredCount < maxQteCount) {
+    let shouldTrigger = false;
+    if (qteTriggeredCount === 0 && progress >= 35 && progress <= 65) {
+      shouldTrigger = true;
+    } else if (qteTriggeredCount === 1 && progress >= 68 && progress <= 88) {
+      shouldTrigger = true;
+    }
+
+    if (shouldTrigger) {
+      triggerQTE();
+      return;
+    }
   }
 
   // 3. 물고기 스턴 타이머
