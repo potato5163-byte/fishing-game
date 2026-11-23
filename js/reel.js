@@ -268,15 +268,21 @@ export function startReelGame(fish, equippedRodId, onFinish) {
 
   const nameEl = document.getElementById('reel-target-name');
   if (nameEl) {
-    // 스포일러 방지: 낚을 때 물고기 이름 대신 신비로운 실루엣 및 미지의 생명체로 표시!
-    const rarityLabel = {
-      common: '일반 어종',
-      rare: '희귀 어종',
-      epic: '영웅 어종',
-      legendary: '전설 어종',
-      mythic: '신화의 지배자',
-    }[fish.rarity] || '미지의 물고기';
-    nameEl.textContent = `❓ [미지의 생명체] - ${rarityLabel}`;
+    const isAlreadyCaught = state.collection && !!state.collection[fish.id];
+    if (isAlreadyCaught) {
+      // 이미 한 번이라도 잡아서 도감에 있는 물고기는 친숙하게 원래 이름 표시!
+      nameEl.textContent = `${fish.emoji} ${fish.name} (${fish.rarity.toUpperCase()})`;
+    } else {
+      // 아직 도감에 없는 미지의 물고기는 스포일러 방지 실루엣 물음표!
+      const rarityLabel = {
+        common: '일반 어종',
+        rare: '희귀 어종',
+        epic: '영웅 어종',
+        legendary: '전설 어종',
+        mythic: '신화의 지배자',
+      }[fish.rarity] || '미지의 물고기';
+      nameEl.textContent = `❓ [미지의 생명체] - ${rarityLabel}`;
+    }
   }
 
   const qteContainer = document.getElementById('reel-qte-container');
@@ -506,8 +512,13 @@ function updateReelDOM() {
     if (isStunned) {
       fishEmoji.textContent = '💫';
     } else {
-      // 스포일러 방지: 낚아 올리기 전까지는 신비한 실루엣 물고기로 표시!
-      fishEmoji.textContent = '🐟';
+      const isAlreadyCaught = state.collection && !!state.collection[currentFish?.id];
+      if (isAlreadyCaught) {
+        fishEmoji.textContent = currentFish ? currentFish.emoji : '🐟';
+      } else {
+        // 미발견 물고기는 신비한 실루엣 물고기로 표시
+        fishEmoji.textContent = '🐟';
+      }
     }
     // 물고기 진행 방향에 따라 좌우 반전
     fishEmoji.style.transform = fishTargetX > fishX ? 'scaleX(1)' : 'scaleX(-1)';
