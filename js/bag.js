@@ -1,4 +1,4 @@
-import { state, sellFish, sellAllFish, addFishToAquarium } from './state.js';
+import { state, sellFish, sellAllFish, addFishToAquarium, autoAddBestFishToAquarium } from './state.js';
 import { FISH, RARITIES, MESSAGES } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
 import { showToast, switchTab } from './ui.js';
@@ -18,9 +18,14 @@ export function renderBag() {
           <div class="t-headline">가방</div>
           <div class="t-subhead">${count}마리 · 총 ${formatGold(totalValue)}G</div>
         </div>
-        <button id="btn-sell-all" class="btn-primary" style="height: 40px; font-size: 14px; padding: 0 var(--space-md);" ${count === 0 ? 'disabled' : ''}>
-          모두 팔기
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-auto-aquarium" class="btn-primary" style="height: 40px; font-size: 13px; padding: 0 12px; background: #0284c7;" ${count === 0 ? 'disabled' : ''}>
+            🐠 최고물고기 일괄입주
+          </button>
+          <button id="btn-sell-all" class="btn-primary" style="height: 40px; font-size: 14px; padding: 0 var(--space-md);" ${count === 0 ? 'disabled' : ''}>
+            모두 팔기
+          </button>
+        </div>
       </div>
     </div>
 
@@ -80,6 +85,19 @@ export function renderBag() {
   if (btnSellAll && count > 0) {
     btnSellAll.addEventListener('click', () => {
       showSellAllConfirmModal(count, totalValue);
+    });
+  }
+
+  const btnAutoAquarium = document.getElementById('btn-auto-aquarium');
+  if (btnAutoAquarium && count > 0) {
+    btnAutoAquarium.addEventListener('click', () => {
+      const res = autoAddBestFishToAquarium();
+      if (!res.ok) {
+        showToast(res.error);
+      } else {
+        showToast(`🐠 최고 등급 물고기 ${res.count}마리를 수족관에 입주시켰습니다!`);
+        renderBag();
+      }
     });
   }
 

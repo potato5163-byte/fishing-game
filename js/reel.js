@@ -12,6 +12,11 @@ let aimX = 50;
 let aimTargetX = 50;
 let aimMoveDir = 0; // -1: 좌, 0: 정지, 1: 우
 
+// 마우스/터치 드래그로 직접 조준 위치 지정
+export function setAimDirectPosition(percentX) {
+  aimX = clamp(percentX, 10, 90);
+}
+
 // 물고기 위치 (X: 0 ~ 100%, Y: 깊이/점프 높이)
 let fishX = 50;
 let fishTargetX = 50;
@@ -181,14 +186,19 @@ export function trySmashAction() {
 
     playSound('smash_hit');
 
-    // 스턴 적용 (낚싯대 제압력 + 강화 레벨에 비례)
+    // 스턴 시간 난이도 보정:
+    // 어려운 물고기(난이도 3, 4, 5 / 영웅, 전설, 신화)일수록 스턴 저항력이 강해 기절 시간이 짧음!
+    const diff = currentFish ? (currentFish.difficulty || 1) : 1;
     const baseStun = currentRodData ? (currentRodData.stunDuration || 1.2) : 1.2;
-    stunTimer = baseStun + (enhanceBonus * 0.25);
+    // 난이도당 스턴 시간 0.25초씩 감쇄 (최소 0.5초 보장)
+    const difficultyStunResistance = (diff - 1) * 0.25;
+    const calculatedStun = Math.max(0.5, baseStun - difficultyStunResistance + (enhanceBonus * 0.15));
+    stunTimer = calculatedStun;
     isStunned = true;
 
-    // 진행도 급상승 (+15% ~ +25%)
-    const smashPower = 15 + (enhanceBonus * 1.5);
-    progress = clamp(progress + smashPower, 0, 100);
+    // 진행도 상승치도 난이도가 높을수록 적당한 긴장감 유지 (쉬운 고기 +20%, 신화급 +12%)
+    const smashGain = Math.max(10, (20 - diff * 2) + (enhanceBonus * 1.2));
+    progress = clamp(progress + smashGain, 0, 100);
 
     // 강타 플래시 & 화면 진동
     const oceanView = document.getElementById('reel-ocean-view');

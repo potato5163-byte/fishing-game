@@ -9,7 +9,7 @@ import {
   updateFishingIndicators,
   updateFishingScene,
 } from './fishing.js';
-import { setReelHolding, isQTEActive, handleQTEInput, setAimDirection, trySmashAction } from './reel.js';
+import { setReelHolding, isQTEActive, handleQTEInput, setAimDirection, setAimDirectPosition, trySmashAction, isReelingActive } from './reel.js';
 import { initDebug } from './debug.js';
 import { formatGold } from './utils.js';
 import { toggleSound, isSoundEnabled, playSound } from './sound.js';
@@ -147,6 +147,43 @@ function initFishingInput() {
       }
     });
   });
+
+  // 3D 낚시 화면 위에서 마우스 드래그 / 터치 스와이프로 낚싯대 즉각 조준
+  const oceanView = document.getElementById('reel-ocean-view');
+  if (oceanView) {
+    let isDragging = false;
+
+    const handlePointerAim = (e) => {
+      if (!isReelingActive()) return;
+      const rect = oceanView.getBoundingClientRect();
+      if (rect.width > 0) {
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const percentX = ((clientX - rect.left) / rect.width) * 100;
+        setAimDirectPosition(percentX);
+      }
+    };
+
+    oceanView.addEventListener('pointerdown', (e) => {
+      // 터치 버튼 클릭 시 중복 이벤트 방지
+      if (e.target && (e.target.classList.contains('qte-btn') || e.target.closest('.qte-btn'))) return;
+      isDragging = true;
+      handlePointerAim(e);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (isDragging) {
+        handlePointerAim(e);
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+    });
+
+    window.addEventListener('pointercancel', () => {
+      isDragging = false;
+    });
+  }
 
   // 모바일 터치 조준 패들 바인딩
   const touchLeft = document.getElementById('touch-left');

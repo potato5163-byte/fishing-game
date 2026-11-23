@@ -436,6 +436,42 @@ export function addFishToAquarium(bagIndex) {
   return { ok: true, fish: { ...item, name: fishMeta.name } };
 }
 
+// 가방에서 최고 등급 물고기들 수족관에 한 번에 일괄 입주
+export function autoAddBestFishToAquarium() {
+  if (!state.aquarium) state.aquarium = [];
+  const availableSlots = 20 - state.aquarium.length;
+  if (availableSlots <= 0) {
+    return { ok: false, error: '수족관이 이미 가득 찼습니다! (최대 20마리)' };
+  }
+  if (!state.bag || state.bag.length === 0) {
+    return { ok: false, error: '가방에 물고기가 없습니다.' };
+  }
+
+  const rarityRank = { mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+
+  // 가방 물고기들을 희귀도 및 가격 순으로 정렬
+  const sortedBag = [...state.bag].sort((a, b) => {
+    const metaA = FISH.find((f) => f.id === a.fishId) || { rarity: 'common', basePrice: 0 };
+    const metaB = FISH.find((f) => f.id === b.fishId) || { rarity: 'common', basePrice: 0 };
+    const rankDiff = (rarityRank[metaB.rarity] || 1) - (rarityRank[metaA.rarity] || 1);
+    if (rankDiff !== 0) return rankDiff;
+    return (b.price || 0) - (a.price || 0);
+  });
+
+  const toAdd = sortedBag.slice(0, availableSlots);
+  let addedCount = 0;
+
+  toAdd.forEach((item) => {
+    const bagIdx = state.bag.findIndex((b) => b.uid === item.uid);
+    if (bagIdx !== -1) {
+      addFishToAquarium(bagIdx);
+      addedCount++;
+    }
+  });
+
+  return { ok: true, count: addedCount };
+}
+
 export function releaseFishFromAquarium(aquariumId) {
   if (!state.aquarium) return false;
   const idx = state.aquarium.findIndex((f) => f.id === aquariumId);
