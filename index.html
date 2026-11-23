@@ -42,23 +42,45 @@
             <div id="fishing-bobber" class="fishing-bobber" hidden>🔴</div>
             <div id="fishing-bite-alert" class="fishing-bite-alert" hidden>❗</div>
 
-            <!-- 릴 감기 미니게임 오버레이 패널 -->
+            <!-- 릴 감기 미니게임 오버레이 패널 (텐션 밀당 시스템) -->
             <div id="reel-panel" class="reel-panel" hidden>
               <div class="reel-track" id="reel-track">
                 <div id="reel-zone" class="reel-zone"></div>
                 <div id="reel-fish" class="reel-fish">🐟</div>
               </div>
               <div class="reel-info-pane">
+                <!-- 상단 텐션 게이지 -->
+                <div class="tension-meter-wrapper">
+                  <div class="tension-labels">
+                    <span class="tension-title">LINE TENSION (줄 텐션)</span>
+                    <span id="tension-warning-text" class="tension-status">SAFE</span>
+                  </div>
+                  <div class="tension-bar-track">
+                    <div id="tension-fill" class="tension-bar-fill"></div>
+                  </div>
+                </div>
+
+                <!-- 진행도 -->
                 <div>
-                  <div class="t-body-sm" style="margin-bottom: 4px;">진행도</div>
+                  <div class="t-body-sm" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span>끌어올림 진행도</span>
+                    <span id="reel-progress-text" class="tabular-nums" style="font-weight: 700;">30%</span>
+                  </div>
                   <div class="reel-progress-bar">
                     <div id="reel-progress-fill" class="reel-progress-fill"></div>
                   </div>
-                  <div id="reel-progress-text" class="t-card-title tabular-nums" style="margin-top: 4px;">30%</div>
                 </div>
-                <div>
-                  <div class="t-body-sm" style="margin-bottom: 4px;">남은 시간</div>
-                  <div id="reel-time-text" class="t-card-title tabular-nums">25초</div>
+
+                <!-- 하단 시간 및 낚싯대 강화 효과 -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div class="t-body-sm" style="margin-bottom: 2px;">남은 시간</div>
+                    <div id="reel-time-text" class="t-card-title tabular-nums">25초</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div class="t-body-sm" style="margin-bottom: 2px;">낚싯대 파워</div>
+                    <div id="reel-rod-power-text" class="t-body-sm" style="font-weight: 700; color: #0284c7;">+0강</div>
+                  </div>
                 </div>
               </div>
 

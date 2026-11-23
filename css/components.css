@@ -577,7 +577,55 @@
   z-index: 2;
 }
 
+/* 강화된 낚싯대 빛남 효과 */
+.shop-item-row.is-enhanced-rod {
+  border-left: 3px solid #ea580c;
+  background: linear-gradient(90deg, rgba(234, 88, 12, 0.05) 0%, transparent 100%);
+}
+
+/* 수중 기포 파티클 효과 */
+.fishing-scene::before {
+  content: '';
+  position: absolute;
+  top: 45%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: radial-gradient(circle at 20% 70%, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
+              radial-gradient(circle at 60% 85%, rgba(255, 255, 255, 0.15) 3px, transparent 4px),
+              radial-gradient(circle at 85% 60%, rgba(255, 255, 255, 0.2) 2px, transparent 3px);
+  background-size: 100px 100px;
+  animation: bubbles-rise 5s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes bubbles-rise {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-40px); }
+}
+
+/* 릴 감기 중 물결 요동 이펙트 */
 .fishing-rod-visual {
+  position: absolute;
+  top: 38%;
+  right: 25px;
+  font-size: 32px;
+  transform: rotate(-15deg);
+  z-index: 2;
+  transition: transform 0.15s ease-out;
+}
+
+.fishing-scene.is-reeling-pull .fishing-rod-visual {
+  transform: rotate(-35deg) scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+}
+
+/* 신비한 아우라 및 수면 반사광 */
+.fishing-water-surface {
+  filter: drop-shadow(0 2px 5px rgba(255, 255, 255, 0.35));
+}
+
   position: absolute;
   top: 25%;
   right: 15%;
@@ -619,6 +667,62 @@
 @keyframes bite-bounce {
   0% { transform: translate(-50%, -50%) scale(1); }
   100% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* 텐션 미터 게이지 */
+.tension-meter-wrapper {
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tension-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tension-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-subtext);
+}
+
+.tension-status {
+  font-size: 11px;
+  font-weight: 900;
+  color: #10b981;
+  letter-spacing: 0.5px;
+}
+
+.tension-status.is-warning {
+  color: #f59e0b;
+}
+
+.tension-status.is-danger {
+  color: #ef4444;
+  animation: qte-pulse 0.3s infinite alternate;
+}
+
+.tension-bar-track {
+  width: 100%;
+  height: 12px;
+  background: #27272a;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.tension-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f59e0b 80%, #ef4444 100%);
+  transition: width 0.05s linear;
 }
 
 /* 릴 미니게임 패널 (낚시 장면 위 덮개) */

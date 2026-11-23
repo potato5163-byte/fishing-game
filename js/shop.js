@@ -5,6 +5,9 @@ import {
   buyBait,
   buyBagUpgrade,
   buySpecialItem,
+  getRodEnhanceLevel,
+  getRodEnhanceCost,
+  enhanceRod,
 } from './state.js';
 import {
   RODS,
@@ -72,6 +75,8 @@ function renderRodTab() {
     const rod = RODS[id];
     const isOwned = state.ownedRods.includes(id);
     const isEquipped = state.equippedRod === id;
+    const enhanceLvl = getRodEnhanceLevel(id);
+    const enhanceCost = getRodEnhanceCost(id);
 
     let btnHtml = '';
     if (isEquipped) {
@@ -82,18 +87,35 @@ function renderRodTab() {
       btnHtml = `<button class="btn-primary btn-buy-rod" data-rod-id="${id}" style="height: 44px; padding: 0 var(--space-md); font-size: 14px;">구매 ${formatGold(rod.price)}G</button>`;
     }
 
+    let enhanceBtnHtml = '';
+    if (isOwned) {
+      if (enhanceLvl >= 10) {
+        enhanceBtnHtml = `<span class="badge-rarity rarity-mythic" style="font-size: 11px;">MAX +10강</span>`;
+      } else {
+        enhanceBtnHtml = `
+          <button class="btn-primary btn-enhance-rod" data-rod-id="${id}" style="height: 34px; font-size: 12px; padding: 0 10px; background: #ea580c;">
+            ⚡+${enhanceLvl + 1}강 (${formatGold(enhanceCost)}G)
+          </button>
+        `;
+      }
+    }
+
     return `
-          <div class="shop-item-row">
+          <div class="shop-item-row ${enhanceLvl > 0 ? 'is-enhanced-rod' : ''}">
             <div class="shop-item-emoji">${rod.emoji}</div>
             <div class="shop-item-info">
-              <div class="t-card-title">${rod.name}</div>
+              <div class="t-card-title">
+                ${rod.name}
+                ${enhanceLvl > 0 ? `<span style="color: #ea580c; font-weight: 900; margin-left: 4px;">+${enhanceLvl}강</span>` : ''}
+              </div>
               <div class="t-body-sm">${rod.desc}</div>
-              <div class="t-body-sm" style="color: var(--color-ink); opacity: 0.7;">
-                잡기 영역 +${rod.zoneBonus} · 감기 속도 ×${rod.reelMultiplier.toFixed(2)}
+              <div class="t-body-sm" style="color: var(--color-ink); opacity: 0.85;">
+                영역 +${rod.zoneBonus + enhanceLvl * 2}% · 파워 ×${(rod.reelMultiplier * (1 + enhanceLvl * 0.05)).toFixed(2)} · 텐션 저항 +${enhanceLvl * 4}%
               </div>
             </div>
-            <div class="shop-item-action">
+            <div class="shop-item-action" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
               ${btnHtml}
+              ${enhanceBtnHtml}
             </div>
           </div>
         `;
@@ -228,7 +250,28 @@ function bindShopEvents(screen) {
     });
   });
 
-  // 낚싯대 장착
+  // 낚싯대 강화
+  const enhanceRodBtns = screen.querySelectorAll('.btn-enhance-rod');
+  enhanceRodBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const rodId = btn.dataset.rodId;
+      const rod = RODS[rodId];
+      if (!rod) return;
+
+      const cost = getRodEnhanceCost(rodId);
+      const level = getRodEnhanceLevel(rodId);
+      showHighPriceConfirmModal(`${rod.name}을(를) +${level + 1}강으로 강화할까요? (${formatGold(cost)}G)`, () => {
+        const res = enhanceRod(rodId);
+        if (res.ok) {
+          showToast(`⚡ [${rod.name}] +${res.newLevel}강 강화 성공!`);
+          updateFishingIndicators();
+          renderShop();
+        } else {
+          showToast(res.error);
+        }
+      });
+    });
+  });
   const equipRodBtns = screen.querySelectorAll('.btn-equip-rod');
   equipRodBtns.forEach((btn) => {
     btn.addEventListener('click', () => {

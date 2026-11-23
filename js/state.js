@@ -15,6 +15,7 @@ export function createNewState() {
     unlockedRegions: [START.region],
     ownedRods: [START.rod],
     equippedRod: START.rod,
+    rodEnhancements: {}, // { bamboo: 0, carbon: 3, ... }
     baits: {
       worm: 0,
       shiny: 0,
@@ -97,6 +98,7 @@ export function saveGame() {
     unlockedRegions: state.unlockedRegions,
     ownedRods: state.ownedRods,
     equippedRod: state.equippedRod,
+    rodEnhancements: state.rodEnhancements || {},
     baits: state.baits,
     selectedBait: state.selectedBait,
     bagCapacity: state.bagCapacity,
@@ -621,6 +623,45 @@ export function equipRod(rodId) {
     saveGame();
     updateTopbar();
   }
+}
+
+// ==========================================
+// 낚싯대 강화 시스템 (+1 ~ +10강)
+// ==========================================
+
+export function getRodEnhanceLevel(rodId) {
+  if (!state.rodEnhancements) state.rodEnhancements = {};
+  return state.rodEnhancements[rodId] || 0;
+}
+
+export function getRodEnhanceCost(rodId) {
+  const rod = RODS[rodId] || RODS.bamboo;
+  const currentLevel = getRodEnhanceLevel(rodId);
+  if (currentLevel >= 10) return 0; // 최대 강화
+  const baseCost = Math.max(100, Math.round(rod.price * 0.25));
+  return Math.round(baseCost * Math.pow(1.5, currentLevel));
+}
+
+export function enhanceRod(rodId) {
+  if (!state.ownedRods.includes(rodId)) {
+    return { ok: false, error: '보유하지 않은 낚싯대입니다.' };
+  }
+  const currentLevel = getRodEnhanceLevel(rodId);
+  if (currentLevel >= 10) {
+    return { ok: false, error: '이미 최고 강화 단계(+10강)입니다!' };
+  }
+  const cost = getRodEnhanceCost(rodId);
+  if (state.gold < cost) {
+    return { ok: false, error: '골드가 부족합니다!' };
+  }
+
+  state.gold -= cost;
+  if (!state.rodEnhancements) state.rodEnhancements = {};
+  state.rodEnhancements[rodId] = currentLevel + 1;
+
+  saveGame();
+  updateTopbar();
+  return { ok: true, newLevel: currentLevel + 1, cost };
 }
 
 export function buyBait(baitId, qty) {

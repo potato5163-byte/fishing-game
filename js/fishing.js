@@ -713,7 +713,9 @@ export function updateFishingIndicators() {
 
   if (rodEl) {
     const rod = RODS[state.equippedRod] || RODS.bamboo;
-    rodEl.textContent = `${rod.emoji} ${rod.name}`;
+    const enhanceLevel = state.rodEnhancements ? (state.rodEnhancements[state.equippedRod] || 0) : 0;
+    const enhanceTag = enhanceLevel > 0 ? ` (+${enhanceLevel}강)` : '';
+    rodEl.textContent = `${rod.emoji} ${rod.name}${enhanceTag}`;
   }
 
   if (baitSelect) {

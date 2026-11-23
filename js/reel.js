@@ -1,7 +1,7 @@
 import { FISHING_CONFIG, RODS } from './data.js';
 import { clamp } from './utils.js';
 import { playSound } from './sound.js';
-import { state } from './state.js';
+import { state, getRodEnhanceLevel } from './state.js';
 
 let isReeling = false;
 let isHolding = false;
@@ -16,10 +16,15 @@ let zoneH = 25;
 let zoneY = 37.5;
 let zoneVel = 0;
 
+// 텐션 시스템 물리 변수
+let tension = 20; // 0 ~ 100
+let tensionSnapTimer = 0; // 위험 텐션(90 이상) 지속 시 줄 끊어짐 카운트다운
+
 let progress = 30;
 let timeLeft = 25;
 let lastFrameTime = 0;
 let animFrameId = null;
+let enhanceBonus = 0; // 현재 낚싯대 강화 레벨 (+0 ~ +10)
 
 // 특수 커맨드 (QTE) 상태 변수
 let qteActive = false;
@@ -161,6 +166,11 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   isReeling = true;
   isHolding = false;
 
+  enhanceBonus = getRodEnhanceLevel(equippedRodId);
+
+  tension = 20;
+  tensionSnapTimer = 0;
+
   qteActive = false;
   qteSequence = [];
   qteIndex = 0;
@@ -174,7 +184,8 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   }
 
   const rod = RODS[equippedRodId] || RODS.bamboo;
-  let bonusH = rod.zoneBonus || 0;
+  // 강화 단계당 영역 +2% 및 텐션 버퍼 제공
+  let bonusH = (rod.zoneBonus || 0) + (enhanceBonus * 2);
 
   // 거인의 비약 활성화 시 잡기 영역 1.5배 증가
   if (state.specialItems && state.specialItems.potion_zone > 0) {
@@ -202,6 +213,11 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   const panel = document.getElementById('reel-panel');
   if (panel) {
     panel.hidden = false;
+  }
+
+  const powerEl = document.getElementById('reel-rod-power-text');
+  if (powerEl) {
+    powerEl.textContent = `+${enhanceBonus}강 (${rod.name})`;
   }
 
   updateReelDOM();
@@ -272,6 +288,36 @@ function updatePhysics(dt) {
     return; // QTE 중에는 일반 물리 이동 일시 정지 (긴박한 QTE에 집중)
   }
 
+  // 3. 줄 텐션(Tension) 물리 계산
+  // 릴을 누르고 있으면 텐션이 빠르게 오르고, 놓으면 서서히 풀림
+  // 낚싯대 강화가 높을수록 텐션 상승을 억제하고 안정화 빠름
+  const rod = RODS[window.__currentRodId || 'bamboo'] || RODS.bamboo;
+  const enhanceResist = enhanceBonus * 0.04; // 1강당 4% 텐션 저항
+  const inZone = fishY >= zoneY && fishY <= zoneY + zoneH;
+
+  if (isHolding) {
+    // 물고기가 잡기 영역 안에 있으면 텐션이 안정적으로 오르고, 밖에서 날뛸 땐 텐션 급증!
+    const tensionRiseSpeed = inZone ? 32 : 55;
+    tension += (tensionRiseSpeed * (1 - enhanceResist)) * dt;
+  } else {
+    // 릴을 놓으면 텐션이 자연스럽게 풀림
+    tension -= (45 + enhanceBonus * 2) * dt;
+  }
+  tension = clamp(tension, 0, 100);
+
+  // 텐션이 88% 이상인 DANGER 구간에서 지속 시 줄 끊어짐 위기!
+  if (tension >= 88) {
+    tensionSnapTimer += dt;
+    if (tensionSnapTimer >= (1.8 + enhanceBonus * 0.15)) {
+      // 줄 끊어짐 발생! (실패)
+      finishGame('fail_escaped');
+      playSound('qte_fail');
+      return;
+    }
+  } else {
+    tensionSnapTimer = Math.max(0, tensionSnapTimer - dt * 2);
+  }
+
   // QTE 트리거 체크: 영웅/전설/신화 등급
   // 영웅: 1회 발생 (45~65% 구간)
   // 전설: 최대 2회 발생 (1차: 35~55%, 2차: 65~85%)
@@ -336,13 +382,16 @@ function updatePhysics(dt) {
     fishY = clamp(fishY, 0, 100);
   }
 
-  // 6. 진행도 증감
-  const inZone = fishY >= zoneY && fishY <= zoneY + zoneH;
+  // 6. 진행도 증감 (텐션 최적 구간 40~80%에서 끌어올림 효율 극대화!)
   if (inZone) {
-    // 잡기 영역 안
-    const rod = RODS[window.__currentRodId || 'bamboo'] || RODS.bamboo;
-    const mult = rod.reelMultiplier || 1.0;
-    progress += FISHING_CONFIG.PROGRESS_GAIN * mult * dt;
+    let tensionBonus = 1.0;
+    if (tension >= 40 && tension <= 80) {
+      tensionBonus = 1.35; // PERFECT 텐션 밀당 보너스!
+    } else if (tension >= 88) {
+      tensionBonus = 0.5; // 위험 텐션에서는 효율 급감
+    }
+    const mult = (rod.reelMultiplier || 1.0) * (1 + enhanceBonus * 0.05);
+    progress += FISHING_CONFIG.PROGRESS_GAIN * mult * tensionBonus * dt;
   } else {
     // 밖 (스턴 중일 때는 패널티 절반)
     const penalty = qteStunTimer > 0 ? diffSettings.progressLoss * 0.5 : diffSettings.progressLoss;
@@ -357,6 +406,30 @@ function updateReelDOM() {
   const progressFill = document.getElementById('reel-progress-fill');
   const progressText = document.getElementById('reel-progress-text');
   const timeText = document.getElementById('reel-time-text');
+  const tensionFill = document.getElementById('tension-fill');
+  const tensionStatus = document.getElementById('tension-warning-text');
+
+  if (tensionFill) {
+    tensionFill.style.width = `${tension}%`;
+  }
+
+  if (tensionStatus) {
+    if (tension >= 88) {
+      tensionStatus.textContent = 'DANGER! (끊어짐 위기)';
+      tensionStatus.className = 'tension-status is-danger';
+    } else if (tension >= 65) {
+      tensionStatus.textContent = 'WARNING (높음)';
+      tensionStatus.className = 'tension-status is-warning';
+    } else if (tension >= 35) {
+      tensionStatus.textContent = 'PERFECT (최적 텐션)';
+      tensionStatus.className = 'tension-status';
+      tensionStatus.style.color = '#3b82f6';
+    } else {
+      tensionStatus.textContent = 'SAFE (느슨함)';
+      tensionStatus.className = 'tension-status';
+      tensionStatus.style.color = '#10b981';
+    }
+  }
 
   if (fishEl) {
     // 바닥이 0이므로 bottom: fishY%
