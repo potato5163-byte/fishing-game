@@ -1,4 +1,4 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
 
 const STORAGE_KEY = 'mulgyeol-fishing-save';
@@ -670,16 +670,46 @@ export function checkRegionCompletion() {
 export function claimRegionReward(regionId) {
   const region = REGIONS.find((r) => r.id === regionId);
   if (!region || state.claimedRegionRewards.includes(regionId)) {
-    return 0;
+    return null;
+  }
+
+  // 10마리 모두 잡았는지 체크
+  const regionFish = FISH.filter((f) => f.region === regionId);
+  const allCaught = regionFish.every((f) => state.collection && state.collection[f.id]);
+  if (!allCaught) {
+    return null;
+  }
+
+  // 복권 당첨 추첨 (1등 1%, 2등 9%, 3등 30%, 4등 60%)
+  const rand = Math.random() * 100;
+  let lotteryReward = LOTTERY_TIERS[3]; // 기본 4등
+  if (rand < 1) {
+    lotteryReward = LOTTERY_TIERS[0]; // 1등
+  } else if (rand < 10) {
+    lotteryReward = LOTTERY_TIERS[1]; // 2등
+  } else if (rand < 40) {
+    lotteryReward = LOTTERY_TIERS[2]; // 3등
   }
 
   state.claimedRegionRewards.push(regionId);
-  state.gold += region.completeReward;
-  state.stats.totalEarned = (state.stats.totalEarned || 0) + region.completeReward;
+  const totalGoldReward = region.completeReward + lotteryReward.gold;
+  state.gold += totalGoldReward;
+  state.stats.totalEarned = (state.stats.totalEarned || 0) + totalGoldReward;
+
+  // 복권 보너스 미끼 지급
+  if (lotteryReward.baitType) {
+    state.baits[lotteryReward.baitType] = (state.baits[lotteryReward.baitType] || 0) + lotteryReward.baitCount;
+  }
 
   saveGame();
   updateTopbar();
-  return region.completeReward;
+
+  return {
+    regionName: region.name,
+    baseGold: region.completeReward,
+    lottery: lotteryReward,
+    totalGold: totalGoldReward,
+  };
 }
 
 export function checkKingAchievement() {

@@ -340,6 +340,15 @@ export const ECO_SHOP = {
   eco_bait: { id: 'eco_bait', name: '생분해 친환경 미끼 (20개)', emoji: '🌱', reqPoint: 20, desc: '바다를 오염시키지 않는 천연 효모 미끼' },
 };
 
+// 행운의 황금 복권 티어 및 당첨 테이블
+export const LOTTERY_TIERS = [
+  { rank: 1, name: '🥇 1등 대박 잭팟', gold: 1000000, baitType: 'rainbow', baitCount: 50, baitName: '무지개 미끼', weight: 1, color: '#f59e0b' },
+  { rank: 2, name: '🥈 2등 황금 당첨', gold: 100000, baitType: 'golden', baitCount: 30, baitName: '황금 미끼', weight: 9, color: '#eab308' },
+  { rank: 3, name: '🥉 3등 행운 당첨', gold: 30000, baitType: 'shiny', baitCount: 20, baitName: '반짝이 미끼', weight: 30, color: '#38bdf8' },
+  { rank: 4, name: '🎖️ 4등 실속 당첨', gold: 10000, baitType: 'worm', baitCount: 10, baitName: '지렁이 미끼', weight: 60, color: '#10b981' },
+];
+
+
 // 미끼 확률 합 검증 및 물고기 100종 전수 검사
 function validateData() {
   if (FISH.length !== 100) {

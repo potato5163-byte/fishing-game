@@ -31,7 +31,7 @@ import {
 import { showToast, updateTopbar } from './ui.js';
 import { startReelGame, setReelHolding, isReelingActive } from './reel.js';
 import { isInstantBiteEnabled } from './debug.js';
-import { showKingCelebrationModal } from './collection.js';
+import { showKingCelebrationModal, triggerLotteryClaim } from './collection.js';
 import { playSound } from './sound.js';
 import { getCurrentWeather, updateWeatherVisual, cycleWeather, WEATHERS } from './weather.js';
 import { getFishSvg } from './fish-icons.js';
@@ -619,15 +619,12 @@ export function closeModal() {
 
   // 결과 모달 닫힌 후 지역 완성 보상 및 낚시왕 체크 (docs/06 3, 4장)
   const completedRegions = checkRegionCompletion();
-  completedRegions.forEach((region) => {
-    const reward = claimRegionReward(region.id);
-    showToast(
-      formatMessage(MESSAGES.COLLECTION_COMPLETE, {
-        regionName: region.name,
-        reward: formatGold(reward),
-      })
-    );
-  });
+  if (completedRegions.length > 0) {
+    const firstRegion = completedRegions[0];
+    setTimeout(() => {
+      triggerLotteryClaim(firstRegion.id);
+    }, 300);
+  }
 
   if (checkKingAchievement()) {
     setTimeout(() => {

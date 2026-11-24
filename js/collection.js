@@ -1,4 +1,4 @@
-import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium } from './state.js';
+import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
 import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
@@ -102,6 +102,16 @@ export function renderCollection() {
     btnRates.addEventListener('click', showRatesModal);
   }
 
+  // 도감 10개 완성 보상 받기 버튼 이벤트
+  const claimBtns = screen.querySelectorAll('.btn-claim-region-reward');
+  claimBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const regionId = btn.dataset.regionId;
+      triggerLotteryClaim(regionId);
+    });
+  });
+
   // 미발견 카드 및 발견 카드 클릭 이벤트
   const unknownCards = screen.querySelectorAll('.collection-card.is-unknown');
   unknownCards.forEach((card) => {
@@ -124,12 +134,19 @@ function renderRegionSection(region) {
   const regionFish = FISH.filter((f) => f.region === region.id);
   const caughtInRegion = regionFish.filter((f) => state.collection && state.collection[f.id]).length;
   const isClaimed = state.claimedRegionRewards && state.claimedRegionRewards.includes(region.id);
+  const isCompleted = caughtInRegion >= 10;
 
   let rewardBadge = '';
   if (isClaimed) {
-    rewardBadge = `<span class="collection-reward-tag is-claimed">✅ 보상 받음</span>`;
+    rewardBadge = `<span class="collection-reward-tag is-claimed">✅ 보상 수령 완료</span>`;
+  } else if (isCompleted) {
+    rewardBadge = `
+      <button class="btn-primary btn-claim-region-reward" data-region-id="${region.id}" style="height: 32px; font-size: 12px; padding: 0 12px; background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; font-weight: 700; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4); animation: pulse 1.5s infinite;">
+        🎁 10종 완성! 보상+복권 받기
+      </button>
+    `;
   } else {
-    rewardBadge = `<span class="collection-reward-tag">완성 보상 ${formatGold(region.completeReward)}G</span>`;
+    rewardBadge = `<span class="collection-reward-tag">완성 시 ${formatGold(region.completeReward)}G + 🎟️ 복권</span>`;
   }
 
   return `
@@ -137,7 +154,7 @@ function renderRegionSection(region) {
       <div class="collection-region-header">
         <div class="t-card-title">
           ${region.name} ${!isUnlocked ? '🔒' : ''}
-          <span class="collection-region-count tabular-nums">${caughtInRegion}/10</span>
+          <span class="collection-region-count tabular-nums" style="${isCompleted ? 'color: #10b981; font-weight: 800;' : ''}">${caughtInRegion}/10</span>
         </div>
         ${rewardBadge}
       </div>
@@ -445,6 +462,82 @@ function showAquariumFishActionModal(aquariumId) {
   if (btnCancel) {
     btnCancel.addEventListener('click', () => {
       modalRoot.innerHTML = '';
+    });
+  }
+}
+
+// 🎟️ 황금 행운 복권 스크래치 모달
+export function triggerLotteryClaim(regionId) {
+  const result = claimRegionReward(regionId);
+  if (!result) return;
+
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  const { regionName, baseGold, lottery, totalGold } = result;
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="modal-lottery-scrim">
+      <div class="modal-dialog">
+        <div class="modal-top-block block-gold" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: var(--space-md); text-align: center;">
+          <div style="font-size: 52px; line-height: 1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));">🎟️</div>
+          <div class="t-eyebrow" style="color: #fef08a; margin-top: 4px;">LUCKY GOLD LOTTERY</div>
+          <div class="t-headline" style="color: #fff; font-size: 22px;">황금 스크래치 복권</div>
+        </div>
+        <div class="modal-content" style="padding: var(--space-lg); text-align: center;">
+          <div class="t-body-sm" style="color: var(--color-subtext); margin-bottom: 8px;">
+            🎉 [${regionName}] 10종 물고기 정복 축하 선물!
+          </div>
+
+          <!-- 복권 스크래치 카드 영역 -->
+          <div class="lottery-scratch-card" id="lottery-card">
+            <div class="lottery-hidden-content">
+              <div class="lottery-rank-tag" style="color: ${lottery.color};">${lottery.name}</div>
+              <div class="lottery-prize-gold tabular-nums">+${formatGold(lottery.gold)}G</div>
+              <div class="lottery-prize-item">🎁 ${lottery.baitName} +${lottery.baitCount}개 추가 지급!</div>
+            </div>
+            <div class="lottery-scratch-cover" id="lottery-cover">
+              <div class="scratch-finger-icon">✨</div>
+              <div style="font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                여기를 터치하여 긁어보세요!
+              </div>
+            </div>
+          </div>
+
+          <!-- 기본 보상 내역 -->
+          <div class="modal-info-list" style="margin-top: var(--space-md); text-align: left;">
+            <div class="modal-info-row">
+              <span class="t-body-sm">지역 도감 기본 상금</span>
+              <span class="t-body-sm tabular-nums" style="font-weight: 700;">+${formatGold(baseGold)}G</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="t-body-sm">총 획득 금액</span>
+              <span class="t-card-title tabular-nums" style="color: #10b981;">+${formatGold(totalGold)}G</span>
+            </div>
+          </div>
+
+          <button id="btn-lottery-confirm" class="btn-primary modal-action-btn" style="width: 100%; margin-top: var(--space-md);">
+            보상 모두 받기
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const cover = document.getElementById('lottery-cover');
+  const btnConfirm = document.getElementById('btn-lottery-confirm');
+
+  if (cover) {
+    cover.addEventListener('click', () => {
+      cover.classList.add('is-scratched');
+      showToast(`🎉 축하합니다! [${lottery.name}]에 당첨되었습니다!`);
+    });
+  }
+
+  if (btnConfirm) {
+    btnConfirm.addEventListener('click', () => {
+      modalRoot.innerHTML = '';
+      renderCollection();
     });
   }
 }

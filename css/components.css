@@ -449,6 +449,78 @@
   margin-top: -2px;
 }
 
+/* 🎟️ 황금 행운 스크래치 복권 스타일 */
+.lottery-scratch-card {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+  border: 2px dashed #f59e0b;
+  background: #fffbeb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-xs) 0;
+}
+
+.lottery-hidden-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-sm);
+}
+
+.lottery-rank-tag {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.lottery-prize-gold {
+  font-size: 26px;
+  font-weight: 900;
+  color: #d97706;
+}
+
+.lottery-prize-item {
+  font-size: 13px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.lottery-scratch-cover {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 50%, #475569 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s ease;
+  user-select: none;
+  z-index: 2;
+}
+
+.lottery-scratch-cover.is-scratched {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.1);
+}
+
+.scratch-finger-icon {
+  font-size: 28px;
+  animation: bounce 1s infinite alternate ease-in-out;
+}
+
+
 .collection-card-emoji-box {
   width: 52px;
   height: 52px;
