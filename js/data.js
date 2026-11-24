@@ -357,12 +357,37 @@ export const BOATS = {
 };
 export const BOAT_ORDER = ['wood_raft', 'fishing_boat', 'speed_boat', 'luxury_yacht'];
 
-// 🌊 날씨 전용 돌발 히든 물고기
-export const WEATHER_FISH = {
-  rainy: { id: 'thunder_catfish', name: '⚡ 벼락 맞은 황금메기', emoji: '⚡', rarity: 'legendary', minSize: 120, maxSize: 240, basePrice: 25000, difficulty: 4, desc: '비 오는 날 번개 에너지를 흡수해 황금빛으로 번뜩이는 전설의 메기' },
-  foggy: { id: 'phantom_ray', name: '🌫️ 안개 속 유령가오리', emoji: '👻', rarity: 'legendary', minSize: 150, maxSize: 300, basePrice: 35000, difficulty: 4, desc: '짙은 안개가 자욱할 때만 수면 위로 유영하는 신비한 가오리' },
-  night: { id: 'lunar_jellyfish', name: '🌙 달빛 심연 야광해파리', emoji: '🪼', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 80000, difficulty: 5, desc: '칠흑 같은 밤하늘 달빛을 머금고 푸른 네온빛을 뿜는 심연의 영물' },
-};
+// 🤫 개발자만 알고 있는 20종의 비밀 히든 물고기 (유저에겐 서식지/출현조건 철저히 비공개)
+export const HIDDEN_FISH = [
+  // 날씨 관련 히든 (4종)
+  { id: 'hf_thunder_catfish', name: '⚡ 벼락 맞은 황금메기', emoji: '⚡', rarity: 'legendary', minSize: 120, maxSize: 240, basePrice: 35000, difficulty: 4, desc: '거센 비와 번개가 내리칠 때만 수면 위로 올라오는 번개의 화신', condition: 'weather_rainy' },
+  { id: 'hf_phantom_ray', name: '🌫️ 안개 속 유령가오리', emoji: '👻', rarity: 'legendary', minSize: 150, maxSize: 300, basePrice: 45000, difficulty: 4, desc: '한 치 앞도 보이지 않는 짙은 안개 속에서 환영처럼 나타나는 유령 가오리', condition: 'weather_foggy' },
+  { id: 'hf_lunar_jellyfish', name: '🌙 달빛 심연 야광해파리', emoji: '🪼', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 90000, difficulty: 5, desc: '칠흑 같은 어둠 속 고요한 밤하늘 달빛을 쬐러 올라오는 푸른 네온 해파리', condition: 'weather_night' },
+  { id: 'hf_sun_dragon', name: '☀️ 태양의 화염룡', emoji: '🌞', rarity: 'mythic', minSize: 300, maxSize: 800, basePrice: 120000, difficulty: 5, desc: '눈부시게 화창한 맑은 날, 태양의 적외선을 충전하러 승천하는 불의 용', condition: 'weather_sunny' },
+
+  // 장비/낚싯배 관련 히든 (4종)
+  { id: 'hf_ancient_turtle', name: '🪵 고목 등껍질 거북', emoji: '🐢', rarity: 'rare', minSize: 60, maxSize: 140, basePrice: 18000, difficulty: 3, desc: '오래된 나무 뗏목 밑에 붙어 이끼를 뜯어먹고 살던 장수의 거북', condition: 'boat_wood_raft' },
+  { id: 'hf_speed_sailfish', name: '🚤 모터 광속 돛새치', emoji: '🗡️', rarity: 'epic', minSize: 140, maxSize: 280, basePrice: 40000, difficulty: 4, desc: '통통배와 쾌속정의 스크루 물살 속도를 즐기는 질주의 사냥꾼', condition: 'boat_speed' },
+  { id: 'hf_cruise_leviathan', name: '🛳️ 크루즈 삼킨 모비딕', emoji: '🐋', rarity: 'mythic', minSize: 1000, maxSize: 3500, basePrice: 250000, difficulty: 5, desc: '황금 크루즈 유람선의 거대한 닻을 장난감처럼 물고 노는 전설의 백경', condition: 'boat_yacht' },
+  { id: 'hf_bamboo_spirit', name: '🎋 대나무 요정 송사리', emoji: '🎋', rarity: 'legendary', minSize: 15, maxSize: 30, basePrice: 50000, difficulty: 4, desc: '초보자의 대나무 낚싯대만을 그리워하여 나타나는 신비한 민물 정령', condition: 'rod_bamboo' },
+
+  // 피버 및 시간대/캐스팅 관련 히든 (4종)
+  { id: 'hf_fever_phoenix', name: '🔥 광란의 불새어', emoji: '🦚', rarity: 'mythic', minSize: 150, maxSize: 400, basePrice: 180000, difficulty: 5, desc: '피버 타임의 뜨거운 열기에 이끌려 솟구쳐 오르는 열화의 영물', condition: 'fever_active' },
+  { id: 'hf_sniper_barracuda', name: '🎯 100% 저격 바라쿠다', emoji: '🏹', rarity: 'epic', minSize: 90, maxSize: 200, basePrice: 38000, difficulty: 4, desc: '오직 게이지 100% 퍼펙트 캐스팅에만 날카롭게 반응하는 사냥꾼', condition: 'perfect_cast' },
+  { id: 'hf_golden_koi_king', name: '👑 억만장자 황금비단잉어', emoji: '👑', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 300000, difficulty: 5, desc: '황금 미끼와 황금 복권의 기운을 받고 탄생한 물속의 대부호', condition: 'bait_golden' },
+  { id: 'hf_rainbow_hydra', name: '🌈 칠색 무지개 히드라', emoji: '🐲', rarity: 'mythic', minSize: 500, maxSize: 1500, basePrice: 400000, difficulty: 5, desc: '무지개 미끼의 오색 빛깔 향기에 반응하여 깨어난 일곱 머리의 수룡', condition: 'bait_rainbow' },
+
+  // 고난도 낚시터 심해/시공/우주 히든 (8종)
+  { id: 'hf_cosmic_stardust', name: '✨ 성운의 별가루 엔젤', emoji: '⭐', rarity: 'legendary', minSize: 40, maxSize: 90, basePrice: 75000, difficulty: 4, desc: '은하수가 부서진 가루를 마시며 자라난 우주 속 천사 물고기', condition: 'region_nebula' },
+  { id: 'hf_quantum_ghost', name: '⚛️ 양자 얽힘 유령어', emoji: '👾', rarity: 'mythic', minSize: 70, maxSize: 160, basePrice: 220000, difficulty: 5, desc: '시간의 틈새에서 존재와 소멸을 반복하는 4차원 홀로그램 생명체', condition: 'region_timewarp' },
+  { id: 'hf_magma_behemoth', name: '🌋 용암핵 베히모스', emoji: '🦖', rarity: 'mythic', minSize: 600, maxSize: 1800, basePrice: 280000, difficulty: 5, desc: '화산 심장부 5000도 마그마 마그넷을 뚫고 기어나온 태고의 거수', condition: 'region_volcano' },
+  { id: 'hf_ice_crystal_queen', name: '❄️ 빙정의 얼음여왕어', emoji: '👸', rarity: 'legendary', minSize: 100, maxSize: 220, basePrice: 85000, difficulty: 4, desc: '영하 70도 극지방 가장 투명한 빙벽 속에 얼어붙어 있던 여왕 물고기', condition: 'region_glacier' },
+  { id: 'hf_abyss_kraken', name: '🐙 심연의 공포 크라켄', emoji: '🦑', rarity: 'mythic', minSize: 800, maxSize: 2500, basePrice: 350000, difficulty: 5, desc: '심해 협곡 가장 깊은 1만 미터 참호에서 잠들어 있던 공포의 대왕 촉수', condition: 'region_abyss' },
+  { id: 'hf_dragon_palace_emperor', name: '🐉 용궁 태상황룡', emoji: '🐲', rarity: 'mythic', minSize: 1200, maxSize: 3000, basePrice: 500000, difficulty: 5, desc: '용궁 깊숙한 옥좌 아래에서 여의주를 수호하는 궁극의 황제 용', condition: 'region_palace' },
+  { id: 'hf_seraph_archangel', name: '🪽 치천사 미카엘 어류', emoji: '🪽', rarity: 'mythic', minSize: 400, maxSize: 1000, basePrice: 600000, difficulty: 5, desc: '천상 유원지 가장 높은 무지개 계단 위에서 빛을 내리는 수호 천사', condition: 'region_sky_ocean' },
+  { id: 'hf_genesis_ouroboros', name: '♾️ 무한의 창조 우로보로스', emoji: '🌌', rarity: 'mythic', minSize: 2500, maxSize: 9999, basePrice: 1000000, difficulty: 5, desc: '자신의 꼬리를 물고 세계의 순환과 영원을 상징하는 태초의 우주 뱀', condition: 'endgame_secret' },
+];
+
 
 
 

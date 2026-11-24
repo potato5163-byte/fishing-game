@@ -9,6 +9,7 @@ import {
   TRASH_ITEMS,
   BOATS,
   WEATHER_FISH,
+  HIDDEN_FISH,
 } from './data.js';
 import {
   randomRange,
@@ -286,21 +287,47 @@ function determineFish() {
     return;
   }
 
-  // 1-1. 날씨 전용 돌발 히든 보스 물고기 체크 (비, 안개, 밤 날씨 시 6% 확률로 출현!)
-  const w = getCurrentWeather();
-  if (WEATHER_FISH[w] && Math.random() < 0.06) {
-    const wf = WEATHER_FISH[w];
-    const size = randomRange(wf.minSize, wf.maxSize);
+  // 1-1. 🤫 개발자만 아는 20종 비밀 히든 물고기 돌발 출현 체크 (조건 충족 시 약 8% 확률로 강림!)
+  const currentWeather = getCurrentWeather();
+  const eligibleHiddenFish = HIDDEN_FISH.filter((hf) => {
+    switch (hf.condition) {
+      case 'weather_rainy': return currentWeather === 'rainy';
+      case 'weather_foggy': return currentWeather === 'foggy';
+      case 'weather_night': return currentWeather === 'night';
+      case 'weather_sunny': return currentWeather === 'sunny';
+      case 'boat_wood_raft': return state.equippedBoat === 'wood_raft';
+      case 'boat_speed': return ['fishing_boat', 'speed_boat'].includes(state.equippedBoat);
+      case 'boat_yacht': return state.equippedBoat === 'luxury_yacht';
+      case 'rod_bamboo': return state.equippedRod === 'bamboo';
+      case 'fever_active': return state.isFeverActive;
+      case 'perfect_cast': return chargePower >= 95;
+      case 'bait_golden': return state.selectedBait === 'golden';
+      case 'bait_rainbow': return state.selectedBait === 'rainbow';
+      case 'region_abyss': return state.currentRegion === 'abyss';
+      case 'region_glacier': return state.currentRegion === 'glacier';
+      case 'region_palace': return state.currentRegion === 'palace';
+      case 'region_nebula': return state.currentRegion === 'nebula';
+      case 'region_volcano': return state.currentRegion === 'volcano';
+      case 'region_timewarp': return state.currentRegion === 'timewarp';
+      case 'region_sky_ocean': return state.currentRegion === 'sky_ocean';
+      case 'endgame_secret': return Object.keys(state.collection || {}).length >= 50;
+      default: return false;
+    }
+  });
+
+  if (eligibleHiddenFish.length > 0 && Math.random() < 0.08) {
+    const hf = randomChoice(eligibleHiddenFish);
+    const size = randomRange(hf.minSize, hf.maxSize);
     pendingFish = {
-      id: wf.id,
-      name: wf.name,
-      rarity: wf.rarity,
-      emoji: wf.emoji,
+      id: hf.id,
+      name: hf.name,
+      rarity: hf.rarity,
+      emoji: hf.emoji,
       size: Number(size.toFixed(1)),
-      price: wf.basePrice,
-      difficulty: wf.difficulty,
-      desc: wf.desc,
-      isWeatherFish: true,
+      price: hf.basePrice,
+      difficulty: hf.difficulty,
+      desc: hf.desc,
+      isHiddenFish: true,
     };
     return;
   }
@@ -531,7 +558,9 @@ function showResultModal(fish, recordResult = {}) {
           : 'block-cream';
 
   let badgeHtml = '';
-  if (recordResult.isChest) {
+  if (fish.isHiddenFish) {
+    badgeHtml = '<span class="badge-new" style="background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff;">🤫 비밀 히든 발견!</span>';
+  } else if (recordResult.isChest) {
     badgeHtml = '<span class="badge-new" style="background: #eab308; color: #000;">보물 획득!</span>';
   } else if (recordResult.isTrash) {
     badgeHtml = `<span class="badge-new" style="background: #10b981; color: #fff;">에코 포인트 +${fish.ecoPoint}P</span>`;

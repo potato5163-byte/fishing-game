@@ -1,5 +1,5 @@
 import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
-import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
+import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
@@ -72,6 +72,7 @@ export function renderCollection() {
 
     <div class="collection-body">
       ${REGIONS.map((region) => renderRegionSection(region)).join('')}
+      ${renderHiddenFishSection()}
     </div>
   `;
 
@@ -208,13 +209,71 @@ function renderFishCard(fish) {
   `;
 }
 
+// 🤫 20종 비밀 히든 도감 섹션 렌더링 (서식지/출현조건 철저히 비공개)
+function renderHiddenFishSection() {
+  const caughtHiddenCount = HIDDEN_FISH.filter((f) => state.collection && state.collection[f.id]).length;
+
+  return `
+    <div class="collection-region-group" style="border: 2px dashed #a855f7; border-radius: var(--radius-lg); padding: var(--space-sm); background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);">
+      <div class="collection-region-header">
+        <div class="t-card-title" style="color: #7e22ce; display: flex; align-items: center; gap: 6px;">
+          🤫 미지의 비밀 히든 도감
+          <span class="collection-region-count tabular-nums" style="color: #9333ea; font-weight: 800;">${caughtHiddenCount}/20</span>
+        </div>
+        <span class="collection-reward-tag" style="background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe;">
+          출현 조건: 일급 비밀 🔒
+        </span>
+      </div>
+
+      <div class="collection-grid">
+        ${HIDDEN_FISH.map((fish) => renderHiddenFishCard(fish)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderHiddenFishCard(fish) {
+  const record = state.collection ? state.collection[fish.id] : null;
+
+  if (!record) {
+    return `
+      <div class="collection-card is-unknown" data-fish-id="${fish.id}" style="border: 1px dashed #d8b4fe;">
+        <div class="collection-card-emoji-box" style="opacity: 0.35; background: #faf5ff;">❓</div>
+        <div class="collection-card-name t-body-sm" style="color: #a855f7;">비밀 생명체</div>
+      </div>
+    `;
+  }
+
+  const rarity = RARITIES[fish.rarity] || RARITIES.legendary;
+  const cardClass = fish.rarity === 'mythic' ? 'rarity-mythic-card' : 'rarity-legendary-card';
+  const crownBadge = record.crown ? '<span class="collection-crown-badge" title="최대 크기 95% 이상 황금 왕관!">👑</span>' : '';
+
+  return `
+    <div class="collection-card is-known ${cardClass}" data-fish-id="${fish.id}">
+      <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
+      ${crownBadge}
+      <div class="collection-card-emoji-box theme-timewarp">
+        ${getFishSvg(fish.id, 46)}
+      </div>
+      <div class="collection-card-name t-body-sm" style="font-weight: 700; color: #6b21a8;">${fish.name}</div>
+      <span class="fish-family-tag" style="background: #f3e8ff; color: #7e22ce;">비밀 히든</span>
+      <span class="badge-rarity rarity-${fish.rarity}" style="margin-top: 2px;">${rarity.name}</span>
+    </div>
+  `;
+}
+
 // 럭셔리 수족관 상세 모달
 function showFishDetailModal(fishId) {
-  const fish = FISH.find((f) => f.id === fishId);
+  let fish = FISH.find((f) => f.id === fishId);
+  let isHidden = false;
+  if (!fish) {
+    fish = HIDDEN_FISH.find((f) => f.id === fishId);
+    isHidden = true;
+  }
   const record = state.collection ? state.collection[fishId] : null;
   if (!fish || !record) return;
 
-  const region = REGIONS.find((r) => r.id === fish.region) || REGIONS[0];
+  const region = isHidden ? { name: '🤫 알 수 없음 (일급 비밀)' } : (REGIONS.find((r) => r.id === fish.region) || REGIONS[0]);
   const rarity = RARITIES[fish.rarity] || RARITIES.common;
   const dateStr = record.firstCaughtAt
     ? new Date(record.firstCaughtAt).toLocaleDateString('ko-KR', {

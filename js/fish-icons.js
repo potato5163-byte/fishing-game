@@ -125,6 +125,28 @@ const FISH_SPECS = {
   eden_serpent: { shape: 'eel', c1: '#10b981', c2: '#fde047', fin: '#059669', eye: '#dc2626', glow: '#34d399', crown: true },
   heavenly_phoenix: { shape: 'dragon', c1: '#f59e0b', c2: '#ef4444', fin: '#fbbf24', eye: '#ffffff', glow: '#fde047', phoenixWings: true },
   celestial_yggdrasil: { shape: 'dragon', c1: '#6366f1', c2: '#f43f5e', fin: '#facc15', eye: '#22d3ee', glow: '#ffffff', godCrown: true },
+
+  // 🤫 비밀 히든 물고기 20종 전용 맞춤형 고화질 비주얼
+  hf_thunder_catfish: { shape: 'deep_body', c1: '#eab308', c2: '#fde047', fin: '#ca8a04', eye: '#ffffff', glow: '#fde047', whiskers: true },
+  hf_phantom_ray: { shape: 'ray', c1: '#94a3b8', c2: '#e2e8f0', fin: '#cbd5e1', eye: '#38bdf8', glow: '#38bdf8', opacity: 0.8 },
+  hf_lunar_jellyfish: { shape: 'jellyfish', c1: '#06b6d4', c2: '#38bdf8', fin: '#a5f3fc', eye: '#ffffff', glow: '#06b6d4' },
+  hf_sun_dragon: { shape: 'dragon', c1: '#ea580c', c2: '#facc15', fin: '#dc2626', eye: '#ffffff', glow: '#f97316' },
+  hf_ancient_turtle: { shape: 'flat', c1: '#78716c', c2: '#a8a29e', fin: '#57534e', eye: '#1c1917' },
+  hf_speed_sailfish: { shape: 'streamline', c1: '#0284c7', c2: '#38bdf8', fin: '#f97316', eye: '#0369a1', sword: true },
+  hf_cruise_leviathan: { shape: 'whale', c1: '#eab308', c2: '#fef08a', fin: '#ca8a04', eye: '#78350f', glow: '#fde047' },
+  hf_bamboo_spirit: { shape: 'streamline', c1: '#16a34a', c2: '#86efac', fin: '#15803d', eye: '#14532d', glow: '#4ade80' },
+  hf_fever_phoenix: { shape: 'dragon', c1: '#dc2626', c2: '#f97316', fin: '#facc15', eye: '#ffffff', glow: '#ef4444', phoenixWings: true },
+  hf_sniper_barracuda: { shape: 'streamline', c1: '#dc2626', c2: '#ffffff', fin: '#991b1b', eye: '#000000', sword: true },
+  hf_golden_koi_king: { shape: 'deep_body', c1: '#f59e0b', c2: '#fde047', fin: '#d97706', eye: '#78350f', crown: true, glow: '#fde047' },
+  hf_rainbow_hydra: { shape: 'dragon', c1: '#ec4899', c2: '#38bdf8', fin: '#facc15', eye: '#ffffff', glow: '#a855f7' },
+  hf_cosmic_stardust: { shape: 'deep_body', c1: '#a855f7', c2: '#f472b6', fin: '#facc15', eye: '#ffffff', glow: '#c084fc' },
+  hf_quantum_ghost: { shape: 'streamline', c1: '#06b6d4', c2: '#8b5cf6', fin: '#ec4899', eye: '#ffffff', glow: '#06b6d4' },
+  hf_magma_behemoth: { shape: 'shark', c1: '#450a0a', c2: '#ef4444', fin: '#f97316', eye: '#fde047', glow: '#dc2626' },
+  hf_ice_crystal_queen: { shape: 'deep_body', c1: '#cffafe', c2: '#ffffff', fin: '#38bdf8', eye: '#0284c7', crown: true, glow: '#a5f3fc' },
+  hf_abyss_kraken: { shape: 'cephalopod', c1: '#4c1d95', c2: '#db2777', fin: '#701a75', eye: '#facc15', glow: '#a21caf' },
+  hf_dragon_palace_emperor: { shape: 'dragon', c1: '#eab308', c2: '#f59e0b', fin: '#dc2626', eye: '#fde047', crown: true, glow: '#fef08a' },
+  hf_seraph_archangel: { shape: 'deep_body', c1: '#ffffff', c2: '#fef08a', fin: '#fde047', eye: '#0284c7', glow: '#ffffff' },
+  hf_genesis_ouroboros: { shape: 'dragon', c1: '#312e81', c2: '#ec4899', fin: '#06b6d4', eye: '#fde047', glow: '#c084fc', godCrown: true },
 };
 
 // SVG 그래픽 렌더러
