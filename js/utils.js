@@ -35,3 +35,22 @@ export function formatMessage(template, params = {}) {
   }
   return message;
 }
+
+// 물고기/돌연변이/히든/보스 통합 메타데이터 조회 헬퍼
+export function getFishMeta(fishId, FISH = [], HIDDEN_FISH = [], HYBRID_FISH = [], VORTEX_BOSSES = []) {
+  if (!fishId) return { id: 'unknown', name: '알 수 없는 생명체', emoji: '🐟', rarity: 'common' };
+  
+  let found = FISH.find((f) => f.id === fishId);
+  if (found) return found;
+
+  found = HYBRID_FISH.find((f) => f.id === fishId);
+  if (found) return found;
+
+  found = HIDDEN_FISH.find((f) => f.id === fishId);
+  if (found) return found;
+
+  found = VORTEX_BOSSES.find((f) => f.id === fishId);
+  if (found) return found;
+
+  return { id: fishId, name: '돌연변이 어종', emoji: '🧬', rarity: 'rare' };
+}

@@ -1,6 +1,6 @@
 import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
 import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES, HYBRID_FISH } from './data.js';
-import { formatGold } from './utils.js';
+import { formatGold, getFishMeta } from './utils.js';
 import { showToast } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
 
@@ -54,7 +54,7 @@ export function renderCollection() {
             ? `<div class="aquarium-empty-msg">가방 탭에서 잡은 물고기의 [🐠 수족관] 버튼을 눌러 넣어보세요!<br>물고기들이 헤엄치며 방치 관람료 골드를 생산합니다.</div>`
             : aquariumList
                 .map((f, i) => {
-                  const meta = FISH.find((item) => item.id === f.fishId) || f;
+                  const meta = getFishMeta(f.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES) || f;
                   const animDuration = 6 + (i % 5) * 1.5;
                   const animDelay = (i * 0.7) % 4;
                   const topPos = 12 + ((i * 22) % 65);
@@ -365,12 +365,8 @@ function renderHiddenFishCard(fish) {
 
 // 럭셔리 수족관 상세 모달
 function showFishDetailModal(fishId) {
-  let fish = FISH.find((f) => f.id === fishId);
-  let isHidden = false;
-  if (!fish) {
-    fish = HIDDEN_FISH.find((f) => f.id === fishId);
-    isHidden = true;
-  }
+  let fish = getFishMeta(fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
+  let isHidden = HIDDEN_FISH.some((f) => f.id === fishId);
   const record = state.collection ? state.collection[fishId] : null;
   if (!fish || !record) return;
 
@@ -551,7 +547,7 @@ function showAquariumFishActionModal(aquariumId) {
   const target = (state.aquarium || []).find((f) => f.id === aquariumId);
   if (!target) return;
 
-  const meta = FISH.find((f) => f.id === target.fishId) || target;
+  const meta = getFishMeta(target.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES) || target;
   const rarityMeta = RARITIES[target.rarity] || RARITIES.common;
   const price = target.price || 10;
 

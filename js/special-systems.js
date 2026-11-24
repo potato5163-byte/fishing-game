@@ -6,11 +6,12 @@
  * 3. 🏗️ 침몰선 보물 인양 크레인 (Shipwreck Salvage Crane)
  */
 
-import { VORTEX_BOSSES, HYBRID_FISH, SALVAGE_ITEMS, FISH } from './data.js';
+import { VORTEX_BOSSES, HYBRID_FISH, SALVAGE_ITEMS, FISH, HIDDEN_FISH } from './data.js';
 import { state, addGold, saveGame, addFishToBag } from './state.js';
 import { showToast, updateTopbar } from './ui.js';
 import { startReelGame } from './reel.js';
 import { playSound } from './sound.js';
+import { getFishMeta } from './utils.js';
 
 // ========================================================
 // 1. 🌀 차원 소용돌이 포탈 보스 시스템
@@ -199,12 +200,12 @@ function renderFusionContent() {
   if (!modalRoot) return;
 
   const bagFish = state.bag.map((item, idx) => {
-    const fishInfo = FISH.find((f) => f.id === item.fishId) || { name: '물고기', emoji: '🐟' };
+    const fishInfo = getFishMeta(item.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
     const isSel1 = selectedFusion1 === idx;
     const isSel2 = selectedFusion2 === idx;
     return `
       <div class="fusion-card ${isSel1 || isSel2 ? 'is-selected' : ''}" data-idx="${idx}" style="cursor: pointer; padding: 8px; border-radius: var(--radius-md); background: ${isSel1 ? '#bbf7d0' : isSel2 ? '#fed7aa' : '#ffffff'}; border: 2px solid ${isSel1 ? '#16a34a' : isSel2 ? '#ea580c' : '#e2e8f0'}; display: flex; align-items: center; justify-content: space-between;">
-        <div style="font-size: 14px; font-weight: 700;">${fishInfo.emoji} ${fishInfo.name} (${item.size.toFixed(1)}cm)</div>
+        <div style="font-size: 14px; font-weight: 700;">${fishInfo.emoji} ${fishInfo.name} (${item.size ? item.size.toFixed(1) : '0.0'}cm)</div>
         <div style="font-size: 12px; color: #059669; font-weight: 700;">${item.price.toLocaleString()}G</div>
       </div>
     `;
@@ -225,7 +226,7 @@ function renderFusionContent() {
           <div style="flex: 1; padding: 12px; background: #fff; border-radius: var(--radius-md); text-align: center; border: 2px dashed #16a34a;">
             <div style="font-size: 12px; font-weight: 800; color: #16a34a;">[DNA 슬롯 1]</div>
             <div id="fusion-slot-1-text" style="font-size: 14px; font-weight: 700; margin-top: 6px;">
-              ${selectedFusion1 !== null ? (FISH.find(f => f.id === state.bag[selectedFusion1]?.fishId)?.name || '선택됨') : '물고기 선택'}
+              ${selectedFusion1 !== null ? (getFishMeta(state.bag[selectedFusion1]?.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES)?.name || '선택됨') : '물고기 선택'}
             </div>
             ${selectedFusion1 !== null ? `<div style="font-size: 12px; color: #059669; font-weight: 700;">${(state.bag[selectedFusion1]?.price || 0).toLocaleString()}G</div>` : ''}
           </div>
@@ -233,7 +234,7 @@ function renderFusionContent() {
           <div style="flex: 1; padding: 12px; background: #fff; border-radius: var(--radius-md); text-align: center; border: 2px dashed #ea580c;">
             <div style="font-size: 12px; font-weight: 800; color: #ea580c;">[DNA 슬롯 2]</div>
             <div id="fusion-slot-2-text" style="font-size: 14px; font-weight: 700; margin-top: 6px;">
-              ${selectedFusion2 !== null ? (FISH.find(f => f.id === state.bag[selectedFusion2]?.fishId)?.name || '선택됨') : '물고기 선택'}
+              ${selectedFusion2 !== null ? (getFishMeta(state.bag[selectedFusion2]?.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES)?.name || '선택됨') : '물고기 선택'}
             </div>
             ${selectedFusion2 !== null ? `<div style="font-size: 12px; color: #ea580c; font-weight: 700;">${(state.bag[selectedFusion2]?.price || 0).toLocaleString()}G</div>` : ''}
           </div>
@@ -301,14 +302,14 @@ function doFusion() {
   const fishItem2 = state.bag[selectedFusion2];
   if (!fishItem1 || !fishItem2) return;
 
-  const cost = Math.max(500, Math.round((fishItem1.price + fishItem2.price) * 0.4));
+  const cost = Math.max(300, Math.round((fishItem1.price + fishItem2.price) * 0.25));
   if (state.gold < cost) {
     showToast(`생체 융합 연구비(${cost.toLocaleString()}G)가 부족합니다.`);
     return;
   }
 
-  const name1 = FISH.find(f => f.id === fishItem1.fishId)?.name || '물고기1';
-  const name2 = FISH.find(f => f.id === fishItem2.fishId)?.name || '물고기2';
+  const name1 = getFishMeta(fishItem1.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES)?.name || '물고기1';
+  const name2 = getFishMeta(fishItem2.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES)?.name || '물고기2';
 
   // 재료 물고기 제거 (뒤 인덱스부터 제거)
   const idx1 = selectedFusion1;
@@ -345,15 +346,15 @@ function doFusion() {
   let finalPrice = hybrid.basePrice;
 
   if (targetRarity === 'mythic') {
-    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 5 + 500000));
+    finalPrice = Math.round(hybrid.basePrice * 1.5 + baseCombined * 1.5);
   } else if (targetRarity === 'legendary') {
-    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 2.5 + 80000));
+    finalPrice = Math.round(hybrid.basePrice * 1.3 + baseCombined * 1.2);
   } else if (targetRarity === 'epic') {
-    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.6 + 20000));
+    finalPrice = Math.round(hybrid.basePrice * 1.2 + baseCombined * 0.8);
   } else if (targetRarity === 'rare') {
-    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.2 + 5000));
+    finalPrice = Math.round(hybrid.basePrice * 1.1 + baseCombined * 0.5);
   } else {
-    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 0.9 + 1000));
+    finalPrice = Math.round(hybrid.basePrice * 1.0 + baseCombined * 0.3);
   }
 
   const newBagItem = {

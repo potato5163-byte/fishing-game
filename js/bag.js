@@ -1,6 +1,6 @@
 import { state, sellFish, sellAllFish, addFishToAquarium, autoAddBestFishToAquarium } from './state.js';
-import { FISH, RARITIES, MESSAGES } from './data.js';
-import { formatGold, formatMessage } from './utils.js';
+import { FISH, RARITIES, MESSAGES, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES } from './data.js';
+import { formatGold, formatMessage, getFishMeta } from './utils.js';
 import { showToast, switchTab } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
 
@@ -18,7 +18,7 @@ export function renderBag() {
   let filteredItems = [...state.bag];
   if (bagFilterRarity !== 'all') {
     filteredItems = filteredItems.filter((item) => {
-      const meta = FISH.find((f) => f.id === item.fishId) || FISH[0];
+      const meta = getFishMeta(item.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
       return meta.rarity === bagFilterRarity;
     });
   }
@@ -81,12 +81,12 @@ export function renderBag() {
           <div class="bag-items">
             ${filteredItems
               .map((item) => {
-                const fishMeta = FISH.find((f) => f.id === item.fishId) || FISH[0];
+                const fishMeta = getFishMeta(item.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
                 const rarityMeta = RARITIES[fishMeta.rarity] || RARITIES.common;
                 return `
                 <div class="bag-item-row" data-uid="${item.uid}">
-                  <div class="bag-item-emoji" style="display: flex; align-items: center; justify-content: center;">
-                    ${getFishSvg(fishMeta.id, 40)}
+                  <div class="bag-item-emoji" style="display: flex; align-items: center; justify-content: center; font-size: 26px;">
+                    ${fishMeta.emoji || getFishSvg(fishMeta.id, 40)}
                   </div>
                   <div class="bag-item-info">
                     <div style="display: flex; align-items: center; gap: 6px;">
@@ -94,7 +94,7 @@ export function renderBag() {
                       ${item.isCrown ? '<span style="font-size: 13px;" title="황금 왕관 초대형 크기">👑</span>' : ''}
                       <span class="badge-rarity rarity-${fishMeta.rarity}">${rarityMeta.name}</span>
                     </div>
-                    <div class="t-body-sm tabular-nums">${item.size.toFixed(1)}cm ${item.isCrown ? '<strong style="color: #ca8a04;">(1.5배 보너스!)</strong>' : ''}</div>
+                    <div class="t-body-sm tabular-nums">${item.size ? item.size.toFixed(1) : '0.0'}cm ${item.isCrown ? '<strong style="color: #ca8a04;">(1.5배 보너스!)</strong>' : ''}</div>
                   </div>
                   <div class="bag-item-price tabular-nums t-card-title">${formatGold(item.price)}G</div>
                   <div style="display: flex; gap: 4px;">
@@ -164,7 +164,7 @@ export function renderBag() {
       const target = state.bag.find((item) => item.uid === uid);
       if (!target) return;
 
-      const fishMeta = FISH.find((f) => f.id === target.fishId);
+      const fishMeta = getFishMeta(target.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
       const earned = sellFish(uid);
       showToast(
         formatMessage(MESSAGES.SELL_ONE, {

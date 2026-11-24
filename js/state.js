@@ -1,5 +1,6 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, HIDDEN_FISH } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
+import { getFishMeta } from './utils.js';
 
 const STORAGE_KEY = 'mulgyeol-fishing-save';
 const BROKEN_STORAGE_KEY = 'mulgyeol-fishing-save-broken';
@@ -277,7 +278,12 @@ function sanitizeSavedData(d) {
     d.equippedRod = d.ownedRods[0];
   }
 
-  const validFishIds = FISH.map((f) => f.id);
+  const validFishIds = [
+    ...FISH.map((f) => f.id),
+    ...HIDDEN_FISH.map((f) => f.id),
+    ...HYBRID_FISH.map((f) => f.id),
+    ...VORTEX_BOSSES.map((f) => f.id),
+  ];
   d.bag = d.bag.filter((item) => validFishIds.includes(item.fishId));
   for (const fid of Object.keys(d.collection)) {
     if (!validFishIds.includes(fid)) {
@@ -498,7 +504,7 @@ export function addFishToAquarium(bagIndex) {
   const item = state.bag[bagIndex];
   state.bag.splice(bagIndex, 1);
 
-  const fishMeta = FISH.find((f) => f.id === item.fishId) || FISH[0];
+  const fishMeta = getFishMeta(item.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES) || { name: '물고기', rarity: 'common' };
 
   state.aquarium.push({
     id: `aq_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -531,8 +537,8 @@ export function autoAddBestFishToAquarium() {
 
   // 가방 물고기들을 희귀도 및 가격 순으로 정렬
   const sortedBag = [...state.bag].sort((a, b) => {
-    const metaA = FISH.find((f) => f.id === a.fishId) || { rarity: 'common', basePrice: 0 };
-    const metaB = FISH.find((f) => f.id === b.fishId) || { rarity: 'common', basePrice: 0 };
+    const metaA = getFishMeta(a.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES) || { rarity: 'common', basePrice: 0 };
+    const metaB = getFishMeta(b.fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES) || { rarity: 'common', basePrice: 0 };
     const rankDiff = (rarityRank[metaB.rarity] || 1) - (rarityRank[metaA.rarity] || 1);
     if (rankDiff !== 0) return rankDiff;
     return (b.price || 0) - (a.price || 0);
@@ -984,7 +990,7 @@ export function exportRankingCardCode() {
   Object.entries(state.collection || {}).forEach(([fishId, record]) => {
     if (record.maxSize > maxFishSize) {
       maxFishSize = record.maxSize;
-      const meta = FISH.find((f) => f.id === fishId);
+      const meta = getFishMeta(fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
       maxFishName = meta ? meta.name : fishId;
     }
   });
@@ -1052,7 +1058,7 @@ export function getRankingBoard(sortBy = 'score') {
   Object.entries(state.collection || {}).forEach(([fishId, record]) => {
     if (record.maxSize > maxFishSize) {
       maxFishSize = record.maxSize;
-      const meta = FISH.find((f) => f.id === fishId);
+      const meta = getFishMeta(fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
       maxFishName = meta ? meta.name : fishId;
     }
   });
