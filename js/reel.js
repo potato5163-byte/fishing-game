@@ -2,6 +2,7 @@ import { FISHING_CONFIG, RODS } from './data.js';
 import { clamp } from './utils.js';
 import { playSound } from './sound.js';
 import { state, getRodEnhanceLevel } from './state.js';
+import { getFishSvg } from './fish-icons.js';
 
 let isReeling = false;
 let currentFish = null;
@@ -296,7 +297,19 @@ export function startReelGame(fish, equippedRodId, onFinish) {
   animFrameId = requestAnimationFrame(gameLoop);
 }
 
+let isHoldingReel = false;
+
 export function setReelHolding(holding) {
+  isHoldingReel = holding;
+  const panel = document.getElementById('reel-panel');
+  if (panel) {
+    if (holding) {
+      panel.classList.add('is-reeling-spin');
+    } else {
+      panel.classList.remove('is-reeling-spin');
+    }
+  }
+
   // 스페이스바가 눌렸을 때 점프 중이면 스매시 타격, 아니면 기본 당김
   if (holding) {
     trySmashAction();
@@ -510,18 +523,20 @@ function updateReelDOM() {
 
   if (fishEmoji) {
     if (isStunned) {
-      fishEmoji.textContent = '💫';
+      fishEmoji.innerHTML = '<span style="font-size: 38px;">💫</span>';
     } else {
       const isAlreadyCaught = state.collection && !!state.collection[currentFish?.id];
-      if (isAlreadyCaught) {
-        fishEmoji.textContent = currentFish ? currentFish.emoji : '🐟';
+      if (isAlreadyCaught && currentFish) {
+        // 도감에 등록된 물고기는 고화질 전용 벡터 SVG 렌더링!
+        fishEmoji.innerHTML = getFishSvg(currentFish.id, 56);
       } else {
         // 미발견 물고기는 신비한 실루엣 물고기로 표시
-        fishEmoji.textContent = '🐟';
+        fishEmoji.innerHTML = '<span style="font-size: 38px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));">🐟</span>';
       }
     }
     // 물고기 진행 방향에 따라 좌우 반전
-    fishEmoji.style.transform = fishTargetX > fishX ? 'scaleX(1)' : 'scaleX(-1)';
+    fishEmoji.style.display = 'inline-block';
+    fishEmoji.style.transform = fishTargetX > fishX ? 'scaleX(-1)' : 'scaleX(1)';
   }
 
   if (jumpAlert) {

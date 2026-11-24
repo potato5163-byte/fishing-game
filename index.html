@@ -197,10 +197,39 @@
                   </div>
                 </div>
 
-                <!-- 화면 하단 1인칭 낚싯대 손잡이 & 휨 그래픽 -->
+                <!-- 화면 하단 1인칭 고화질 낚싯대 & 스피닝 릴 (감기 시 릴 핸들 고속 회전) -->
                 <div id="first-person-rod" class="first-person-rod">
-                  <div class="rod-shaft"></div>
-                  <div class="rod-tip-glow" id="rod-tip-glow"></div>
+                  <svg class="first-person-rod-svg" viewBox="0 0 200 240">
+                    <defs>
+                      <linearGradient id="fpRodGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#0f172a"/>
+                        <stop offset="50%" stop-color="#334155"/>
+                        <stop offset="85%" stop-color="#ea580c"/>
+                        <stop offset="100%" stop-color="#f59e0b"/>
+                      </linearGradient>
+                      <linearGradient id="fpReelSpool" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f8fafc"/>
+                        <stop offset="40%" stop-color="#cbd5e1"/>
+                        <stop offset="100%" stop-color="#475569"/>
+                      </linearGradient>
+                    </defs>
+                    <!-- 낚싯대 본체 카본 블랭크 (화면 우측 하단에서 중앙 위로 뻗음) -->
+                    <path d="M 170 240 Q 140 130 50 20" stroke="url(#fpRodGrad)" stroke-width="12" stroke-linecap="round" fill="none" class="fp-rod-blank"/>
+                    <path d="M 170 240 Q 140 130 50 20" stroke="#f8fafc" stroke-width="2" stroke-dasharray="4, 18" fill="none" opacity="0.6"/>
+                    <!-- 초릿대 발광 팁 링 -->
+                    <circle cx="50" cy="20" r="6" fill="#38bdf8" filter="drop-shadow(0 0 10px #38bdf8)" id="rod-tip-glow"/>
+                    <circle cx="50" cy="20" r="3" fill="#ffffff"/>
+                    <!-- 릴 시트 및 스피닝 릴 하우징 -->
+                    <rect x="135" y="160" width="30" height="45" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+                    <ellipse cx="145" cy="180" rx="14" ry="18" fill="url(#fpReelSpool)" stroke="#0f172a" stroke-width="1.5"/>
+                    <!-- 회전하는 스피닝 릴 핸들 -->
+                    <g id="spinning-reel-handle" class="spinning-reel-handle">
+                      <rect x="143" y="155" width="4" height="26" rx="2" fill="#e2e8f0"/>
+                      <circle cx="145" cy="155" r="7" fill="#ea580c" stroke="#f8fafc" stroke-width="1.5"/>
+                    </g>
+                    <!-- EVA 폼 핸들 그립 -->
+                    <path d="M 178 240 L 158 195" stroke="#090d16" stroke-width="18" stroke-linecap="round"/>
+                  </svg>
                 </div>
 
                 <!-- 좌우 조작용 모바일 터치 패들 -->
