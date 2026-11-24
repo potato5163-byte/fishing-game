@@ -1,4 +1,4 @@
-import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium } from './state.js';
+import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium } from './state.js';
 import { FISH, REGIONS, RARITIES, MESSAGES, BAITS } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
@@ -36,7 +36,7 @@ export function renderCollection() {
       <div class="aquarium-header">
         <div>
           <div class="t-card-title">🐟 내 아쿠아리움 (${aquariumList.length}/20)</div>
-          <div class="t-body-sm" style="color: var(--color-subtext); font-size: 11px;">물고기 클릭 시 자연으로 방출</div>
+          <div class="t-body-sm" style="color: var(--color-subtext); font-size: 11px;">물고기 클릭 시 판매 또는 방생</div>
         </div>
         <button id="btn-collect-revenue" class="btn-primary btn-aquarium-claim" ${pendingRevenue <= 0 ? 'disabled' : ''}>
           🪙 관람료 수령 (${formatGold(pendingRevenue)}G)
@@ -87,16 +87,12 @@ export function renderCollection() {
     });
   }
 
-  // 수족관 물고기 클릭 시 방출 확인
+  // 수족관 물고기 클릭 시 액션 모달 (판매 또는 방생)
   const swimFishList = screen.querySelectorAll('.aquarium-swimming-fish');
   swimFishList.forEach((el) => {
     el.addEventListener('click', () => {
       const aqId = el.dataset.aqId;
-      if (confirm('이 물고기를 자연으로 방출하시겠습니까?')) {
-        releaseFishFromAquarium(aqId);
-        showToast('물고기를 자연으로 돌려보냈습니다.');
-        renderCollection();
-      }
+      showAquariumFishActionModal(aqId);
     });
   });
 
@@ -368,4 +364,87 @@ export function showKingCelebrationModal() {
   btnConfirm.addEventListener('click', () => {
     modalRoot.innerHTML = '';
   });
+}
+
+// 수족관 물고기 관리 모달 (판매하기 / 방생하기)
+function showAquariumFishActionModal(aquariumId) {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  const target = (state.aquarium || []).find((f) => f.id === aquariumId);
+  if (!target) return;
+
+  const meta = FISH.find((f) => f.id === target.fishId) || target;
+  const rarityMeta = RARITIES[target.rarity] || RARITIES.common;
+  const price = target.price || 10;
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="modal-aquarium-action-scrim">
+      <div class="modal-dialog">
+        <div class="modal-top-block block-mint" style="display: flex; justify-content: center; align-items: center; padding: var(--space-md);">
+          ${getFishSvg(target.fishId, 80)}
+        </div>
+        <div class="modal-content" style="padding: var(--space-lg); text-align: center;">
+          <div class="t-headline" style="margin-bottom: 4px;">${meta.name}</div>
+          <div style="margin-bottom: var(--space-sm);">
+            <span class="badge-rarity rarity-${target.rarity}">${rarityMeta.name}</span>
+            <span class="t-body-sm tabular-nums" style="margin-left: 6px;">${target.size ? target.size.toFixed(1) : '0.0'}cm</span>
+          </div>
+
+          <div class="modal-info-list" style="margin-bottom: var(--space-md); text-align: left;">
+            <div class="modal-info-row">
+              <span class="t-body-sm">판매 예상가</span>
+              <span class="t-card-title tabular-nums" style="color: #0284c7;">+${formatGold(price)}G</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="t-body-sm">수족관 방출 효과</span>
+              <span class="t-body-sm" style="color: var(--color-subtext);">수조 슬롯 1칸 확보</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; width: 100%; margin-bottom: 8px;">
+            <button id="btn-aq-sell" class="btn-primary" style="flex: 1; height: 42px; background: #0284c7; border: none; font-size: 14px;">
+              🪙 ${formatGold(price)}G에 판매
+            </button>
+            <button id="btn-aq-release" class="btn-secondary" style="flex: 1; height: 42px; font-size: 14px; background: #f1f5f9; color: #475569;">
+              🌊 자연으로 방생
+            </button>
+          </div>
+          <button id="btn-aq-cancel" class="btn-secondary modal-action-btn" style="width: 100%;">취소</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const btnSell = document.getElementById('btn-aq-sell');
+  const btnRelease = document.getElementById('btn-aq-release');
+  const btnCancel = document.getElementById('btn-aq-cancel');
+
+  if (btnSell) {
+    btnSell.addEventListener('click', () => {
+      const res = sellFishFromAquarium(aquariumId);
+      if (res.ok) {
+        showToast(`🪙 ${meta.name}을(를) 수족관에서 꺼내 ${formatGold(res.price)}G에 판매했습니다!`);
+        modalRoot.innerHTML = '';
+        renderCollection();
+      } else {
+        showToast(res.error || '판매에 실패했습니다.');
+      }
+    });
+  }
+
+  if (btnRelease) {
+    btnRelease.addEventListener('click', () => {
+      releaseFishFromAquarium(aquariumId);
+      showToast(`🌊 ${meta.name}을(를) 자연으로 돌려보냈습니다.`);
+      modalRoot.innerHTML = '';
+      renderCollection();
+    });
+  }
+
+  if (btnCancel) {
+    btnCancel.addEventListener('click', () => {
+      modalRoot.innerHTML = '';
+    });
+  }
 }

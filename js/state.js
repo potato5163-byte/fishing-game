@@ -548,9 +548,26 @@ export function releaseFishFromAquarium(aquariumId) {
   const idx = state.aquarium.findIndex((f) => f.id === aquariumId);
   if (idx === -1) return false;
 
-  state.aquarium.splice(idx, 1);
+  const releasedFish = state.aquarium.splice(idx, 1)[0];
   saveGame();
-  return true;
+  return releasedFish;
+}
+
+// 수족관 물고기 즉시 판매
+export function sellFishFromAquarium(aquariumId) {
+  if (!state.aquarium) return { ok: false, error: '수족관이 비어있습니다.' };
+  const idx = state.aquarium.findIndex((f) => f.id === aquariumId);
+  if (idx === -1) return { ok: false, error: '물고기를 찾을 수 없습니다.' };
+
+  const fish = state.aquarium.splice(idx, 1)[0];
+  const sellPrice = fish.price || 10;
+
+  state.gold += sellPrice;
+  state.stats.totalEarned = (state.stats.totalEarned || 0) + sellPrice;
+
+  saveGame();
+  updateTopbar();
+  return { ok: true, fish, price: sellPrice };
 }
 
 // 수족관 관람료(방치 수익) 계산 및 수령
