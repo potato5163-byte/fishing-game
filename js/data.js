@@ -646,6 +646,21 @@ export const SALVAGE_ITEMS = [
   { id: 'sal_atlantis_tablet', name: '📜 아틀란티스 석판 조각', price: 800000, desc: '잃어버린 고대 초고대 문명의 비밀이 새겨진 석판' },
 ];
 
+// 🧬 5. 돌연변이 & 보스 도감 마일스톤 달성 보상
+export const MUTATION_REWARDS = [
+  { count: 10,  title: '생체 연구 입문자', gold: 50000,    desc: '연구비 5만G 지원' },
+  { count: 25,  title: '유전자 교배 마스터', gold: 200000,   desc: '연구비 20만G 지원' },
+  { count: 50,  title: '돌연변이 권위자',   gold: 1000000,  desc: '연구비 100만G 지원' },
+  { count: 75,  title: '사이언스 닥터',     gold: 5000000,  desc: '연구비 500만G 지원' },
+  { count: 100, title: '키메라의 창조신',   gold: 20000000, desc: '연구비 2000만G 지원 + 영구 칭호' },
+];
+
+export const BOSS_REWARDS = [
+  { count: 1, title: '소용돌이 도전자', gold: 100000,   desc: '격퇴 축하금 10만G' },
+  { count: 3, title: '심해 레이드 헌터', gold: 1000000,  desc: '격퇴 축하금 100만G' },
+  { count: 5, title: '심해의 절대 지배자', gold: 10000000, desc: '전설 격퇴 축하금 1000만G + 영구 칭호' },
+];
+
 // 미끼 확률 합 검증 및 물고기 150종 전수 검사
 function validateData() {
   if (FISH.length !== 150) {

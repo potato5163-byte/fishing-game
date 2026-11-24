@@ -1,5 +1,5 @@
-import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
-import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES, HYBRID_FISH } from './data.js';
+import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward, claimMutationReward, claimBossReward } from './state.js';
+import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES, HYBRID_FISH, MUTATION_REWARDS, BOSS_REWARDS } from './data.js';
 import { formatGold, getFishMeta } from './utils.js';
 import { showToast } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
@@ -115,6 +115,38 @@ export function renderCollection() {
     });
   });
 
+  // 🧬 돌연변이 마일스톤 보상 수령 이벤트
+  const mutationClaimBtns = screen.querySelectorAll('.btn-claim-mutation-reward');
+  mutationClaimBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const count = Number(btn.dataset.count);
+      const res = claimMutationReward(count);
+      if (res.ok) {
+        showToast(`🎉 [${res.milestone.title}] 달성! +${formatGold(res.milestone.gold)}G 획득!`);
+        renderCollection();
+      } else {
+        showToast('보상을 수령할 수 없습니다.');
+      }
+    });
+  });
+
+  // 🌀 보스 레이드 마일스톤 보상 수령 이벤트
+  const bossClaimBtns = screen.querySelectorAll('.btn-claim-boss-reward');
+  bossClaimBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const count = Number(btn.dataset.count);
+      const res = claimBossReward(count);
+      if (res.ok) {
+        showToast(`👑 [${res.milestone.title}] 달성! +${formatGold(res.milestone.gold)}G 획득!`);
+        renderCollection();
+      } else {
+        showToast('보상을 수령할 수 없습니다.');
+      }
+    });
+  });
+
   // 미발견 카드 및 발견 카드 클릭 이벤트
   const unknownCards = screen.querySelectorAll('.collection-card.is-unknown');
   unknownCards.forEach((card) => {
@@ -214,11 +246,11 @@ function renderFishCard(fish) {
 // 🌀 보스 레이드 도감 섹션 렌더링
 function renderBossRaidSection() {
   const bosses = VORTEX_BOSSES || [];
-  const defeatedCount = bosses.filter((b) => state.defeatedBosses && state.defeatedBosses[b.id]).length;
+  const defeatedCount = Object.keys(state.defeatedBosses || {}).length;
 
   return `
     <div class="collection-region-group" style="border: 2px solid #7c3aed; border-radius: var(--radius-lg); padding: var(--space-sm); background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%); margin-bottom: var(--space-md);">
-      <div class="collection-region-header">
+      <div class="collection-region-header" style="flex-wrap: wrap; gap: 8px;">
         <div class="t-card-title" style="color: #5b21b6; display: flex; align-items: center; gap: 6px;">
           🌀 차원 소용돌이 보스 도감
           <span class="collection-region-count tabular-nums" style="color: #7c3aed; font-weight: 800;">${defeatedCount}/${bosses.length}</span>
@@ -226,6 +258,28 @@ function renderBossRaidSection() {
         <span class="collection-reward-tag" style="background: #ede9fe; color: #6d28d9; border-color: #c4b5fd;">
           레이드 제압 증표 👑
         </span>
+      </div>
+
+      <!-- 보스 도감 마일스톤 달성 보상 패널 -->
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px 12px 4px; margin-bottom: 8px; -webkit-overflow-scrolling: touch;">
+        ${BOSS_REWARDS.map((rew) => {
+          const isClaimed = state.claimedBossRewards && state.claimedBossRewards.includes(rew.count);
+          const canClaim = defeatedCount >= rew.count && !isClaimed;
+          return `
+            <div style="flex: 0 0 160px; background: #ffffff; border-radius: 10px; border: 1.5px solid ${isClaimed ? '#cbd5e1' : canClaim ? '#7c3aed' : '#e2e8f0'}; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center;">
+              <div style="font-size: 11px; font-weight: 800; color: #7c3aed;">보스 ${rew.count}종 토벌</div>
+              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin: 2px 0;">${rew.title}</div>
+              <div style="font-size: 11px; color: #d97706; font-weight: 800; margin-bottom: 6px;">+${formatGold(rew.gold)}G</div>
+              ${
+                isClaimed
+                  ? `<span style="font-size: 11px; color: #94a3b8; font-weight: 700;">수령 완료</span>`
+                  : canClaim
+                  ? `<button class="btn-claim-boss-reward btn-primary" data-count="${rew.count}" style="height: 26px; font-size: 11px; padding: 0 8px; width: 100%; background: #7c3aed; animation: pulse 1.5s infinite;">수령하기</button>`
+                  : `<span style="font-size: 11px; color: #94a3b8;">${defeatedCount}/${rew.count}</span>`
+              }
+            </div>
+          `;
+        }).join('')}
       </div>
 
       <div class="collection-grid">
@@ -262,11 +316,11 @@ function renderBossCard(boss) {
 // 🧬 100종 돌연변이 생체 도감 섹션 렌더링
 function renderMutationSection() {
   const muts = HYBRID_FISH || [];
-  const discoveredCount = muts.filter((m) => state.mutationCollection && state.mutationCollection[m.id]).length;
+  const discoveredCount = Object.keys(state.mutationCollection || {}).length;
 
   return `
     <div class="collection-region-group" style="border: 2px solid #10b981; border-radius: var(--radius-lg); padding: var(--space-sm); background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%); margin-bottom: var(--space-md);">
-      <div class="collection-region-header">
+      <div class="collection-region-header" style="flex-wrap: wrap; gap: 8px;">
         <div class="t-card-title" style="color: #065f46; display: flex; align-items: center; gap: 6px;">
           🧬 돌연변이 생체 도감
           <span class="collection-region-count tabular-nums" style="color: #059669; font-weight: 800;">${discoveredCount}/100</span>
@@ -274,6 +328,28 @@ function renderMutationSection() {
         <span class="collection-reward-tag" style="background: #d1fae5; color: #047857; border-color: #6ee7b7;">
           생체 연구소 융합종 🔬
         </span>
+      </div>
+
+      <!-- 돌연변이 100종 마일스톤 달성 보상 패널 -->
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px 12px 4px; margin-bottom: 8px; -webkit-overflow-scrolling: touch;">
+        ${MUTATION_REWARDS.map((rew) => {
+          const isClaimed = state.claimedMutationRewards && state.claimedMutationRewards.includes(rew.count);
+          const canClaim = discoveredCount >= rew.count && !isClaimed;
+          return `
+            <div style="flex: 0 0 160px; background: #ffffff; border-radius: 10px; border: 1.5px solid ${isClaimed ? '#cbd5e1' : canClaim ? '#10b981' : '#e2e8f0'}; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); text-align: center;">
+              <div style="font-size: 11px; font-weight: 800; color: #059669;">변이 ${rew.count}종 수집</div>
+              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin: 2px 0;">${rew.title}</div>
+              <div style="font-size: 11px; color: #059669; font-weight: 800; margin-bottom: 6px;">+${formatGold(rew.gold)}G</div>
+              ${
+                isClaimed
+                  ? `<span style="font-size: 11px; color: #94a3b8; font-weight: 700;">수령 완료</span>`
+                  : canClaim
+                  ? `<button class="btn-claim-mutation-reward btn-primary" data-count="${rew.count}" style="height: 26px; font-size: 11px; padding: 0 8px; width: 100%; background: #059669; animation: pulse 1.5s infinite;">수령하기</button>`
+                  : `<span style="font-size: 11px; color: #94a3b8;">${discoveredCount}/${rew.count}</span>`
+              }
+            </div>
+          `;
+        }).join('')}
       </div>
 
       <div class="collection-grid">

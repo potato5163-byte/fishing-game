@@ -375,14 +375,44 @@ function doFusion() {
   saveGame();
   updateTopbar();
 
-  if (targetRarity === 'mythic' || targetRarity === 'legendary') {
-    playSound('legendary');
-  } else {
-    playSound('catch');
-  }
+  // 🧬 화려한 생체 합성 가속 연출 시작 후 결과 팝업 표시
+  playFusionAnimationSequence(hybrid, finalPrice, name1, name2, targetRarity);
+}
 
-  // 결과 전용 팝업창 띄우기
-  showFusionResultModal(hybrid, finalPrice, name1, name2);
+// 🧬 생체 융합 가속 애니메이션 시퀀스 (1.5초)
+function playFusionAnimationSequence(hybrid, finalPrice, name1, name2, targetRarity) {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  playSound('reel');
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="fusion-anim-scrim" style="background: rgba(6, 15, 25, 0.92); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+      <div style="text-align: center; color: #fff; max-width: 320px; padding: 20px;">
+        <div class="fusion-anim-dna" style="font-size: 64px; margin-bottom: 16px;">
+          🧬
+        </div>
+        <div class="fusion-anim-energy" style="font-size: 20px; font-weight: 800; color: #34d399; letter-spacing: 1px;">
+          GENETIC SYNTHESIS...
+        </div>
+        <div style="font-size: 13px; color: #94a3b8; margin-top: 8px;">
+          [${name1}] × [${name2}]<br>염색체 재조합 및 세포 가속 중...
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; margin-top: 18px; overflow: hidden; position: relative;">
+          <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4, #a855f7); animation: bounce 0.6s infinite alternate;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    if (targetRarity === 'mythic' || targetRarity === 'legendary') {
+      playSound('legendary');
+    } else {
+      playSound('catch');
+    }
+    showFusionResultModal(hybrid, finalPrice, name1, name2);
+  }, 1400);
 }
 
 // 🧬 생체 융합 결과 전용 팝업창
@@ -390,38 +420,65 @@ function showFusionResultModal(hybrid, finalPrice, parent1, parent2) {
   const modalRoot = document.getElementById('modal-root');
   if (!modalRoot) return;
 
+  const rarityMeta = RARITIES[hybrid.rarity] || RARITIES.common;
+  const isMythic = hybrid.rarity === 'mythic';
+  const isLegendary = hybrid.rarity === 'legendary';
+  const isEpic = hybrid.rarity === 'epic';
+
+  const modalBorderClass = isMythic
+    ? 'fusion-modal-mythic'
+    : isLegendary
+    ? 'fusion-modal-legendary'
+    : '';
+
+  const rarityBadgeText = isMythic
+    ? '🌟 초월적 신화 돌연변이 (황금 왕관)'
+    : isLegendary
+    ? '👑 전설의 돌연변이 (황금 왕관)'
+    : isEpic
+    ? '💎 영웅 돌연변이'
+    : hybrid.rarity === 'rare'
+    ? '✨ 희귀 돌연변이'
+    : '🧬 일반 돌연변이';
+
+  const titleText = isMythic
+    ? '🌌 신화급 초월 키메라 탄생!! 🌌'
+    : isLegendary
+    ? '✨ 전설 돌연변이 합성 대성공! ✨'
+    : '🧬 생체 융합 완료!';
+
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="fusion-result-scrim">
-      <div class="modal-content color-block block-mint" style="max-height: 85vh; text-align: center; padding: 24px 18px; border: 2.5px solid #10b981; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);">
-        <div class="t-eyebrow" style="color: #047857; letter-spacing: 1px;">GENETIC SYNTHESIS COMPLETE</div>
-        <div class="t-headline" style="color: #065f46; font-size: 24px; margin-top: 4px;">
-          🧬 생체 융합 대성공!
+      <div class="modal-content color-block ${isMythic ? 'block-navy' : 'block-mint'} ${modalBorderClass}" style="max-height: 85vh; text-align: center; padding: 24px 18px; border: 2.5px solid ${isMythic ? '#a855f7' : isLegendary ? '#f59e0b' : '#10b981'}; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);">
+        <div class="t-eyebrow" style="color: ${isMythic ? '#c084fc' : '#047857'}; letter-spacing: 1px;">GENETIC SYNTHESIS COMPLETE</div>
+        <div class="t-headline" style="color: ${isMythic ? '#fbbf24' : '#065f46'}; font-size: 22px; margin-top: 4px;">
+          ${titleText}
         </div>
 
-        <div style="font-size: 13px; color: #047857; margin-top: 6px;">
-          [${parent1}] + [${parent2}] 의 DNA가 결합되었습니다!
+        <div style="font-size: 13px; color: ${isMythic ? '#94a3b8' : '#047857'}; margin-top: 6px;">
+          [${parent1}] + [${parent2}] 의 유전자가 융합되었습니다!
         </div>
 
-        <div style="margin: 18px 0; padding: 20px; background: #ffffff; border-radius: var(--radius-lg); border: 2px solid #a7f3d0;">
-          <div style="font-size: 64px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); animation: bounce 1s infinite alternate;">
+        <div style="margin: 18px 0; padding: 20px; background: ${isMythic ? '#0f172a' : '#ffffff'}; border-radius: var(--radius-lg); border: 2px solid ${isMythic ? '#7c3aed' : isLegendary ? '#fbbf24' : '#a7f3d0'};">
+          <div style="font-size: 68px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3)); animation: bounce 1s infinite alternate;">
             ${hybrid.emoji}
           </div>
-          <div style="font-size: 20px; font-weight: 900; margin-top: 10px; color: #065f46;">
+          <div style="font-size: 20px; font-weight: 900; margin-top: 10px; color: ${isMythic ? '#ffffff' : '#065f46'};">
             ${hybrid.name}
           </div>
-          <div style="display: inline-block; margin-top: 6px; padding: 3px 12px; background: #ecfdf5; border-radius: var(--radius-pill); border: 1px solid #10b981;">
-            <span style="font-size: 12px; font-weight: 800; color: #059669;">👑 돌연변이 신화 어종 (황금 왕관)</span>
+          <div style="display: inline-block; margin-top: 6px; padding: 4px 14px; background: ${isMythic ? 'rgba(168, 85, 247, 0.2)' : '#ecfdf5'}; border-radius: var(--radius-pill); border: 1px solid ${isMythic ? '#a855f7' : '#10b981'};">
+            <span style="font-size: 12px; font-weight: 800; color: ${isMythic ? '#e9d5ff' : '#059669'};">${rarityBadgeText}</span>
           </div>
-          <div style="font-size: 13px; color: #64748b; margin-top: 10px; line-height: 1.4;">
+          <div style="font-size: 13px; color: ${isMythic ? '#cbd5e1' : '#64748b'}; margin-top: 10px; line-height: 1.4;">
             ${hybrid.desc}
           </div>
-          <div style="font-size: 24px; font-weight: 900; color: #059669; margin-top: 14px;" class="tabular-nums">
+          <div style="font-size: 24px; font-weight: 900; color: ${isMythic ? '#38bdf8' : isLegendary ? '#f59e0b' : '#059669'}; margin-top: 14px;" class="tabular-nums">
             가치: +${finalPrice.toLocaleString()}G
           </div>
         </div>
 
         <div style="display: flex; gap: 8px;">
-          <button id="btn-fusion-again" class="btn-primary" style="flex: 1; height: 48px; background: #059669; font-weight: 800;">
+          <button id="btn-fusion-again" class="btn-primary" style="flex: 1; height: 48px; background: ${isMythic ? '#7c3aed' : '#059669'}; font-weight: 800;">
             한 번 더 융합하기
           </button>
           <button id="btn-close-fusion-result" class="btn-secondary" style="flex: 1; height: 48px; font-weight: 700;">

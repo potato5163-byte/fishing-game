@@ -1,4 +1,4 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES, MUTATION_REWARDS, BOSS_REWARDS } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
 import { getFishMeta } from './utils.js';
 
@@ -31,6 +31,8 @@ export function createNewState() {
     bag: [],
     collection: {},
     claimedRegionRewards: [],
+    claimedMutationRewards: [], // 수령한 돌연변이 마일스톤 [10, 25, 50, 75, 100]
+    claimedBossRewards: [], // 수령한 보스 마일스톤 [1, 3, 5]
     kingAchieved: false,
     specialItems: {
       charm_luck: 0,
@@ -736,6 +738,56 @@ export function checkKingAchievement() {
     return true;
   }
   return false;
+}
+
+// 🧬 돌연변이 도감 마일스톤 보상 수령
+export function claimMutationReward(targetCount) {
+  if (!state.claimedMutationRewards) state.claimedMutationRewards = [];
+  if (state.claimedMutationRewards.includes(targetCount)) {
+    return { ok: false, error: 'ALREADY_CLAIMED' };
+  }
+
+  const milestone = MUTATION_REWARDS.find((m) => m.count === targetCount);
+  if (!milestone) return { ok: false, error: 'INVALID_MILESTONE' };
+
+  const discoveredCount = Object.keys(state.mutationCollection || {}).length;
+  if (discoveredCount < targetCount) {
+    return { ok: false, error: 'NOT_ENOUGH_MUTATIONS' };
+  }
+
+  state.claimedMutationRewards.push(targetCount);
+  state.gold += milestone.gold;
+  state.stats.totalEarned = (state.stats.totalEarned || 0) + milestone.gold;
+
+  saveGame();
+  updateTopbar();
+
+  return { ok: true, milestone };
+}
+
+// 🌀 보스 레이드 도감 마일스톤 보상 수령
+export function claimBossReward(targetCount) {
+  if (!state.claimedBossRewards) state.claimedBossRewards = [];
+  if (state.claimedBossRewards.includes(targetCount)) {
+    return { ok: false, error: 'ALREADY_CLAIMED' };
+  }
+
+  const milestone = BOSS_REWARDS.find((b) => b.count === targetCount);
+  if (!milestone) return { ok: false, error: 'INVALID_MILESTONE' };
+
+  const defeatedCount = Object.keys(state.defeatedBosses || {}).length;
+  if (defeatedCount < targetCount) {
+    return { ok: false, error: 'NOT_ENOUGH_BOSSES' };
+  }
+
+  state.claimedBossRewards.push(targetCount);
+  state.gold += milestone.gold;
+  state.stats.totalEarned = (state.stats.totalEarned || 0) + milestone.gold;
+
+  saveGame();
+  updateTopbar();
+
+  return { ok: true, milestone };
 }
 
 export function buySpecialItem(itemId) {
