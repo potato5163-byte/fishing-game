@@ -44,6 +44,8 @@ export function createNewState() {
     speedMode: false, // 스피드 파밍 모드 (결과창 자동 닫기)
     ecoPoints: 0, // 해양 쓰레기 정화 마일리지 포인트
     hasEcoRod: false, // 에코 낚싯대 보유 여부
+    fisherName: '도시 어부', // 랭킹에 표시될 플레이어 닉네임
+    rankingCompetitors: [], // 친구 및 타 유저 랭킹 프로필 목록
     // 일일 의뢰 (데일리 퀘스트)
     dailyQuests: [
       { id: 'q1', title: '물고기 5마리 낚기', current: 0, target: 5, reward: 5000, completed: false },
@@ -158,6 +160,8 @@ export function saveGame() {
     speedMode: state.speedMode || false,
     ecoPoints: state.ecoPoints || 0,
     hasEcoRod: state.hasEcoRod || false,
+    fisherName: state.fisherName || '도시 어부',
+    rankingCompetitors: state.rankingCompetitors || [],
     dailyQuests: state.dailyQuests || [],
     stats: state.stats,
   };
@@ -954,4 +958,136 @@ export function exchangeEcoReward(rewardId) {
   saveGame();
   return { ok: true, name: item.name };
 }
+
+// ==========================================
+// 🏆 랭킹 명함 코드 내보내기 & 친구 등록 시스템
+// ==========================================
+
+export function setFisherName(name) {
+  if (!name || !name.trim()) return;
+  state.fisherName = name.trim().substring(0, 12);
+  saveGame();
+  updateTopbar();
+}
+
+// 내 랭킹 전용 명함 코드 생성 (세이브 전체가 아닌 랭킹 스펙만 압축)
+export function exportRankingCardCode() {
+  const collectionCount = Object.keys(state.collection || {}).length;
+  let maxFishSize = 0;
+  let maxFishName = '없음';
+
+  Object.entries(state.collection || {}).forEach(([fishId, record]) => {
+    if (record.maxSize > maxFishSize) {
+      maxFishSize = record.maxSize;
+      const meta = FISH.find((f) => f.id === fishId);
+      maxFishName = meta ? meta.name : fishId;
+    }
+  });
+
+  const profile = {
+    type: 'MG_RANK_V1',
+    name: state.fisherName || '도시 어부',
+    collectionCount,
+    maxFishSize: Number(maxFishSize.toFixed(1)),
+    maxFishName,
+    crownCount: state.stats ? state.stats.crownCount || 0 : 0,
+    totalEarned: state.stats ? state.stats.totalEarned || 0 : 0,
+    equippedRod: state.equippedRod || 'bamboo',
+    unlockedRegionsCount: (state.unlockedRegions || []).length,
+    timestamp: Date.now(),
+  };
+
+  try {
+    return 'FISHER-' + btoa(encodeURIComponent(JSON.stringify(profile)));
+  } catch (e) {
+    return '';
+  }
+}
+
+// 친구 및 경쟁자 랭킹 코드 등록
+export function importRankingCardCode(codeStr) {
+  if (!codeStr || typeof codeStr !== 'string') {
+    return { ok: false, error: '올바른 랭킹 코드가 아닙니다.' };
+  }
+
+  const clean = codeStr.trim().replace(/^FISHER-/, '');
+  try {
+    const raw = decodeURIComponent(atob(clean));
+    const data = JSON.parse(raw);
+
+    if (data.type !== 'MG_RANK_V1' || !data.name) {
+      return { ok: false, error: '어부 랭킹 카드 규격이 올바르지 않습니다.' };
+    }
+
+    if (!state.rankingCompetitors) {
+      state.rankingCompetitors = [];
+    }
+
+    // 이미 등록된 유저인지 확인 (닉네임 기준 갱신)
+    const existingIdx = state.rankingCompetitors.findIndex((c) => c.name === data.name);
+    if (existingIdx !== -1) {
+      state.rankingCompetitors[existingIdx] = data;
+    } else {
+      state.rankingCompetitors.push(data);
+    }
+
+    saveGame();
+    return { ok: true, name: data.name };
+  } catch (err) {
+    return { ok: false, error: '랭킹 코드를 해독할 수 없습니다. 복사한 코드를 확인해 주세요.' };
+  }
+}
+
+// 랭킹 리스트 가져오기 (나 + 등록된 경쟁자들 종합)
+export function getRankingBoard(sortBy = 'score') {
+  const collectionCount = Object.keys(state.collection || {}).length;
+  let maxFishSize = 0;
+  let maxFishName = '없음';
+
+  Object.entries(state.collection || {}).forEach(([fishId, record]) => {
+    if (record.maxSize > maxFishSize) {
+      maxFishSize = record.maxSize;
+      const meta = FISH.find((f) => f.id === fishId);
+      maxFishName = meta ? meta.name : fishId;
+    }
+  });
+
+  const myProfile = {
+    isMe: true,
+    name: state.fisherName || '도시 어부',
+    collectionCount,
+    maxFishSize: Number(maxFishSize.toFixed(1)),
+    maxFishName,
+    crownCount: state.stats ? state.stats.crownCount || 0 : 0,
+    totalEarned: state.stats ? state.stats.totalEarned || 0 : 0,
+    equippedRod: state.equippedRod || 'bamboo',
+    unlockedRegionsCount: (state.unlockedRegions || []).length,
+  };
+
+  const list = [myProfile, ...(state.rankingCompetitors || []).map((c) => ({ ...c, isMe: false }))];
+
+  // 종합 종합 어부 전투력 점수 계산:
+  // (도감 수 × 1000) + (최대어cm × 10) + (황금 왕관 × 500) + (총 골드 / 1000)
+  list.forEach((item) => {
+    item.score = Math.floor(
+      (item.collectionCount || 0) * 1000 +
+      (item.maxFishSize || 0) * 10 +
+      (item.crownCount || 0) * 500 +
+      (item.totalEarned || 0) / 1000
+    );
+  });
+
+  if (sortBy === 'collection') {
+    list.sort((a, b) => b.collectionCount - a.collectionCount || b.score - a.score);
+  } else if (sortBy === 'size') {
+    list.sort((a, b) => b.maxFishSize - a.maxFishSize || b.score - a.score);
+  } else if (sortBy === 'gold') {
+    list.sort((a, b) => b.totalEarned - a.totalEarned || b.score - a.score);
+  } else {
+    list.sort((a, b) => b.score - a.score);
+  }
+
+  return list;
+}
+
 

@@ -16,6 +16,7 @@ import { toggleSound, isSoundEnabled, playSound } from './sound.js';
 import { cycleWeather, updateWeatherVisual } from './weather.js';
 
 import { showRatesModal } from './collection.js';
+import { showRankingModal } from './ranking.js';
 
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-item');
@@ -268,6 +269,11 @@ function showDailyQuestModal() {
 }
 
 function initSettings() {
+  const rankingBtn = document.getElementById('btn-ranking');
+  if (rankingBtn) {
+    rankingBtn.addEventListener('click', showRankingModal);
+  }
+
   const questBtn = document.getElementById('btn-daily-quest');
   if (questBtn) {
     questBtn.addEventListener('click', showDailyQuestModal);
