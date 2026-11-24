@@ -8,7 +8,6 @@ import {
   REGIONS,
   TRASH_ITEMS,
   BOATS,
-  WEATHER_FISH,
   HIDDEN_FISH,
 } from './data.js';
 import {

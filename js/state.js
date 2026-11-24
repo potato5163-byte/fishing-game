@@ -1,4 +1,4 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, WEATHER_FISH } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, HIDDEN_FISH } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
 
 const STORAGE_KEY = 'mulgyeol-fishing-save';
