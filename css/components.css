@@ -828,7 +828,274 @@
   left: var(--space-md);
   color: var(--color-inverse-ink);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  z-index: 4;
+}
+
+/* ========================================================
+   초고화질 그래픽 시스템 (원경 실루엣, 낚싯줄 베지어, 파티클, 갓챠)
+======================================================== */
+
+/* 1. 지역별 2.5D 원경 실루엣 배경 */
+.fishing-scenery-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.65;
+  transition: opacity 0.5s ease;
+}
+
+.scenery-lake {
+  background: radial-gradient(circle at 80% 25%, rgba(254, 240, 138, 0.4) 0%, transparent 40%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M0,120 L0,90 Q70,40 140,85 T280,75 T420,80 T500,90 L500,120 Z" fill="%232b5368" opacity="0.35"/><path d="M0,120 L0,100 Q60,70 120,95 T260,90 T380,85 T500,105 L500,120 Z" fill="%231d3f52" opacity="0.55"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-river {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M0,120 L0,80 Q90,30 180,70 T360,60 T500,80 L500,120 Z" fill="%231b4332" opacity="0.4"/><path d="M0,120 L0,95 Q100,60 200,85 T400,80 T500,95 L500,120 Z" fill="%23081c15" opacity="0.6"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-sea {
+  background: radial-gradient(circle at 50% 30%, rgba(255, 237, 213, 0.5) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M0,120 L0,105 Q125,85 250,105 T500,105 L500,120 Z" fill="%23005f73" opacity="0.5"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-abyss {
+  background: radial-gradient(circle at 50% 60%, rgba(6, 182, 212, 0.25) 0%, transparent 70%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M30,120 L30,40 L60,120 M120,120 L130,20 L150,120 M320,120 L330,35 L350,120 M420,120 L430,50 L450,120" stroke="%2306b6d4" stroke-width="4" stroke-linecap="round" opacity="0.3"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-glacier {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><polygon points="0,120 40,50 80,120 120,40 180,120 240,30 300,120 380,45 440,120 500,55 500,120" fill="%2394d2bd" opacity="0.45"/><polygon points="0,120 70,75 140,120 200,65 270,120 350,70 420,120 500,80 500,120" fill="%23e0fbfc" opacity="0.6"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-palace {
+  background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.4) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M60,120 L60,60 Q90,40 120,60 L120,120 M200,120 L200,30 Q250,10 300,30 L300,120 M380,120 L380,60 Q410,40 440,60 L440,120" fill="%23d97706" opacity="0.35"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-nebula {
+  background: radial-gradient(circle at 75% 30%, rgba(192, 132, 252, 0.5) 0%, transparent 50%),
+              radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.4) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><circle cx="40" cy="30" r="1.5" fill="%23fff"/><circle cx="120" cy="50" r="2" fill="%23c084fc"/><circle cx="220" cy="20" r="1.5" fill="%23fff"/><circle cx="340" cy="40" r="2.5" fill="%2338bdf8"/><circle cx="460" cy="25" r="1.5" fill="%23fff"/></svg>') repeat;
+}
+
+.scenery-volcano {
+  background: radial-gradient(circle at 50% 40%, rgba(239, 68, 68, 0.5) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><polygon points="0,120 100,50 140,55 200,120 280,40 330,45 420,120 500,60 500,120" fill="%237f1d1d" opacity="0.55"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-timewarp {
+  background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.4) 0%, transparent 70%);
+}
+
+.scenery-sky_ocean {
+  background: radial-gradient(circle at 50% 20%, rgba(253, 224, 71, 0.6) 0%, transparent 55%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M0,120 L0,90 Q60,70 120,90 Q180,60 240,90 Q300,70 360,90 Q430,60 500,90 L500,120 Z" fill="%23ffffff" opacity="0.5"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+/* 2. 실시간 낚싯줄 베지어 곡선 SVG */
+.fishing-main-line-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 3. 물방울 스플래시 파티클 시스템 */
+.water-splash-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.water-drop {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #7dd3fc);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  pointer-events: none;
+  animation: drop-fly 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes drop-fly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* 4. 찬란한 갓챠(Gacha) 획득 컷씬 연출 */
+.gacha-cutscene-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 15, 0.94);
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: gacha-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  user-select: none;
+}
+
+.gacha-cutscene-overlay.fade-out {
+  animation: gacha-fade-out 0.4s ease forwards;
+}
+
+@keyframes gacha-fade-in {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes gacha-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.gacha-god-rays {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(251, 191, 36, 0.35) 0deg 20deg,
+    transparent 20deg 45deg,
+    rgba(251, 191, 36, 0.35) 45deg 65deg,
+    transparent 65deg 90deg,
+    rgba(251, 191, 36, 0.35) 90deg 110deg,
+    transparent 110deg 135deg,
+    rgba(251, 191, 36, 0.35) 135deg 155deg,
+    transparent 155deg 180deg,
+    rgba(251, 191, 36, 0.35) 180deg 200deg,
+    transparent 200deg 225deg,
+    rgba(251, 191, 36, 0.35) 225deg 245deg,
+    transparent 245deg 270deg,
+    rgba(251, 191, 36, 0.35) 270deg 290deg,
+    transparent 290deg 315deg,
+    rgba(251, 191, 36, 0.35) 315deg 335deg,
+    transparent 335deg 360deg
+  );
+  animation: god-ray-spin 12s linear infinite;
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+.gacha-cutscene-overlay.is-hidden-fish .gacha-god-rays {
+  background: conic-gradient(
+    from 0deg,
+    rgba(168, 85, 247, 0.45) 0deg 20deg,
+    transparent 20deg 45deg,
+    rgba(236, 72, 153, 0.45) 45deg 65deg,
+    transparent 65deg 90deg,
+    rgba(168, 85, 247, 0.45) 90deg 110deg,
+    transparent 110deg 135deg,
+    rgba(236, 72, 153, 0.45) 135deg 155deg,
+    transparent 155deg 180deg,
+    rgba(168, 85, 247, 0.45) 180deg 200deg,
+    transparent 200deg 225deg,
+    rgba(236, 72, 153, 0.45) 225deg 245deg,
+    transparent 245deg 270deg,
+    rgba(168, 85, 247, 0.45) 270deg 290deg,
+    transparent 290deg 315deg,
+    rgba(236, 72, 153, 0.45) 315deg 335deg,
+    transparent 335deg 360deg
+  );
+}
+
+@keyframes god-ray-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.gacha-fish-card {
+  position: relative;
+  width: 240px;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 2px solid #f59e0b;
+  border-radius: var(--radius-lg);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), inset 0 0 15px rgba(245, 158, 11, 0.2);
+  animation: card-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 2;
+}
+
+@keyframes card-pop {
+  0% { transform: scale(0.3) rotate(-12deg); opacity: 0; }
+  70% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.gacha-fish-avatar {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+  animation: float-avatar 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes float-avatar {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px) scale(1.04); }
+}
+
+.gacha-fish-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+.gacha-fish-rarity {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gacha-click-hint {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 600;
+  animation: pulse-hint 1s infinite alternate;
+  margin-top: 10px;
+}
+
+@keyframes pulse-hint {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
 }
 
 /* 고화질 다층 파도 & 윤슬(빛 반사) 시스템 */

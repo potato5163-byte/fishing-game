@@ -33,11 +33,23 @@
         <div class="fishing-container">
           <!-- 낚시 장면 -->
           <div class="fishing-scene" id="fishing-scene">
+            <!-- 원경 2.5D 실루엣 배경 레이어 -->
+            <div id="fishing-scenery-backdrop" class="fishing-scenery-backdrop"></div>
+
             <div class="fishing-scene-eyebrow t-eyebrow" id="fishing-eyebrow">FISHING · 잔잔한 호수</div>
             <div id="fishing-deco-container" class="fishing-deco-container">
               <span class="deco-item deco-lake">🌿 🌿</span>
             </div>
-            <div class="fishing-rod-visual">🎣</div>
+            
+            <!-- 실시간 낚싯대 및 낚싯줄 베지어 SVG 곡선 -->
+            <svg id="fishing-main-line-svg" class="fishing-main-line-svg" viewBox="0 0 480 320" preserveAspectRatio="none">
+              <path id="fishing-main-line-path" d="" stroke="rgba(255, 255, 255, 0.85)" stroke-width="1.8" fill="none" stroke-linecap="round" />
+            </svg>
+
+            <!-- 물방울 스플래시 파티클 컨테이너 -->
+            <div id="water-splash-container" class="water-splash-container"></div>
+
+            <div class="fishing-rod-visual" id="fishing-rod-visual">🎣</div>
             <!-- 고화질 다층 파도 & 윤슬(빛 반사) SVG -->
             <div class="fishing-water-container">
               <!-- 햇살 윤슬 효과 레이어 -->

@@ -105,6 +105,14 @@ export function setState(next) {
     biteAlert.hidden = next !== FishingState.BITE;
   }
 
+  // 실시간 낚싯줄 및 파티클 연출 갱신
+  updateMainFishingLine(next);
+  if (next === FishingState.BITE) {
+    triggerWaterSplash(45, 45, 12);
+  } else if (next === FishingState.WAITING) {
+    triggerWaterSplash(45, 45, 6);
+  }
+
   // 상태 문구 및 메인 버튼 라벨 갱신
   switch (next) {
     case FishingState.IDLE:
@@ -450,12 +458,17 @@ function handleReelFinish(result, fish) {
       if (state.specialItems.potion_zone > 0) state.specialItems.potion_zone--;
     }
 
-    if (fish.rarity === 'mythic') {
+    if (fish.isHiddenFish) {
       playSound('legendary');
-      triggerMythicVictoryCutscene(fish);
+      triggerGachaCatchCutscene(fish, true);
+      triggerMythicConfetti();
+    } else if (fish.rarity === 'mythic') {
+      playSound('legendary');
+      triggerGachaCatchCutscene(fish, false);
       triggerMythicConfetti();
     } else if (fish.rarity === 'legendary') {
       playSound('legendary');
+      triggerGachaCatchCutscene(fish, false);
       triggerConfetti();
     } else {
       playSound('catch');
@@ -760,6 +773,110 @@ export function updateFeverUI() {
   }
 }
 
+// 🎣 실시간 메인 낚싯줄 베지어 곡선 연출
+function updateMainFishingLine(state) {
+  if (typeof document === 'undefined') return;
+  const path = document.getElementById('fishing-main-line-path');
+  const bobber = document.getElementById('fishing-bobber');
+  const rod = document.getElementById('fishing-rod-visual');
+  if (!path) return;
+
+  if (state === FishingState.IDLE) {
+    path.setAttribute('d', '');
+    return;
+  }
+
+  // 낚싯대 끝 좌표(오른쪽 상단)와 찌 좌표(중앙)
+  const startX = 390;
+  const startY = 120;
+  const endX = 216; // 45% of 480
+  const endY = 144; // 45% of 320
+
+  let controlX = (startX + endX) / 2;
+  let controlY = (startY + endY) / 2;
+
+  if (state === FishingState.BITE) {
+    // 팽팽하게 당겨진 직선 형태
+    controlY -= 10;
+    path.setAttribute('stroke', '#ef4444');
+    path.setAttribute('stroke-width', '2.5');
+  } else if (state === FishingState.WAITING) {
+    // 아래로 자연스럽게 늘어진 현수선 베지어 곡선
+    controlY += 35;
+    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.75)');
+    path.setAttribute('stroke-width', '1.6');
+  } else {
+    controlY += 15;
+    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.6)');
+    path.setAttribute('stroke-width', '1.6');
+  }
+
+  path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
+}
+
+// 💦 물방울 스플래시 파티클 연출
+function triggerWaterSplash(centerXPercent = 45, centerYPercent = 45, count = 8) {
+  if (typeof document === 'undefined') return;
+  const container = document.getElementById('water-splash-container');
+  if (!container) return;
+
+  for (let i = 0; i < count; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'water-drop';
+    drop.style.left = `${centerXPercent}%`;
+    drop.style.top = `${centerYPercent}%`;
+
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+    const distance = Math.random() * 35 + 20;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance * 0.7 - 25; // 위쪽으로 튀어오름
+
+    drop.style.setProperty('--dx', `${dx}px`);
+    drop.style.setProperty('--dy', `${dy}px`);
+
+    container.appendChild(drop);
+    setTimeout(() => drop.remove(), 700);
+  }
+}
+
+// ✨ 찬란한 갓챠(Gacha) 획득 컷씬
+function triggerGachaCatchCutscene(fish, isHidden = false) {
+  if (typeof document === 'undefined') return;
+  const overlay = document.createElement('div');
+  overlay.className = `gacha-cutscene-overlay ${isHidden ? 'is-hidden-fish' : ''}`;
+
+  const rarityColor =
+    fish.rarity === 'mythic' ? '#ff0055' :
+    fish.rarity === 'legendary' ? '#eab308' :
+    fish.rarity === 'epic' ? '#a855f7' : '#0ea5e9';
+
+  const badgeText = isHidden ? '🤫 비밀 히든 강림' :
+    fish.rarity === 'mythic' ? '✨ 신화(MYTHIC)' :
+    fish.rarity === 'legendary' ? '👑 전설(LEGENDARY)' : '⭐ 희귀 획득';
+
+  overlay.innerHTML = `
+    <div class="gacha-god-rays"></div>
+    <div class="gacha-fish-card">
+      <div class="gacha-fish-avatar">${fish.emoji}</div>
+      <div class="gacha-fish-title">${fish.name}</div>
+      <span class="gacha-fish-rarity" style="background: ${rarityColor}; color: #fff;">${badgeText}</span>
+      <div style="font-size: 13px; color: #cbd5e1; font-weight: 600;">${fish.size.toFixed(1)}cm · ${fish.price.toLocaleString()}G</div>
+    </div>
+    <div class="gacha-click-hint">화면을 터치하여 획득하기 탭</div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const dismiss = () => {
+    overlay.removeEventListener('click', dismiss);
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.remove(), 400);
+  };
+
+  overlay.addEventListener('click', dismiss);
+  setTimeout(dismiss, 3500); // 3.5초 후 자동 닫힘
+}
+
 function triggerMythicVictoryCutscene(fish) {
   if (typeof document === 'undefined') return;
   const overlay = document.createElement('div');
@@ -829,6 +946,7 @@ export function updateFishingScene() {
   const scene = document.getElementById('fishing-scene');
   const eyebrow = document.getElementById('fishing-eyebrow');
   const decoContainer = document.getElementById('fishing-deco-container');
+  const backdrop = document.getElementById('fishing-scenery-backdrop');
 
   const current = REGIONS.find((r) => r.id === state.currentRegion) || REGIONS[0];
 
@@ -838,6 +956,10 @@ export function updateFishingScene() {
 
   if (scene) {
     scene.className = `fishing-scene region-${current.id}`;
+  }
+
+  if (backdrop) {
+    backdrop.className = `fishing-scenery-backdrop scenery-${current.id}`;
   }
 
   if (decoContainer) {
