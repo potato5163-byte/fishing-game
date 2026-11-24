@@ -382,12 +382,17 @@ function doFusion() {
 // 🧬 생체 융합 가속 애니메이션 시퀀스 (1.5초)
 function playFusionAnimationSequence(hybrid, finalPrice, name1, name2, targetRarity) {
   const modalRoot = document.getElementById('modal-root');
-  if (!modalRoot) return;
+  if (!modalRoot) {
+    showFusionResultModal(hybrid, finalPrice, name1, name2);
+    return;
+  }
 
-  playSound('reel');
+  try {
+    playSound('reel_tick');
+  } catch (e) {}
 
   modalRoot.innerHTML = `
-    <div class="modal-scrim" id="fusion-anim-scrim" style="background: rgba(6, 15, 25, 0.92); z-index: 10000; display: flex; justify-content: center; align-items: center;">
+    <div class="modal-scrim" id="fusion-anim-scrim" style="background: rgba(6, 15, 25, 0.95); z-index: 10000; display: flex; justify-content: center; align-items: center; cursor: pointer;">
       <div style="text-align: center; color: #fff; max-width: 320px; padding: 20px;">
         <div class="fusion-anim-dna" style="font-size: 64px; margin-bottom: 16px;">
           🧬
@@ -401,18 +406,29 @@ function playFusionAnimationSequence(hybrid, finalPrice, name1, name2, targetRar
         <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; margin-top: 18px; overflow: hidden; position: relative;">
           <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4, #a855f7); animation: bounce 0.6s infinite alternate;"></div>
         </div>
+        <div style="margin-top: 14px; font-size: 11px; color: #64748b;">(클릭하여 즉시 건너뛰기)</div>
       </div>
     </div>
   `;
 
-  setTimeout(() => {
-    if (targetRarity === 'mythic' || targetRarity === 'legendary') {
-      playSound('legendary');
-    } else {
-      playSound('catch');
-    }
+  let finished = false;
+  const finishAnim = () => {
+    if (finished) return;
+    finished = true;
+    try {
+      if (targetRarity === 'mythic' || targetRarity === 'legendary') {
+        playSound('legendary');
+      } else {
+        playSound('catch');
+      }
+    } catch (e) {}
     showFusionResultModal(hybrid, finalPrice, name1, name2);
-  }, 1400);
+  };
+
+  // 클릭 시 스킵 가능하도록 안전장치
+  document.getElementById('fusion-anim-scrim')?.addEventListener('click', finishAnim);
+
+  setTimeout(finishAnim, 1200);
 }
 
 // 🧬 생체 융합 결과 전용 팝업창
