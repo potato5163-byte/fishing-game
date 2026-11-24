@@ -850,9 +850,7 @@ export function updateFishingIndicators() {
   if (rodEl) {
     const rod = RODS[state.equippedRod] || RODS.bamboo;
     const enhanceLevel = state.rodEnhancements ? (state.rodEnhancements[state.equippedRod] || 0) : 0;
-    if (enhanceLevel > 0) {
-      enhanceTag = ` (+${enhanceLevel}강)`;
-    }
+    const enhanceTag = enhanceLevel > 0 ? ` (+${enhanceLevel}강)` : '';
     const boat = BOATS[state.equippedBoat] || BOATS.wood_raft;
     rodEl.textContent = `${rod.emoji} ${rod.name}${enhanceTag} · ${boat.emoji} ${boat.name}`;
   }
