@@ -504,20 +504,24 @@ export function triggerLotteryClaim(regionId) {
             </div>
           </div>
 
-          <!-- 기본 보상 내역 -->
+          <!-- 기본 보상 내역 (긁기 전에는 합산 금액 스포 방지!) -->
           <div class="modal-info-list" style="margin-top: var(--space-md); text-align: left;">
             <div class="modal-info-row">
               <span class="t-body-sm">지역 도감 기본 상금</span>
               <span class="t-body-sm tabular-nums" style="font-weight: 700;">+${formatGold(baseGold)}G</span>
             </div>
             <div class="modal-info-row">
-              <span class="t-body-sm">총 획득 금액</span>
-              <span class="t-card-title tabular-nums" style="color: #10b981;">+${formatGold(totalGold)}G</span>
+              <span class="t-body-sm">복권 당첨 상금</span>
+              <span id="lottery-row-prize" class="t-body-sm tabular-nums" style="color: #64748b; font-weight: 700;">❓ 복권을 긁어 확인하세요</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="t-body-sm">최종 획득 합계</span>
+              <span id="lottery-row-total" class="t-card-title tabular-nums" style="color: #10b981;">❓ ??? G</span>
             </div>
           </div>
 
-          <button id="btn-lottery-confirm" class="btn-primary modal-action-btn" style="width: 100%; margin-top: var(--space-md);">
-            보상 모두 받기
+          <button id="btn-lottery-confirm" class="btn-primary modal-action-btn" style="width: 100%; margin-top: var(--space-md); opacity: 0.5; pointer-events: none;">
+            복권을 먼저 긁어주세요
           </button>
         </div>
       </div>
@@ -526,10 +530,30 @@ export function triggerLotteryClaim(regionId) {
 
   const cover = document.getElementById('lottery-cover');
   const btnConfirm = document.getElementById('btn-lottery-confirm');
+  const rowPrize = document.getElementById('lottery-row-prize');
+  const rowTotal = document.getElementById('lottery-row-total');
+  let isScratched = false;
 
   if (cover) {
     cover.addEventListener('click', () => {
+      if (isScratched) return;
+      isScratched = true;
       cover.classList.add('is-scratched');
+
+      // 스크래치 후에 비로소 당첨금과 총합 금액 공개!
+      if (rowPrize) {
+        rowPrize.style.color = lottery.color;
+        rowPrize.textContent = `+${formatGold(lottery.gold)}G (${lottery.name})`;
+      }
+      if (rowTotal) {
+        rowTotal.textContent = `+${formatGold(totalGold)}G`;
+      }
+      if (btnConfirm) {
+        btnConfirm.style.opacity = '1';
+        btnConfirm.style.pointerEvents = 'auto';
+        btnConfirm.textContent = '보상 모두 받기';
+      }
+
       showToast(`🎉 축하합니다! [${lottery.name}]에 당첨되었습니다!`);
     });
   }
