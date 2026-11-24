@@ -288,24 +288,24 @@ function determineFish() {
   if (Math.random() < chestChance) {
     const isGoldChest = Math.random() < 0.3;
 
-    // 현재 스테이지(지역) 레벨에 비례하여 보물상자 상금 스케일링
-    // 1지역(호수) 배율 1x ~ 10지역(천상 유원지) 배율 150x+
+    // 현재 스테이지(지역) 레벨에 비례하여 적정 수준의 보물상자 상금 지급 (인플레이션 방지 밸런스)
+    // 1지역 300G ~ 10지역 25만G 수준 (최고가 낚싯대 1000만G 및 물고기 시세 고려)
     const regionIdx = Math.max(0, REGIONS.findIndex((r) => r.id === state.currentRegion));
     const stageMultiplier = [
-      1,      // 1. lake (1.5만 ~ 3.5만)
-      2.5,    // 2. river (3.75만 ~ 8.75만)
-      6,      // 3. sea (9만 ~ 21만)
-      15,     // 4. abyss (22.5만 ~ 52.5만)
-      35,     // 5. glacier (52.5만 ~ 122.5만)
-      80,     // 6. palace (120만 ~ 280만)
-      180,    // 7. nebula (270만 ~ 630만)
-      400,    // 8. volcano (600만 ~ 1400만)
-      900,    // 9. timewarp (1350만 ~ 3150만)
-      2000,   // 10. sky_ocean (3000만 ~ 7000만)
-    ][regionIdx] || (1 + regionIdx * 10);
+      1,     // 1. lake (황금: 800 ~ 1,500G / 일반: 300 ~ 600G)
+      2,     // 2. river (황금: 1,600 ~ 3,000G / 일반: 600 ~ 1,200G)
+      4,     // 3. sea (황금: 3,200 ~ 6,000G / 일반: 1,200 ~ 2,400G)
+      8,     // 4. abyss (황금: 6,400 ~ 12,000G / 일반: 2,400 ~ 4,800G)
+      16,    // 5. glacier (황금: 12,800 ~ 24,000G / 일반: 4,800 ~ 9,600G)
+      32,    // 6. palace (황금: 25,600 ~ 48,000G / 일반: 9,600 ~ 19,200G)
+      60,    // 7. nebula (황금: 48,000 ~ 90,000G / 일반: 18,000 ~ 36,000G)
+      100,   // 8. volcano (황금: 80,000 ~ 150,000G / 일반: 30,000 ~ 60,000G)
+      150,   // 9. timewarp (황금: 120,000 ~ 225,000G / 일반: 45,000 ~ 90,000G)
+      200,   // 10. sky_ocean (황금: 160,000 ~ 300,000G / 일반: 60,000 ~ 120,000G)
+    ][regionIdx] || (1 + regionIdx * 15);
 
-    const baseMin = isGoldChest ? 15000 : 3000;
-    const baseMax = isGoldChest ? 35000 : 8000;
+    const baseMin = isGoldChest ? 800 : 300;
+    const baseMax = isGoldChest ? 1500 : 600;
     const goldReward = Math.round(randomRange(baseMin * stageMultiplier, baseMax * stageMultiplier));
 
     pendingFish = {
