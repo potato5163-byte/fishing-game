@@ -1131,29 +1131,62 @@
 /* 고화질 다층 파도 & 윤슬(빛 반사) 시스템 */
 .fishing-water-container {
   position: absolute;
-  top: 45%;
+  top: 42%;
   bottom: 0;
   left: 0;
   right: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 2;
+  background: linear-gradient(180deg, rgba(2, 132, 199, 0.25) 0%, rgba(15, 23, 42, 0.85) 100%);
+  box-shadow: inset 0 6px 16px rgba(255, 255, 255, 0.3);
+}
+
+/* 수면 최상단 림라이트 (수평선 빛 번짐) */
+.water-surface-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(224, 242, 254, 0.85) 50%, rgba(255, 255, 255, 0.3) 100%);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+  z-index: 4;
+}
+
+/* 수중 빛 굴절 코스틱스 효과 (Caustics) */
+.water-caustics-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 45%),
+              radial-gradient(circle at 75% 65%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+  mix-blend-mode: overlay;
+  animation: caustics-pulse 4.5s ease-in-out infinite alternate;
+  z-index: 3;
+}
+
+@keyframes caustics-pulse {
+  0% { transform: scale(1) translateY(0); opacity: 0.6; }
+  50% { transform: scale(1.08) translateY(-6px); opacity: 0.95; }
+  100% { transform: scale(0.96) translateY(4px); opacity: 0.7; }
 }
 
 .water-shimmer {
   position: absolute;
   top: 0;
-  left: -50%;
-  width: 200%;
-  height: 40px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.05) 75%, transparent 100%);
-  animation: shimmer-drift 6s linear infinite;
-  filter: blur(2px);
+  left: -60%;
+  width: 220%;
+  height: 48px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0.08) 80%, transparent 100%);
+  animation: shimmer-drift 5s linear infinite;
+  filter: blur(1.5px);
+  z-index: 4;
 }
 
 @keyframes shimmer-drift {
   0% { transform: translateX(0); }
-  100% { transform: translateX(50%); }
+  100% { transform: translateX(45%); }
 }
 
 .fishing-water-wave {
@@ -1166,142 +1199,156 @@
 }
 
 .wave-back {
-  animation: wave-flow 10s ease-in-out infinite alternate;
-  opacity: 0.6;
+  animation: wave-flow 8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  opacity: 0.75;
 }
 
 .wave-mid {
-  animation: wave-flow 6.5s ease-in-out infinite alternate-reverse;
-  opacity: 0.8;
+  animation: wave-flow 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate-reverse;
+  opacity: 0.88;
 }
 
 .wave-front {
-  animation: wave-flow 4.5s ease-in-out infinite alternate;
+  animation: wave-flow 3.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  filter: drop-shadow(0 -3px 6px rgba(255, 255, 255, 0.35));
 }
 
 @keyframes wave-flow {
   0% { transform: translateX(0) scaleY(1); }
-  50% { transform: translateX(-25%) scaleY(1.15); }
-  100% { transform: translateX(-50%) scaleY(0.95); }
+  50% { transform: translateX(-22%) scaleY(1.18); }
+  100% { transform: translateX(-44%) scaleY(0.92); }
 }
 
-/* 수면 아래 유영하는 물고기 실루엣 */
+/* 수면 아래 유영하는 디테일 물고기 그림자 실루엣 */
 .underwater-shadow {
   position: absolute;
-  top: 60%;
-  left: -60px;
-  width: 44px;
-  height: 16px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 80%);
-  border-radius: 50%;
-  filter: blur(3px);
+  top: 55%;
+  left: -80px;
+  width: 70px;
+  height: 28px;
   pointer-events: none;
   z-index: 2;
-  animation: fish-swim 14s ease-in-out infinite;
+  filter: blur(2.5px);
+  animation: fish-swim 13s ease-in-out infinite;
+}
+
+.underwater-fish-shadow-svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  animation: fish-tail-wag 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes fish-tail-wag {
+  0% { transform: rotate(-3deg) scaleY(0.95); }
+  100% { transform: rotate(3deg) scaleY(1.05); }
 }
 
 @keyframes fish-swim {
-  0% { transform: translate(0, 0) scale(0.8) rotate(5deg); opacity: 0; }
-  15% { opacity: 0.6; }
-  50% { transform: translate(260px, 20px) scale(1.2) rotate(-5deg); opacity: 0.7; }
-  85% { opacity: 0.5; }
-  100% { transform: translate(520px, -15px) scale(0.9) rotate(8deg); opacity: 0; }
+  0% { transform: translate(0, 0) scale(0.75) rotate(6deg); opacity: 0; }
+  12% { opacity: 0.65; }
+  48% { transform: translate(250px, 22px) scale(1.15) rotate(-6deg); opacity: 0.85; }
+  85% { opacity: 0.55; }
+  100% { transform: translate(520px, -18px) scale(0.85) rotate(8deg); opacity: 0; }
 }
 
-/* 강화된 낚싯대 빛남 효과 */
-.shop-item-row.is-enhanced-rod {
-  border-left: 3px solid #ea580c;
-  background: linear-gradient(90deg, rgba(234, 88, 12, 0.05) 0%, transparent 100%);
-}
-
-/* 수중 기포 파티클 효과 */
-.fishing-scene::before {
-  content: '';
+/* 고화질 벡터 낚싯대 컨테이너 & 휨새 애니메이션 */
+.fishing-rod-container {
   position: absolute;
-  top: 45%;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: radial-gradient(circle at 20% 70%, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
-              radial-gradient(circle at 60% 85%, rgba(255, 255, 255, 0.15) 3px, transparent 4px),
-              radial-gradient(circle at 85% 60%, rgba(255, 255, 255, 0.2) 2px, transparent 3px);
-  background-size: 100px 100px;
-  animation: bubbles-rise 5s linear infinite;
+  top: 18%;
+  right: -10px;
+  width: 130px;
+  height: 130px;
+  z-index: 3;
   pointer-events: none;
-  z-index: 2;
+  transform-origin: 20px 140px;
+  transform: rotate(-10deg);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
 }
 
-@keyframes bubbles-rise {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-40px); }
+.fishing-rod-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-/* 릴 감기 중 물결 요동 이펙트 */
-.fishing-rod-visual {
-  position: absolute;
-  top: 38%;
-  right: 25px;
-  font-size: 32px;
-  transform: rotate(-15deg);
-  z-index: 2;
-  transition: transform 0.15s ease-out;
+/* 낚싯대 블랭크 텐션 휨새 (입질 및 릴링 시 휘어짐) */
+.rod-blank-path {
+  transition: d 0.15s ease-out;
 }
 
-.fishing-scene.is-reeling-pull .fishing-rod-visual {
-  transform: rotate(-35deg) scale(1.1);
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+.fishing-scene.is-charging .fishing-rod-container {
+  transform: rotate(15deg) scale(0.95);
 }
 
-/* 신비한 아우라 및 수면 반사광 */
-.fishing-water-surface {
-  filter: drop-shadow(0 2px 5px rgba(255, 255, 255, 0.35));
+.fishing-scene.is-waiting .fishing-rod-container {
+  animation: rod-idle-breathe 3s ease-in-out infinite alternate;
 }
 
-  position: absolute;
-  top: 25%;
-  right: 15%;
-  font-size: 40px;
-  transform: rotate(-15deg);
-  z-index: 2;
+@keyframes rod-idle-breathe {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(-12deg); }
 }
 
+.fishing-scene.is-biting .fishing-rod-container,
+.fishing-scene.is-reeling-pull .fishing-rod-container {
+  transform: rotate(-38deg) scale(1.12);
+  filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.8));
+  animation: rod-tension-shake 0.12s infinite alternate;
+}
+
+@keyframes rod-tension-shake {
+  0% { transform: rotate(-36deg) translateY(-2px); }
+  100% { transform: rotate(-40deg) translateY(2px); }
+}
+
+/* 고화질 입체 찌(Bobber) 및 실시간 동심원 물결 파동 */
 .fishing-bobber {
   position: absolute;
   top: 45%;
   left: 45%;
+  width: 28px;
+  height: 38px;
   transform: translate(-50%, -50%);
-  font-size: 24px;
-  z-index: 3;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-  transition: transform 0.1s ease;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+  transition: transform 0.15s ease;
+}
+
+.bobber-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .fishing-bobber::after {
   content: '';
   position: absolute;
-  bottom: 0px;
+  bottom: 2px;
   left: 50%;
-  width: 22px;
-  height: 8px;
+  width: 32px;
+  height: 12px;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.7) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.8) 0%, rgba(56, 189, 248, 0.4) 40%, transparent 75%);
   border-radius: 50%;
-  animation: bobber-ripple 1.8s infinite ease-out;
+  animation: bobber-ripple 1.6s infinite ease-out;
   pointer-events: none;
 }
 
 @keyframes bobber-ripple {
-  0% { transform: translateX(-50%) scale(0.5); opacity: 0.9; }
-  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
+  0% { transform: translateX(-50%) scale(0.4); opacity: 0.95; }
+  100% { transform: translateX(-50%) scale(2.6); opacity: 0; }
 }
 
 .fishing-bobber.is-biting {
-  animation: bobber-bite-pulse 0.1s infinite alternate;
+  animation: bobber-bite-pulse 0.09s infinite alternate;
 }
 
 @keyframes bobber-bite-pulse {
-  0% { transform: translate(-50%, -50%) translateY(-6px) scale(0.95); filter: drop-shadow(0 0 10px #ef4444); }
-  100% { transform: translate(-50%, -50%) translateY(6px) scale(1.1); filter: drop-shadow(0 0 20px #ef4444); }
+  0% { transform: translate(-50%, -50%) translateY(-10px) scale(0.9); filter: drop-shadow(0 0 12px #ef4444); }
+  100% { transform: translate(-50%, -50%) translateY(12px) scale(1.15); filter: drop-shadow(0 0 25px #ef4444); }
 }
 
 .fishing-bite-alert {

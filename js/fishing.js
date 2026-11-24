@@ -239,6 +239,40 @@ function stopCharging() {
   waitTimerId = setTimeout(() => {
     triggerBite();
   }, waitSec * 1000);
+
+  // 🐟 상용 낚시 게임 스타일: 입질 0.8초 전 수면 아래 그림자 접근 & 찌 톡톡(Nibble) 전조 연출!
+  const nibbleDelay = Math.max(100, (waitSec - 0.9) * 1000);
+  setTimeout(() => {
+    if (currentState === FishingState.WAITING) {
+      triggerBiteNibbleForeshadow();
+    }
+  }, nibbleDelay);
+}
+
+// 🌊 입질 직전 찌 건드리기(Nibble) 및 그림자 접근 전조 효과
+function triggerBiteNibbleForeshadow() {
+  const bobber = document.getElementById('fishing-bobber');
+  const shadow = document.getElementById('fishing-underwater-shadow');
+  if (bobber) {
+    bobber.style.transform = 'translate(-50%, -50%) translateY(4px) scale(0.95)';
+    triggerWaterSplash(45, 45, 3);
+    setTimeout(() => {
+      if (currentState === FishingState.WAITING) {
+        bobber.style.transform = 'translate(-50%, -50%) translateY(0px)';
+      }
+    }, 250);
+  }
+
+  if (shadow) {
+    shadow.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+    shadow.style.left = '42%';
+    shadow.style.top = '44%';
+    shadow.style.transform = 'scale(1.35) rotate(-15deg)';
+    shadow.style.opacity = '0.9';
+    setTimeout(() => {
+      shadow.style.transition = '';
+    }, 850);
+  }
 }
 
 // 2-3. WAITING 중 너무 일찍 당김 (E05)
@@ -791,42 +825,63 @@ export function updateFeverUI() {
   }
 }
 
-// 🎣 실시간 메인 낚싯줄 베지어 곡선 연출
+// 🎣 실시간 메인 낚싯줄 베지어 곡선 및 낚싯대 휨새 연출
 function updateMainFishingLine(state) {
   if (typeof document === 'undefined') return;
   const path = document.getElementById('fishing-main-line-path');
   const bobber = document.getElementById('fishing-bobber');
   const rod = document.getElementById('fishing-rod-visual');
+  const scene = document.querySelector('.fishing-scene');
   if (!path) return;
+
+  if (scene) {
+    scene.classList.remove('is-charging', 'is-waiting', 'is-biting', 'is-reeling-pull');
+    if (state === FishingState.CHARGING) scene.classList.add('is-charging');
+    else if (state === FishingState.WAITING) scene.classList.add('is-waiting');
+    else if (state === FishingState.BITE) scene.classList.add('is-biting');
+    else if (state === FishingState.REELING) scene.classList.add('is-reeling-pull');
+  }
 
   if (state === FishingState.IDLE) {
     path.setAttribute('d', '');
     return;
   }
 
-  // 낚싯대 끝 좌표(오른쪽 상단)와 찌 좌표(중앙)
-  const startX = 390;
-  const startY = 120;
-  const endX = 216; // 45% of 480
-  const endY = 144; // 45% of 320
+  // 벡터 낚싯대 초릿대(팁 가이드) 끝 좌표(viewBox 480x320 기준)
+  let startX = 425;
+  let startY = 65;
+
+  if (state === FishingState.BITE || state === FishingState.REELING) {
+    startX = 385;
+    startY = 95; // 강하게 아래로 휘어진 초릿대 위치
+  } else if (state === FishingState.CHARGING) {
+    startX = 445;
+    startY = 85;
+  }
+
+  const endX = 216; // 45% of 480 (찌 중심)
+  const endY = 144; // 45% of 320 (찌 중심)
 
   let controlX = (startX + endX) / 2;
   let controlY = (startY + endY) / 2;
 
   if (state === FishingState.BITE) {
-    // 팽팽하게 당겨진 직선 형태
-    controlY -= 10;
+    // 팽팽하게 당겨져 떨리는 강렬한 붉은 텐션 라인
+    controlY -= 8;
     path.setAttribute('stroke', '#ef4444');
     path.setAttribute('stroke-width', '2.5');
+    path.style.filter = 'drop-shadow(0 0 6px rgba(239, 68, 68, 0.8))';
   } else if (state === FishingState.WAITING) {
-    // 아래로 자연스럽게 늘어진 현수선 베지어 곡선
-    controlY += 35;
-    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.75)');
+    // 자연스러운 중력 현수선 베지어 곡선
+    controlY += 38;
+    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.85)');
     path.setAttribute('stroke-width', '1.6');
+    path.style.filter = 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4))';
   } else {
-    controlY += 15;
-    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.6)');
+    controlY += 12;
+    path.setAttribute('stroke', 'rgba(255, 255, 255, 0.7)');
     path.setAttribute('stroke-width', '1.6');
+    path.style.filter = 'none';
   }
 
   path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
@@ -857,7 +912,7 @@ function triggerWaterSplash(centerXPercent = 45, centerYPercent = 45, count = 8)
   }
 }
 
-// ✨ 찬란한 갓챠(Gacha) 획득 컷씬
+// ✨ 찬란한 갓챠(Gacha) 획득 컷씬 (고화질 벡터 일러스트 적용)
 function triggerGachaCatchCutscene(fish, isHidden = false) {
   if (typeof document === 'undefined') return;
   const overlay = document.createElement('div');
@@ -875,10 +930,12 @@ function triggerGachaCatchCutscene(fish, isHidden = false) {
   overlay.innerHTML = `
     <div class="gacha-god-rays"></div>
     <div class="gacha-fish-card">
-      <div class="gacha-fish-avatar">${fish.emoji}</div>
+      <div class="gacha-fish-avatar" style="display: flex; justify-content: center; align-items: center; width: 120px; height: 120px; margin: 0 auto 12px auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+        ${getFishSvg(fish.id, 110)}
+      </div>
       <div class="gacha-fish-title">${fish.name}</div>
       <span class="gacha-fish-rarity" style="background: ${rarityColor}; color: #fff;">${badgeText}</span>
-      <div style="font-size: 13px; color: #cbd5e1; font-weight: 600;">${fish.size.toFixed(1)}cm · ${fish.price.toLocaleString()}G</div>
+      <div style="font-size: 14px; color: #cbd5e1; font-weight: 700; margin-top: 6px;">${fish.size.toFixed(1)}cm · +${fish.price.toLocaleString()}G</div>
     </div>
     <div class="gacha-click-hint">화면을 터치하여 획득하기 탭</div>
   `;

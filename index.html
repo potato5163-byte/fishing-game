@@ -52,27 +52,114 @@
             <!-- 물방울 스플래시 파티클 컨테이너 -->
             <div id="water-splash-container" class="water-splash-container"></div>
 
-            <div class="fishing-rod-visual" id="fishing-rod-visual">🎣</div>
+            <!-- 고화질 디테일 낚싯대 벡터 그래픽 (카본 블랭크, 가이드 링, 릴, 그립 핸들) -->
+            <div class="fishing-rod-container" id="fishing-rod-visual">
+              <svg class="fishing-rod-svg" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="rodBlankGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1e293b"/>
+                    <stop offset="40%" stop-color="#334155"/>
+                    <stop offset="70%" stop-color="#ea580c"/>
+                    <stop offset="100%" stop-color="#fbbf24"/>
+                  </linearGradient>
+                  <linearGradient id="rodReelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f8fafc"/>
+                    <stop offset="50%" stop-color="#94a3b8"/>
+                    <stop offset="100%" stop-color="#475569"/>
+                  </linearGradient>
+                </defs>
+                <!-- 낚싯대 대 (블랭크) -->
+                <path d="M 12 148 Q 65 95 142 16" stroke="url(#rodBlankGrad)" stroke-width="4.5" stroke-linecap="round" fill="none" class="rod-blank-path"/>
+                <!-- 가이드 링들 -->
+                <circle cx="56" cy="102" r="3.2" stroke="#f8fafc" stroke-width="1.5" fill="none"/>
+                <circle cx="98" cy="58" r="2.6" stroke="#f8fafc" stroke-width="1.5" fill="none"/>
+                <circle cx="138" cy="20" r="2.0" stroke="#f8fafc" stroke-width="1.5" fill="none"/>
+                <!-- 스피닝 릴 몸체 & 손잡이 -->
+                <ellipse cx="28" cy="132" rx="7" ry="9" fill="url(#rodReelGrad)" stroke="#0f172a" stroke-width="1"/>
+                <rect x="22" y="125" width="12" height="14" rx="2" fill="#0f172a"/>
+                <circle cx="34" cy="132" r="3" fill="#ea580c"/>
+                <!-- EVA 폼 그립 핸들 -->
+                <path d="M 8 152 L 24 136" stroke="#0f172a" stroke-width="7" stroke-linecap="round"/>
+              </svg>
+            </div>
             <!-- 고화질 다층 파도 & 윤슬(빛 반사) SVG -->
             <div class="fishing-water-container">
-              <!-- 햇살 윤슬 효과 레이어 -->
+              <!-- 수면 상단 빛 반사 림라이트 & 햇살 윤슬 -->
+              <div class="water-surface-glow"></div>
               <div class="water-shimmer"></div>
-              <!-- 1단 뒤쪽 파도 -->
-              <svg class="fishing-water-wave wave-back" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M0,40 C150,80 350,0 500,40 C650,80 900,10 1200,40 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.12)"/>
+              <div class="water-caustics-layer"></div>
+
+              <!-- 1단 심층 깊은 파도 (원근감 짙은 블루/암청색) -->
+              <svg class="fishing-water-wave wave-back" viewBox="0 0 1440 160" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="waveGradDeep" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#0284c7" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,45 C240,95 480,10 720,55 C960,95 1200,20 1440,50 L1440,160 L0,160 Z" fill="url(#waveGradDeep)"/>
               </svg>
-              <!-- 2단 중간 파도 -->
-              <svg class="fishing-water-wave wave-mid" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M0,50 C200,10 450,80 650,40 C850,0 1050,70 1200,50 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.18)"/>
+
+              <!-- 2단 중층 입체 물결 파도 (투명 반사광) -->
+              <svg class="fishing-water-wave wave-mid" viewBox="0 0 1440 160" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="waveGradMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.55"/>
+                    <stop offset="100%" stop-color="#0369a1" stop-opacity="0.85"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,60 C360,15 600,90 900,45 C1140,15 1320,80 1440,60 L1440,160 L0,160 Z" fill="url(#waveGradMid)"/>
               </svg>
-              <!-- 3단 앞쪽 입체 수면 -->
-              <svg class="fishing-water-wave wave-front" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M0,60 C300,90 600,30 900,70 C1050,90 1150,50 1200,60 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.25)"/>
+
+              <!-- 3단 표면 생동 파도 & 하얀 포말 엣지 (스파클링 림) -->
+              <svg class="fishing-water-wave wave-front" viewBox="0 0 1440 160" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="waveGradFront" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.75"/>
+                    <stop offset="30%" stop-color="#0284c7" stop-opacity="0.65"/>
+                    <stop offset="100%" stop-color="#075985" stop-opacity="0.95"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,70 C300,105 580,35 880,75 C1120,105 1300,55 1440,70 L1440,160 L0,160 Z" fill="url(#waveGradFront)"/>
               </svg>
             </div>
             <!-- 실시간 물고기 그림자 (수면 아래 유영) -->
-            <div id="fishing-underwater-shadow" class="underwater-shadow"></div>
-            <div id="fishing-bobber" class="fishing-bobber" hidden>🔴</div>
+            <div id="fishing-underwater-shadow" class="underwater-shadow">
+              <svg viewBox="0 0 80 32" class="underwater-fish-shadow-svg">
+                <path d="M 10 16 C 25 6, 55 8, 70 16 C 55 24, 25 26, 10 16 Z" fill="rgba(0, 0, 0, 0.45)"/>
+                <path d="M 8 16 L 0 8 L 2 16 L 0 24 Z" fill="rgba(0, 0, 0, 0.4)"/>
+                <path d="M 40 10 Q 48 2 54 8 Z" fill="rgba(0, 0, 0, 0.35)"/>
+              </svg>
+            </div>
+
+            <!-- 디테일 3D 입체 낚시 찌 (Bobber) -->
+            <div id="fishing-bobber" class="fishing-bobber" hidden>
+              <svg viewBox="0 0 32 44" class="bobber-svg">
+                <defs>
+                  <linearGradient id="bobberRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f87171"/>
+                    <stop offset="50%" stop-color="#ef4444"/>
+                    <stop offset="100%" stop-color="#991b1b"/>
+                  </linearGradient>
+                  <linearGradient id="bobberWhiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="60%" stop-color="#e2e8f0"/>
+                    <stop offset="100%" stop-color="#94a3b8"/>
+                  </linearGradient>
+                </defs>
+                <!-- 찌 상단 안테나 막대 -->
+                <rect x="15" y="2" width="2" height="10" fill="#0f172a" rx="1"/>
+                <circle cx="16" cy="3" r="2.5" fill="#facc15"/>
+                <!-- 상단 구체 (레드 형광) -->
+                <path d="M 6 20 C 6 12, 26 12, 26 20 Z" fill="url(#bobberRedGrad)"/>
+                <!-- 하단 구체 (화이트) -->
+                <path d="M 6 20 C 6 28, 26 28, 26 20 Z" fill="url(#bobberWhiteGrad)"/>
+                <!-- 중심 이음매 링 -->
+                <rect x="5.5" y="19" width="21" height="2" fill="#0f172a" rx="1"/>
+                <!-- 하단 침추 연결부 -->
+                <rect x="15" y="27" width="2" height="8" fill="#475569" rx="1"/>
+              </svg>
+            </div>
             <div id="fishing-bite-alert" class="fishing-bite-alert" hidden>❗</div>
 
             <!-- 3D 1인칭 수면 낚시 파이팅 뷰 (신규 그래픽 릴 배틀) -->
