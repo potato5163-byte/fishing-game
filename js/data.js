@@ -391,6 +391,39 @@ export const HIDDEN_FISH = [
 
 
 
+// 🌀 1. 차원 소용돌이 포탈 보스 (상위 맵 전용 거대 레이드 보스)
+export const VORTEX_BOSSES = [
+  { id: 'boss_kraken', name: '🦑 심연의 절대공포 크라켄', emoji: '🐙', region: 'abyss', hp: 300, dist: 90, rewardGold: 80000, desc: '심연 협곡을 뒤흔드는 고대 거대 촉수의 괴수' },
+  { id: 'boss_dragon_god', name: '🐉 신화의 흑룡신', emoji: '🐲', region: 'palace', hp: 450, dist: 120, rewardGold: 200000, desc: '용궁 옥좌를 지키는 전설의 흑룡신' },
+  { id: 'boss_star_eater', name: '🪐 은하 포식자 레비아탄', emoji: '🌌', region: 'nebula', hp: 600, dist: 150, rewardGold: 500000, desc: '성운의 별빛을 집어삼키는 우주의 지배자' },
+  { id: 'boss_chronos', name: '⏳ 시공간의 파괴자 크로노스', emoji: '⌛', region: 'timewarp', hp: 800, dist: 180, rewardGold: 1200000, desc: '과거와 미래의 시간을 붕괴시키는 차원의 지배체' },
+  { id: 'boss_genesis_titan', name: '👑 창세의 천상 티탄', emoji: '🔱', region: 'sky_ocean', hp: 1000, dist: 220, rewardGold: 3000000, desc: '천상 유원지 가장 높은 옥좌의 궁극 거신' },
+];
+
+// 🔬 3. 생체 연구소 돌연변이/하이브리드 어종 (융합 전용 10종)
+export const HYBRID_FISH = [
+  { id: 'hyb_magma_koi', name: '🔥 볼케이노 비단잉어', emoji: '🎏', rarity: 'legendary', basePrice: 45000, desc: '마그마의 열기와 황금 비늘이 융합된 화려한 물고기' },
+  { id: 'hyb_frost_tuna', name: '🧊 절대영도 프로스트 참치', emoji: '🐟', rarity: 'legendary', basePrice: 65000, desc: '빙하의 한기로 영구 동결된 고속의 탄환' },
+  { id: 'hyb_storm_eel', name: '⚡ 뇌전 플라즈마 전기뱀장어', emoji: '🐍', rarity: 'mythic', basePrice: 120000, desc: '10만 볼트의 번개 에너지를 온몸에 휘감은 위험한 어종' },
+  { id: 'hyb_crystal_manta', name: '💎 오로라 크리스탈 가오리', emoji: '✨', rarity: 'mythic', basePrice: 200000, desc: '수면 위를 날아오르면 영롱한 보석 가루를 흩뿌리는 가오리' },
+  { id: 'hyb_cosmic_shark', name: '🌌 성간 초신성 메갈로돈', emoji: '🦈', rarity: 'mythic', basePrice: 400000, desc: '우주 성운과 심해의 최상위 포식자가 결합한 궁극의 상어' },
+  { id: 'hyb_cyber_squid', name: '🤖 네온 사이버네틱 대왕오징어', emoji: '🦑', rarity: 'mythic', basePrice: 350000, desc: '미래 나노 기술과 심해 촉수가 결합된 인공 생명체' },
+  { id: 'hyb_abyss_phoenix', name: '🪶 심연 불사조 비룡어', emoji: '🦚', rarity: 'mythic', basePrice: 600000, desc: '빛 없는 어둠에서 스스로 영원한 불꽃을 피워내는 환상의 영물' },
+  { id: 'hyb_chrono_turtle', name: '⏳ 시간 왜곡 천년현무', emoji: '🐢', rarity: 'mythic', basePrice: 850000, desc: '등껍질에 시공간 나침반을 얹고 세월을 거스르는 신령' },
+  { id: 'hyb_golden_leviathan', name: '👑 황금 미다스 레비아탄', emoji: '🔱', rarity: 'mythic', basePrice: 1500000, desc: '닿는 모든 바닷물을 순금으로 변환시키는 전설의 거수' },
+  { id: 'hyb_genesis_godfish', name: '♾️ 창세신화 에테르신어', emoji: '🌟', rarity: 'mythic', basePrice: 3000000, desc: '생명의 기원 그 자체를 품고 유영하는 신성한 물고기' },
+];
+
+// 🎰 4. 침몰선 인양 크레인 보물 품목
+export const SALVAGE_ITEMS = [
+  { id: 'sal_rusty_anchor', name: '⚓ 녹슨 해적선 닻', price: 5000, desc: '백 년 전 침몰한 해적선에서 건져 올린 무거운 철제 닻' },
+  { id: 'sal_silver_goblet', name: '🏆 고대 은제 성배', price: 15000, desc: '바닷속에서 은은한 광채를 잃지 않은 왕실의 은잔' },
+  { id: 'sal_gold_chest', name: '🪙 스페인 함선 황금 궤짝', price: 50000, desc: '금화와 은화가 가득 채워져 있는 무거운 보물상자' },
+  { id: 'sal_pearl_crown', name: '👑 심해 인어의 진주 왕관', price: 120000, desc: '영롱한 흑진주와 사파이어가 박힌 전설의 왕관' },
+  { id: 'sal_alien_artifact', name: '🛸 추락한 외계 잠수정 코어', price: 300000, desc: '미지의 외계 항성에서 유입된 무한 에너지 구체' },
+  { id: 'sal_atlantis_tablet', name: '📜 아틀란티스 석판 조각', price: 800000, desc: '잃어버린 고대 초고대 문명의 비밀이 새겨진 석판' },
+];
+
 // 미끼 확률 합 검증 및 물고기 100종 전수 검사
 function validateData() {
   if (FISH.length !== 100) {

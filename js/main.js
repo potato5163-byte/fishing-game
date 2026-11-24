@@ -18,6 +18,7 @@ import { cycleWeather, updateWeatherVisual } from './weather.js';
 import { showRatesModal } from './collection.js';
 import { showRankingModal } from './ranking.js';
 import { showSlotMachineModal } from './minigame.js';
+import { showVortexBossModal, showBioFusionModal, showSalvageCraneModal } from './special-systems.js';
 
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-item');
@@ -270,6 +271,21 @@ function showDailyQuestModal() {
 }
 
 function initSettings() {
+  const btnVortex = document.getElementById('btn-vortex');
+  if (btnVortex) {
+    btnVortex.addEventListener('click', showVortexBossModal);
+  }
+
+  const btnFusion = document.getElementById('btn-fusion');
+  if (btnFusion) {
+    btnFusion.addEventListener('click', showBioFusionModal);
+  }
+
+  const btnSalvage = document.getElementById('btn-salvage');
+  if (btnSalvage) {
+    btnSalvage.addEventListener('click', showSalvageCraneModal);
+  }
+
   const slotBtn = document.getElementById('btn-slot-machine');
   if (slotBtn) {
     slotBtn.addEventListener('click', showSlotMachineModal);
