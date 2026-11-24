@@ -904,6 +904,36 @@
   background-size: cover;
 }
 
+.scenery-rift {
+  background: radial-gradient(circle at 30% 40%, rgba(168, 85, 247, 0.5) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><polygon points="20,120 40,40 60,120 140,20 180,120 300,50 340,120 420,30 460,120" fill="%23a855f7" opacity="0.4"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-horizon {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.95) 0%, rgba(30, 27, 75, 0.8) 50%, transparent 75%),
+              conic-gradient(from 0deg at 50% 50%, #f59e0b, #ef4444, #3b82f6, #f59e0b);
+  filter: blur(1px);
+}
+
+.scenery-atlantis {
+  background: radial-gradient(circle at 50% 20%, rgba(45, 212, 191, 0.4) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M40,120 L40,30 L80,30 L80,120 M140,120 L140,10 L180,10 L180,120 M260,120 L260,40 L300,40 L300,120 M380,120 L380,20 L420,20 L420,120" stroke="%232dd4bf" stroke-width="6" fill="none" opacity="0.45"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-chronos {
+  background: radial-gradient(circle at 70% 30%, rgba(244, 114, 182, 0.5) 0%, transparent 60%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><circle cx="80" cy="60" r="30" stroke="%23f472b6" stroke-width="3" fill="none" opacity="0.4"/><circle cx="250" cy="50" r="45" stroke="%23c084fc" stroke-width="4" fill="none" opacity="0.4"/><circle cx="420" cy="70" r="25" stroke="%23f472b6" stroke-width="3" fill="none" opacity="0.4"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
+.scenery-genesis {
+  background: radial-gradient(circle at 50% 10%, rgba(254, 240, 138, 0.8) 0%, rgba(56, 189, 248, 0.5) 50%, transparent 80%),
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" preserveAspectRatio="none"><path d="M0,120 L0,70 Q125,30 250,70 T500,70 L500,120 Z" fill="%23ffffff" opacity="0.75"/></svg>') bottom repeat-x;
+  background-size: cover;
+}
+
 /* 2. 실시간 낚싯줄 베지어 곡선 SVG */
 .fishing-main-line-svg {
   position: absolute;

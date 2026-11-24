@@ -492,6 +492,15 @@ function handleReelFinish(result, fish) {
       return;
     }
 
+    // 신규 종결 낚싯대 특수 효과: 창세의 에테르 낚싯대 (더블 캐치 35% & 골드 1.5배)
+    let isDoubleCatch = false;
+    if (state.equippedRod === 'genesis_infinity_rod') {
+      fish.price = Math.round(fish.price * 1.5);
+      if (Math.random() < 0.35 && state.bag.length + 1 < getEffectiveBagCapacity()) {
+        isDoubleCatch = true;
+      }
+    }
+
     // 가방 아이템 생성 및 추가 (docs/05 1-1)
     const bagItem = {
       uid: 'f_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
@@ -502,6 +511,15 @@ function handleReelFinish(result, fish) {
       caughtAt: new Date().toISOString(),
     };
     addFishToBag(bagItem);
+
+    if (isDoubleCatch) {
+      const extraItem = {
+        ...bagItem,
+        uid: 'f_double_' + Date.now(),
+      };
+      addFishToBag(extraItem);
+      showToast(`🔱 [창세의 에테르] 더블 캐치 발동! ${fish.name} 2마리 동시 획득!`);
+    }
 
     // 도감 기록 갱신 (docs/06 2장)
     const recordResult = recordCatch(fish.id, fish.size);

@@ -15,7 +15,7 @@ export const RARITIES = {
   mythic:    { id: 'mythic',    name: '신화', cssVar: '--rarity-mythic' },
 };
 
-// 10개 지역
+// 15개 지역 (초대형 엔드콘텐츠 확장)
 export const REGIONS = [
   { id: 'lake', name: '잔잔한 호수', desc: '바람 한 점 없는 조용한 호수', unlockPrice: 0, requiredCollection: 0, completeReward: 500 },
   { id: 'river', name: '맑은 강', desc: '물살이 빠른 시원한 강', unlockPrice: 500, requiredCollection: 0, completeReward: 1500 },
@@ -27,6 +27,11 @@ export const REGIONS = [
   { id: 'volcano', name: '용암 분화호', desc: '끓어오르는 마그마 속에서 헤엄치는 불꽃의 생명체들', unlockPrice: 800000, requiredCollection: 65, completeReward: 400000 },
   { id: 'timewarp', name: '시간의 틈새 해저', desc: '과거와 미래의 시공간이 뒤엉킨 신비의 차원 바다', unlockPrice: 2500000, requiredCollection: 80, completeReward: 1000000 },
   { id: 'sky_ocean', name: '천상 유원지', desc: '무지개 구름 위 신들이 노니는 궁극의 천상 바다', unlockPrice: 8000000, requiredCollection: 90, completeReward: 5000000 },
+  { id: 'rift', name: '차원 왜곡 균열', desc: '시공간이 쪼개져 네온 픽셀 글리치가 흐르는 외계 바다', unlockPrice: 25000000, requiredCollection: 95, completeReward: 12000000 },
+  { id: 'horizon', name: '사건의 지평선', desc: '블랙홀의 강착원반 광선과 빛조차 빨아들이는 중력의 바다', unlockPrice: 80000000, requiredCollection: 105, completeReward: 35000000 },
+  { id: 'atlantis', name: '아틀란티스 신전', desc: '수억 년 전 가라앉은 초고대 기계 문명의 황금 성역', unlockPrice: 200000000, requiredCollection: 115, completeReward: 80000000 },
+  { id: 'chronos', name: '시간의 태엽 나선', desc: '선사 시대 고대어와 3000년 미래 기계어가 공존하는 시간 바다', unlockPrice: 500000000, requiredCollection: 125, completeReward: 200000000 },
+  { id: 'genesis', name: '창세의 에테르 성소', desc: '우주 만물 생명의 기원이 태동한 궁극의 성역 바다', unlockPrice: 1000000000, requiredCollection: 135, completeReward: 500000000 },
 ];
 
 // 미끼 8종 (신화 확률 포함)
@@ -128,9 +133,38 @@ export const RODS = {
     trackingWidth: 75, stunDuration: 5.5, reelMultiplier: 3.60,
     desc: '우주 전체를 가두는 신의 결계. 스매시 성공 시 즉시 35% 끌어당김!',
   },
+  rift_quantum: {
+    id: 'rift_quantum', name: '차원 수렴 퀀텀 낚싯대', emoji: '🌌', price: 30000000,
+    trackingWidth: 80, stunDuration: 6.0, reelMultiplier: 4.20, skill: 'teleport_pull',
+    desc: '⚡특수기: QTE 성공 시 물고기 즉시 30m 강제 순간이동 견인!',
+  },
+  dark_matter_rod: {
+    id: 'dark_matter_rod', name: '암흑물질 블랙홀 낚싯대', emoji: '🕳️', price: 100000000,
+    trackingWidth: 85, stunDuration: 6.5, reelMultiplier: 4.80, skill: 'blackhole_slow',
+    desc: '⚡특수기: 초중력장 발생으로 물고기 도주 속도 -50% 영구 감속!',
+  },
+  atlantis_ancient_rod: {
+    id: 'atlantis_ancient_rod', name: '아틀란티스 하이테크 낚싯대', emoji: '🏛️', price: 250000000,
+    trackingWidth: 90, stunDuration: 7.0, reelMultiplier: 5.50, skill: 'qte_double',
+    desc: '⚡특수기: 신전 나노 와이어로 QTE 판정 2배 확장 및 릴링 파워 극대화!',
+  },
+  chronos_rewind_rod: {
+    id: 'chronos_rewind_rod', name: '크로노스 타임루프 낚싯대', emoji: '⏳', price: 600000000,
+    trackingWidth: 95, stunDuration: 7.5, reelMultiplier: 6.20, skill: 'time_rewind',
+    desc: '⚡특수기: 릴 제한시간 소진 시 1회 시간 10초 되감기 부활!',
+  },
+  genesis_infinity_rod: {
+    id: 'genesis_infinity_rod', name: '궁극 창세의 에테르 낚싯대', emoji: '🔱', price: 1500000000,
+    trackingWidth: 100, stunDuration: 8.5, reelMultiplier: 7.50, skill: 'double_catch',
+    desc: '⚡궁극기: 35% 확률로 2마리 동시 낚기(Double Catch) & 판매 골드 1.5배!',
+  },
 };
 
-export const ROD_ORDER = ['bamboo', 'carbon', 'pro', 'legend', 'titanium', 'dragon', 'cosmic', 'magma', 'timewarp_rod', 'celestial_god'];
+export const ROD_ORDER = [
+  'bamboo', 'carbon', 'pro', 'legend', 'titanium', 'dragon',
+  'cosmic', 'magma', 'timewarp_rod', 'celestial_god',
+  'rift_quantum', 'dark_matter_rod', 'atlantis_ancient_rod', 'chronos_rewind_rod', 'genesis_infinity_rod'
+];
 
 // 특수 부적/아이템 (신규 상점 품목)
 export const SPECIAL_ITEMS = {
@@ -140,7 +174,7 @@ export const SPECIAL_ITEMS = {
   potion_zone: { id: 'potion_zone', name: '거인의 비약', emoji: '🧪', price: 8000, desc: '다음 낚시 5회 동안 잡기 영역 크기가 1.5배로 커집니다', maxCount: 99 },
 };
 
-// 가방 업그레이드 (20 -> 200마리)
+// 가방 업그레이드 (20 -> 500마리)
 export const BAG_UPGRADES = [
   { from: 20, to: 30, price: 400 },
   { from: 30, to: 40, price: 1000 },
@@ -149,6 +183,9 @@ export const BAG_UPGRADES = [
   { from: 70, to: 100, price: 15000 },
   { from: 100, to: 150, price: 50000 },
   { from: 150, to: 200, price: 150000 },
+  { from: 200, to: 300, price: 500000 },
+  { from: 300, to: 400, price: 2000000 },
+  { from: 400, to: 500, price: 10000000 },
 ];
 
 // 총 100종 물고기 (10개 지역 × 10마리씩)
@@ -273,6 +310,66 @@ export const FISH = [
   { id: 'eden_serpent', region: 'sky_ocean', name: '낙원의 비단구렁이', emoji: '🐍', rarity: 'epic', minSize: 400, maxSize: 1200, basePrice: 450000, difficulty: 5, desc: '천상 정원의 생명나무 아래를 지키는 영물' },
   { id: 'heavenly_phoenix', region: 'sky_ocean', name: '천상 봉황어', emoji: '🦚', rarity: 'epic', minSize: 300, maxSize: 900, basePrice: 650000, difficulty: 5, desc: '오색 깃털을 휘날리며 은빛 비를 내려줘요' },
   { id: 'celestial_yggdrasil', region: 'sky_ocean', name: '신화의 창조주 오메가', emoji: '🌌', rarity: 'mythic', minSize: 2000, maxSize: 5000, basePrice: 5000000, difficulty: 5, desc: '🌌[초월 신화] 우주와 천상 모든 낚시터의 시작과 끝을 관장하는 신' },
+
+  // 11. 차원 왜곡 균열 (rift) - 10마리
+  { id: 'glitch_minnow', region: 'rift', name: '글리치 송사리', emoji: '👾', rarity: 'common', minSize: 15, maxSize: 35, basePrice: 45000, difficulty: 4, desc: '데이터 오류처럼 깜빡이며 좌표를 이동해요' },
+  { id: 'pixel_plankton', region: 'rift', name: '네온 픽셀어', emoji: '🟩', rarity: 'common', minSize: 20, maxSize: 45, basePrice: 55000, difficulty: 4, desc: '8비트 레트로 비주얼로 빛나는 차원 생명체' },
+  { id: 'parallel_carp', region: 'rift', name: '평행세계 붕어', emoji: '🐟', rarity: 'common', minSize: 25, maxSize: 60, basePrice: 65000, difficulty: 5, desc: '다른 차원의 나를 마주보고 헤엄쳐요' },
+  { id: 'quantum_tetra', region: 'rift', name: '양자 중첩 피라미', emoji: '⚛️', rarity: 'common', minSize: 20, maxSize: 50, basePrice: 75000, difficulty: 5, desc: '관측하기 전까지는 위치를 알 수 없어요' },
+  { id: 'rift_manta', region: 'rift', name: '차원 도약 가오리', emoji: '🛸', rarity: 'rare', minSize: 80, maxSize: 200, basePrice: 220000, difficulty: 5, desc: '공간의 균열을 접어서 순식간에 워프해요' },
+  { id: 'gravity_invert_fish', region: 'rift', name: '반중력 갈치', emoji: '🗡️', rarity: 'rare', minSize: 70, maxSize: 180, basePrice: 280000, difficulty: 5, desc: '물속에서 거꾸로 서서 하늘로 솟구쳐요' },
+  { id: 'void_puffer', region: 'rift', name: '공허 복어', emoji: '🕳️', rarity: 'rare', minSize: 40, maxSize: 90, basePrice: 350000, difficulty: 5, desc: '부풀어 오르면 주변 빛을 집어삼켜요' },
+  { id: 'mobius_eel', region: 'rift', name: '뫼비우스 뱀장어', emoji: '♾️', rarity: 'epic', minSize: 120, maxSize: 300, basePrice: 900000, difficulty: 5, desc: '시작과 끝이 연결된 무한 루프의 장어' },
+  { id: 'hyperspace_whale', region: 'rift', name: '초공간 아성체 고래', emoji: '🐋', rarity: 'epic', minSize: 600, maxSize: 1800, basePrice: 1400000, difficulty: 5, desc: '4차원 공간을 뚫고 노래를 부르는 고래' },
+  { id: 'rift_nebula_dragon', region: 'rift', name: '차원 붕괴의 네뷸라 드래곤', emoji: '🐲', rarity: 'mythic', minSize: 1500, maxSize: 4500, basePrice: 9000000, difficulty: 5, desc: '🌌[신화] 차원의 벽을 산산조각 내며 강림하는 균열의 수호룡' },
+
+  // 12. 사건의 지평선 (horizon) - 10마리
+  { id: 'dark_matter_smelt', region: 'horizon', name: '암흑물질 빙어', emoji: '🖤', rarity: 'common', minSize: 15, maxSize: 40, basePrice: 90000, difficulty: 5, desc: '우주의 95%를 채우는 미지의 질량으로 된 빙어' },
+  { id: 'gamma_anchovy', region: 'horizon', name: '감마선 멸치', emoji: '⚡', rarity: 'common', minSize: 15, maxSize: 35, basePrice: 110000, difficulty: 5, desc: '초신성 폭발의 고에너지 감마선을 내뿜어요' },
+  { id: 'tachyon_sardine', region: 'horizon', name: '타키온 정어리', emoji: '💫', rarity: 'common', minSize: 20, maxSize: 45, basePrice: 130000, difficulty: 5, desc: '빛보다 빠르게 헤엄쳐 과거로 가버려요' },
+  { id: 'graviton_octopus', region: 'horizon', name: '중력자 문어', emoji: '🐙', rarity: 'common', minSize: 80, maxSize: 220, basePrice: 160000, difficulty: 5, desc: '여덟 개의 촉수로 중력장을 비틀어요' },
+  { id: 'accretion_angler', region: 'horizon', name: '강착원반 아귀', emoji: '🐡', rarity: 'rare', minSize: 70, maxSize: 180, basePrice: 480000, difficulty: 5, desc: '이마의 미끼가 블랙홀로 빨려 들어가는 빛이에요' },
+  { id: 'antimatter_jelly', region: 'horizon', name: '반물질 해파리', emoji: '🪼', rarity: 'rare', minSize: 50, maxSize: 130, basePrice: 600000, difficulty: 5, desc: '물질과 접촉하면 쌍소멸 에너지를 터뜨려요' },
+  { id: 'quasar_ray', region: 'horizon', name: '퀘이사 가오리', emoji: '✨', rarity: 'rare', minSize: 100, maxSize: 280, basePrice: 750000, difficulty: 5, desc: '수천억 개의 별보다 밝은 빛줄기를 뿜어요' },
+  { id: 'whitehole_shark', region: 'horizon', name: '화이트홀 분출 상어', emoji: '🦈', rarity: 'epic', minSize: 400, maxSize: 1100, basePrice: 2200000, difficulty: 5, desc: '모든 물질을 끝없이 뱉어내는 화이트홀의 정점' },
+  { id: 'singularity_serpent', region: 'horizon', name: '특이점 우주구렁이', emoji: '🐍', rarity: 'epic', minSize: 600, maxSize: 1600, basePrice: 3200000, difficulty: 5, desc: '밀도가 무한대인 중심핵에 똬리를 틀고 있어요' },
+  { id: 'blackhole_leviathan', region: 'horizon', name: '종말의 블랙홀 리바이어던', emoji: '🕳️', rarity: 'mythic', minSize: 2500, maxSize: 7000, basePrice: 20000000, difficulty: 5, desc: '🕳️[신화] 빛조차 탈출할 수 없는 사건의 지평선 최심부의 절대신' },
+
+  // 13. 아틀란티스 신전 (atlantis) - 10마리
+  { id: 'ancient_gear_fish', region: 'atlantis', name: '황금 태엽 나비어', emoji: '⚙️', rarity: 'common', minSize: 20, maxSize: 50, basePrice: 180000, difficulty: 5, desc: '초고대 황금 합금으로 제작된 자율 헤엄 기계' },
+  { id: 'orichalcum_tetra', region: 'atlantis', name: '오리하르콘 테트라', emoji: '🪙', rarity: 'common', minSize: 25, maxSize: 55, basePrice: 220000, difficulty: 5, desc: '영원히 녹슬지 않는 전설의 금속 비늘' },
+  { id: 'temple_stone_carp', region: 'atlantis', name: '신전 수호 석조잉어', emoji: '🗿', rarity: 'common', minSize: 40, maxSize: 90, basePrice: 260000, difficulty: 5, desc: '신전 기둥 조각상이 생명을 얻어 헤엄쳐요' },
+  { id: 'hydro_crystal_puffer', region: 'atlantis', name: '수경 크리스탈 복어', emoji: '💎', rarity: 'common', minSize: 30, maxSize: 70, basePrice: 300000, difficulty: 5, desc: '수백만 년 동안 수압을 견디며 다이아몬드가 된 복어' },
+  { id: 'poseidon_trout', region: 'atlantis', name: '포세이돈의 은빛 송어', emoji: '🐟', rarity: 'rare', minSize: 60, maxSize: 150, basePrice: 1100000, difficulty: 5, desc: '바다의 신의 축복을 받은 성스러운 송어' },
+  { id: 'sentinel_crab', region: 'atlantis', name: '센티널 아틀라스 바위게', emoji: '🦀', rarity: 'rare', minSize: 80, maxSize: 200, basePrice: 1400000, difficulty: 5, desc: '고대 신전의 보물창고 문을 지키는 기계 게' },
+  { id: 'trident_swordfish', region: 'atlantis', name: '삼지창 황금 황새치', emoji: '🔱', rarity: 'rare', minSize: 120, maxSize: 320, basePrice: 1800000, difficulty: 5, desc: '부리가 삼지창 형태로 진화한 신전의 경비병' },
+  { id: 'colossus_sea_turtle', region: 'atlantis', name: '아틀란티스 거신 현무', emoji: '🐢', rarity: 'epic', minSize: 400, maxSize: 1200, basePrice: 5500000, difficulty: 5, desc: '등 위에 침몰한 신전의 누각을 짊어진 고대 거북' },
+  { id: 'mecha_kraken_core', region: 'atlantis', name: '고대병기 프로토 크라켄', emoji: '🤖', rarity: 'epic', minSize: 800, maxSize: 2500, basePrice: 8000000, difficulty: 5, desc: '아틀란티스 문명이 남긴 궁극의 해저 결전 병기' },
+  { id: 'atlantis_god_emperor', name: '해신 아틀란티스 황제룡', region: 'atlantis', emoji: '🏛️', rarity: 'mythic', minSize: 3000, maxSize: 8888, basePrice: 50000000, difficulty: 5, desc: '🏛️[신화] 잃어버린 문명의 영원한 영광을 수호하는 해저의 신' },
+
+  // 14. 시간의 태엽 나선 (chronos) - 10마리
+  { id: 'triassic_coelacanth', region: 'chronos', name: '트라이아스 실러캔스', emoji: '🐟', rarity: 'common', minSize: 30, maxSize: 80, basePrice: 380000, difficulty: 5, desc: '공룡보다 먼저 지구에 나타났던 고대 어류' },
+  { id: 'amber_dunkle', region: 'chronos', name: '호박 화석 둔클레오', emoji: '🪨', rarity: 'common', minSize: 50, maxSize: 130, basePrice: 45000, difficulty: 5, desc: '단단한 호박 보석 속에 갇혔다가 풀려났어요' },
+  { id: 'gear_jellyfish', region: 'chronos', name: '태엽 시간 해파리', emoji: '⚙️', rarity: 'common', minSize: 35, maxSize: 80, basePrice: 550000, difficulty: 5, desc: '째깍째깍 초침을 돌리며 유영하는 해파리' },
+  { id: 'paradox_salmon', region: 'chronos', name: '시간 역행 황금연어', emoji: '🐟', rarity: 'common', minSize: 40, maxSize: 100, basePrice: 650000, difficulty: 5, desc: '미래에서 태어나 과거로 거슬러 올라가요' },
+  { id: 'pleiosaur_ray', region: 'chronos', name: '수장룡 지느러미 가오리', emoji: '🦕', rarity: 'rare', minSize: 120, maxSize: 300, basePrice: 2500000, difficulty: 5, desc: '쥐라기 바다 파충류의 유전자를 간직한 대형 가오리' },
+  { id: 'time_capsule_eel', region: 'chronos', name: '타임캡슐 메탈 장어', emoji: '🐍', rarity: 'rare', minSize: 100, maxSize: 250, basePrice: 3200000, difficulty: 5, desc: '서기 4000년의 역사 기록을 몸에 담고 있어요' },
+  { id: 'infinite_spiral_nautilus', region: 'chronos', name: '황금 나선 앵무조개', emoji: '🐚', rarity: 'rare', minSize: 50, maxSize: 140, basePrice: 4000000, difficulty: 5, desc: '피보나치 황금 나선으로 시공간을 왜곡해요' },
+  { id: 'mecha_megalodon_x', region: 'chronos', name: '사이버 메갈로돈 제로', emoji: '🦈', rarity: 'epic', minSize: 700, maxSize: 2000, basePrice: 12000000, difficulty: 5, desc: '선사시대 상어 화석에 나노머신이 융합된 궁극 괴수' },
+  { id: 'chrono_titan_whale', region: 'chronos', name: '세월의 나한 백경', emoji: '🐋', rarity: 'epic', minSize: 1500, maxSize: 400, basePrice: 18000000, difficulty: 5, desc: '등에 영원의 모래시계를 짊어지고 시간을 유영해요' },
+  { id: 'primordial_chronos_god', region: 'chronos', name: '시간의 절대주신 크로노스', emoji: '⌛', rarity: 'mythic', minSize: 4000, maxSize: 9999, basePrice: 120000000, difficulty: 5, desc: '⌛[신화] 과거, 현재, 미래 모든 차원의 흐름을 지배하는 태초신' },
+
+  // 15. 창세의 에테르 성소 (genesis) - 10마리 (궁극 종결)
+  { id: 'primordial_amoeba', region: 'genesis', name: '창세의 프리즘 송사리', emoji: '✨', rarity: 'common', minSize: 20, maxSize: 50, basePrice: 800000, difficulty: 5, desc: '우주 최초의 물 한 방울에서 피어난 생명체' },
+  { id: 'life_spark_tetra', region: 'genesis', name: '생명 불꽃 테트라', emoji: '🌟', rarity: 'common', minSize: 25, maxSize: 60, basePrice: 1000000, difficulty: 5, desc: '비늘 하나하나가 작은 은하처럼 반짝여요' },
+  { id: 'holy_light_guppy', region: 'genesis', name: '신성 광휘 구피', emoji: '🕊️', rarity: 'common', minSize: 30, maxSize: 70, basePrice: 1200000, difficulty: 5, desc: '순백의 신성한 빛으로 주변을 정화해요' },
+  { id: 'aether_butterfly_fish', region: 'genesis', name: '에테르 황금나비치', emoji: '🦋', rarity: 'common', minSize: 35, maxSize: 80, basePrice: 1500000, difficulty: 5, desc: '날갯짓마다 별가루를 흩뿌리는 천상 나비 물고기' },
+  { id: 'celestial_phoenix_carp', region: 'genesis', name: '오로라 불멸 잉어', emoji: '🎏', rarity: 'rare', minSize: 100, maxSize: 250, basePrice: 6000000, difficulty: 5, desc: '에테르 분수 속에서 끝없이 부활하는 성스러운 잉어' },
+  { id: 'sanctuary_archon_ray', region: 'genesis', name: '집정관 아르콘 가오리', emoji: '🪽', rarity: 'rare', minSize: 150, maxSize: 400, basePrice: 8000000, difficulty: 5, desc: '성소의 옥좌 주변을 순찰하는 천사 가오리' },
+  { id: 'eden_golden_salmon', region: 'genesis', name: '에덴의 순금 연어', emoji: '👑', rarity: 'rare', minSize: 90, maxSize: 240, basePrice: 10000000, difficulty: 5, desc: '생명의 강 최초의 상류에서만 산란하는 순금 연어' },
+  { id: 'world_tree_leviathan', region: 'genesis', name: '세계수 뿌리 레비아탄', emoji: '🌳', rarity: 'epic', minSize: 2000, maxSize: 5000, basePrice: 35000000, difficulty: 5, desc: '우주를 떠받치는 이그드라실의 뿌리를 지키는 영물' },
+  { id: 'seraphim_omega_whale', region: 'genesis', name: '치천사 오메가 세라프', emoji: '🪽', rarity: 'epic', minSize: 3000, maxSize: 8000, basePrice: 60000000, difficulty: 5, desc: '열두 장의 날개를 펼치고 창세의 성가를 부르는 고래' },
+  { id: 'genesis_supreme_ouroboros', region: 'genesis', name: '궁극 창조신 인피니티 우로보로스', emoji: '♾️', rarity: 'mythic', minSize: 5000, maxSize: 99999, basePrice: 300000000, difficulty: 5, desc: '♾️[궁극 초월] 온 우주 만물의 시작이자 영원한 무한을 상징하는 전지전능 창조신' },
 ];
 
 export const FISHING_CONFIG = {
@@ -354,10 +451,12 @@ export const BOATS = {
   fishing_boat: { id: 'fishing_boat', name: '바다 통통배', emoji: '🚤', price: 50000, bagBonus: 10, powerBonus: 5, desc: '가방 +10칸 & 캐스팅 파워 +5% 영구 보너스' },
   speed_boat: { id: 'speed_boat', name: '쾌속 낚시보트', emoji: '🛥️', price: 300000, bagBonus: 25, powerBonus: 12, desc: '가방 +25칸 & 캐스팅 파워 +12% 영구 보너스' },
   luxury_yacht: { id: 'luxury_yacht', name: '황금 크루즈 유람선', emoji: '🛳️', price: 2000000, bagBonus: 50, powerBonus: 25, desc: '가방 +50칸 & 캐스팅 파워 +25% 영구 보너스' },
+  hover_craft: { id: 'hover_craft', name: '차원 반중력 호버크래프트', emoji: '🛸', price: 50000000, bagBonus: 100, powerBonus: 40, desc: '가방 +100칸 & 캐스팅 파워 +40% 영구 보너스' },
+  hyperion_mothership: { id: 'hyperion_mothership', name: '성간 하이페리온 기함', emoji: '🚀', price: 300000000, bagBonus: 200, powerBonus: 60, desc: '가방 +200칸 & 캐스팅 파워 +60% 영구 보너스' },
 };
-export const BOAT_ORDER = ['wood_raft', 'fishing_boat', 'speed_boat', 'luxury_yacht'];
+export const BOAT_ORDER = ['wood_raft', 'fishing_boat', 'speed_boat', 'luxury_yacht', 'hover_craft', 'hyperion_mothership'];
 
-// 🤫 개발자만 알고 있는 20종의 비밀 히든 물고기 (유저에겐 서식지/출현조건 철저히 비공개)
+// 🤫 개발자만 알고 있는 40종의 비밀 히든 물고기 (유저에겐 서식지/출현조건 철저히 비공개)
 export const HIDDEN_FISH = [
   // 날씨 관련 히든 (4종)
   { id: 'hf_thunder_catfish', name: '⚡ 벼락 맞은 황금메기', emoji: '⚡', rarity: 'legendary', minSize: 120, maxSize: 240, basePrice: 35000, difficulty: 4, desc: '거센 비와 번개가 내리칠 때만 수면 위로 올라오는 번개의 화신', condition: 'weather_rainy' },
@@ -365,19 +464,22 @@ export const HIDDEN_FISH = [
   { id: 'hf_lunar_jellyfish', name: '🌙 달빛 심연 야광해파리', emoji: '🪼', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 90000, difficulty: 5, desc: '칠흑 같은 어둠 속 고요한 밤하늘 달빛을 쬐러 올라오는 푸른 네온 해파리', condition: 'weather_night' },
   { id: 'hf_sun_dragon', name: '☀️ 태양의 화염룡', emoji: '🌞', rarity: 'mythic', minSize: 300, maxSize: 800, basePrice: 120000, difficulty: 5, desc: '눈부시게 화창한 맑은 날, 태양의 적외선을 충전하러 승천하는 불의 용', condition: 'weather_sunny' },
 
-  // 장비/낚싯배 관련 히든 (4종)
+  // 장비/낚싯배 관련 히든 (6종)
   { id: 'hf_ancient_turtle', name: '🪵 고목 등껍질 거북', emoji: '🐢', rarity: 'rare', minSize: 60, maxSize: 140, basePrice: 18000, difficulty: 3, desc: '오래된 나무 뗏목 밑에 붙어 이끼를 뜯어먹고 살던 장수의 거북', condition: 'boat_wood_raft' },
   { id: 'hf_speed_sailfish', name: '🚤 모터 광속 돛새치', emoji: '🗡️', rarity: 'epic', minSize: 140, maxSize: 280, basePrice: 40000, difficulty: 4, desc: '통통배와 쾌속정의 스크루 물살 속도를 즐기는 질주의 사냥꾼', condition: 'boat_speed' },
   { id: 'hf_cruise_leviathan', name: '🛳️ 크루즈 삼킨 모비딕', emoji: '🐋', rarity: 'mythic', minSize: 1000, maxSize: 3500, basePrice: 250000, difficulty: 5, desc: '황금 크루즈 유람선의 거대한 닻을 장난감처럼 물고 노는 전설의 백경', condition: 'boat_yacht' },
+  { id: 'hf_hover_alien_manta', name: '🛸 반중력 외계 만타', emoji: '🛸', rarity: 'mythic', minSize: 500, maxSize: 1500, basePrice: 1200000, difficulty: 5, desc: '호버크래프트의 자기장 추진력을 연료로 섭취하는 우주 가오리', condition: 'boat_hover' },
+  { id: 'hf_mothership_star_whale', name: '🚀 하이페리온 항성 고래', emoji: '🌌', rarity: 'mythic', minSize: 3000, maxSize: 9999, basePrice: 3500000, difficulty: 5, desc: '성간 기함의 거대한 차원 엔진 소리에 화답하는 은하의 거수', condition: 'boat_mothership' },
   { id: 'hf_bamboo_spirit', name: '🎋 대나무 요정 송사리', emoji: '🎋', rarity: 'legendary', minSize: 15, maxSize: 30, basePrice: 50000, difficulty: 4, desc: '초보자의 대나무 낚싯대만을 그리워하여 나타나는 신비한 민물 정령', condition: 'rod_bamboo' },
 
-  // 피버 및 시간대/캐스팅 관련 히든 (4종)
+  // 피버 및 시간대/캐스팅 관련 히든 (5종)
   { id: 'hf_fever_phoenix', name: '🔥 광란의 불새어', emoji: '🦚', rarity: 'mythic', minSize: 150, maxSize: 400, basePrice: 180000, difficulty: 5, desc: '피버 타임의 뜨거운 열기에 이끌려 솟구쳐 오르는 열화의 영물', condition: 'fever_active' },
   { id: 'hf_sniper_barracuda', name: '🎯 100% 저격 바라쿠다', emoji: '🏹', rarity: 'epic', minSize: 90, maxSize: 200, basePrice: 38000, difficulty: 4, desc: '오직 게이지 100% 퍼펙트 캐스팅에만 날카롭게 반응하는 사냥꾼', condition: 'perfect_cast' },
   { id: 'hf_golden_koi_king', name: '👑 억만장자 황금비단잉어', emoji: '👑', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 300000, difficulty: 5, desc: '황금 미끼와 황금 복권의 기운을 받고 탄생한 물속의 대부호', condition: 'bait_golden' },
   { id: 'hf_rainbow_hydra', name: '🌈 칠색 무지개 히드라', emoji: '🐲', rarity: 'mythic', minSize: 500, maxSize: 1500, basePrice: 400000, difficulty: 5, desc: '무지개 미끼의 오색 빛깔 향기에 반응하여 깨어난 일곱 머리의 수룡', condition: 'bait_rainbow' },
+  { id: 'hf_lucky_seven_dolphin', name: '🎰 777 잭팟 행운돌고래', emoji: '🐬', rarity: 'mythic', minSize: 120, maxSize: 300, basePrice: 777777, difficulty: 5, desc: '슬롯머신 잭팟의 행운 기운을 타고 나타나는 황금 무지개 돌고래', condition: 'slot_jackpot' },
 
-  // 고난도 낚시터 심해/시공/우주 히든 (8종)
+  // 1~10 지역 서식 히든 (10종)
   { id: 'hf_cosmic_stardust', name: '✨ 성운의 별가루 엔젤', emoji: '⭐', rarity: 'legendary', minSize: 40, maxSize: 90, basePrice: 75000, difficulty: 4, desc: '은하수가 부서진 가루를 마시며 자라난 우주 속 천사 물고기', condition: 'region_nebula' },
   { id: 'hf_quantum_ghost', name: '⚛️ 양자 얽힘 유령어', emoji: '👾', rarity: 'mythic', minSize: 70, maxSize: 160, basePrice: 220000, difficulty: 5, desc: '시간의 틈새에서 존재와 소멸을 반복하는 4차원 홀로그램 생명체', condition: 'region_timewarp' },
   { id: 'hf_magma_behemoth', name: '🌋 용암핵 베히모스', emoji: '🦖', rarity: 'mythic', minSize: 600, maxSize: 1800, basePrice: 280000, difficulty: 5, desc: '화산 심장부 5000도 마그마 마그넷을 뚫고 기어나온 태고의 거수', condition: 'region_volcano' },
@@ -385,7 +487,28 @@ export const HIDDEN_FISH = [
   { id: 'hf_abyss_kraken', name: '🐙 심연의 공포 크라켄', emoji: '🦑', rarity: 'mythic', minSize: 800, maxSize: 2500, basePrice: 350000, difficulty: 5, desc: '심해 협곡 가장 깊은 1만 미터 참호에서 잠들어 있던 공포의 대왕 촉수', condition: 'region_abyss' },
   { id: 'hf_dragon_palace_emperor', name: '🐉 용궁 태상황룡', emoji: '🐲', rarity: 'mythic', minSize: 1200, maxSize: 3000, basePrice: 500000, difficulty: 5, desc: '용궁 깊숙한 옥좌 아래에서 여의주를 수호하는 궁극의 황제 용', condition: 'region_palace' },
   { id: 'hf_seraph_archangel', name: '🪽 치천사 미카엘 어류', emoji: '🪽', rarity: 'mythic', minSize: 400, maxSize: 1000, basePrice: 600000, difficulty: 5, desc: '천상 유원지 가장 높은 무지개 계단 위에서 빛을 내리는 수호 천사', condition: 'region_sky_ocean' },
-  { id: 'hf_genesis_ouroboros', name: '♾️ 무한의 창조 우로보로스', emoji: '🌌', rarity: 'mythic', minSize: 2500, maxSize: 9999, basePrice: 1000000, difficulty: 5, desc: '자신의 꼬리를 물고 세계의 순환과 영원을 상징하는 태초의 우주 뱀', condition: 'endgame_secret' },
+  { id: 'hf_lake_nessie', name: '🦕 호수의 네시 주니어', emoji: '🦕', rarity: 'epic', minSize: 200, maxSize: 600, basePrice: 150000, difficulty: 4, desc: '조용한 호수 안개 낀 새벽에만 목을 내미는 전설의 수룡 새끼', condition: 'region_lake' },
+  { id: 'hf_river_golden_otter', name: '🦦 황금 강달 어류', emoji: '🦦', rarity: 'legendary', minSize: 70, maxSize: 150, basePrice: 180000, difficulty: 4, desc: '맑은 강의 물살을 타고 조개를 깨먹는 영특한 황금 수달 어류', condition: 'region_river' },
+  { id: 'hf_sea_megalodon_ghost', name: '🦈 푸른 바다 유령 메갈로돈', emoji: '🦈', rarity: 'legendary', minSize: 800, maxSize: 2000, basePrice: 320000, difficulty: 5, desc: '수백만 년 전 멸종했던 거대 상어의 푸른 영혼', condition: 'region_sea' },
+
+  // 신규 11~15지역 초월 히든 (10종)
+  { id: 'hf_rift_glitch_dragon', name: '👾 차원 글리치 시공룡', emoji: '🐉', rarity: 'mythic', minSize: 2000, maxSize: 6000, basePrice: 15000000, difficulty: 5, desc: '차원 왜곡 균열 속에서 코드가 붕괴되며 깨어난 디지털 용', condition: 'region_rift' },
+  { id: 'hf_rift_hypercube', name: '🧊 4차원 테서랙트 어류', emoji: '💎', rarity: 'mythic', minSize: 100, maxSize: 300, basePrice: 12000000, difficulty: 5, desc: '보는 각도에 따라 형태가 끝없이 변하는 4차원 정육면체 생명체', condition: 'region_rift' },
+  { id: 'hf_horizon_hawking_rad', name: '☢️ 호킹 복사 광휘어', emoji: '☀️', rarity: 'mythic', minSize: 150, maxSize: 400, basePrice: 25000000, difficulty: 5, desc: '블랙홀이 소멸할 때 마지막으로 내뿜는 찬란한 호킹 복사의 정수', condition: 'region_horizon' },
+  { id: 'hf_horizon_dark_titan', name: '🕳️ 암흑 특이점 티탄상어', emoji: '🦈', rarity: 'mythic', minSize: 3500, maxSize: 8500, basePrice: 35000000, difficulty: 5, desc: '블랙홀 한가운데에서 중력을 삼키며 유영하는 절대 포식자', condition: 'region_horizon' },
+  { id: 'hf_atlantis_orichalcum_dragon', name: '🏛️ 오리하르콘 기계황룡', emoji: '🐲', rarity: 'mythic', minSize: 4000, maxSize: 9000, basePrice: 60000000, difficulty: 5, desc: '침몰한 아틀란티스 중앙 제어 컴퓨터가 가동한 영구동력 수호룡', condition: 'region_atlantis' },
+  { id: 'hf_atlantis_chronos_nautilus', name: '🐚 신전의 황금 나선 앵무조개', emoji: '🐚', rarity: 'mythic', minSize: 200, maxSize: 500, basePrice: 45000000, difficulty: 5, desc: '아틀란티스 왕족의 비밀 지도가 새겨진 신성한 앵무조개', condition: 'region_atlantis' },
+  { id: 'hf_chronos_time_rewinder', name: '⏳ 시간역행 크로노사우루스', emoji: '🐊', rarity: 'mythic', minSize: 3000, maxSize: 7500, basePrice: 150000000, difficulty: 5, desc: '시간의 태엽을 거꾸로 감아 부상을 스스로 치유하는 고대 해룡', condition: 'region_chronos' },
+  { id: 'hf_chronos_paradox_butterfly', name: '🦋 타임 패러독스 나비어', emoji: '🦋', rarity: 'mythic', minSize: 120, maxSize: 350, basePrice: 90000000, difficulty: 5, desc: '날갯짓 한 번에 미래의 태풍을 과거로 보내는 시공간 나비치', condition: 'region_chronos' },
+  { id: 'hf_genesis_aether_god', name: '🕊️ 태초의 창세 에테르신어', emoji: '🌟', rarity: 'mythic', minSize: 5000, maxSize: 15000, basePrice: 500000000, difficulty: 5, desc: '창세의 성소 중앙 분수에서 태어난 전 우주 모든 물고기의 어버이', condition: 'region_genesis' },
+  { id: 'hf_genesis_ouroboros', name: '♾️ 무한의 창조 우로보로스', emoji: '🌌', rarity: 'mythic', minSize: 10000, maxSize: 99999, basePrice: 1000000000, difficulty: 5, desc: '자신의 꼬리를 물고 세계의 순환과 영원을 상징하는 태초의 우주 뱀', condition: 'endgame_secret' },
+
+  // 특수 융합/인양/보스 연계 히든 (5종)
+  { id: 'hf_chimera_beast', name: '🧬 키메라 돌연변이 카오스', emoji: '🦖', rarity: 'mythic', minSize: 800, maxSize: 2500, basePrice: 8000000, difficulty: 5, desc: '생체 연구소의 수많은 실험 끝에 탄생한 궁극의 융합 생명체', condition: 'fusion_secret' },
+  { id: 'hf_salvage_treasure_shark', name: '🏴‍☠️ 해적선 금괴 먹은 상어', emoji: '🦈', rarity: 'mythic', minSize: 600, maxSize: 1800, basePrice: 5000000, difficulty: 5, desc: '침몰선 보물창고의 금괴를 온몸에 둘러 번쩍이는 보물 상어', condition: 'salvage_secret' },
+  { id: 'hf_boss_baby_leviathan', name: '👶 소용돌이 보스의 새끼용', emoji: '🐲', rarity: 'mythic', minSize: 300, maxSize: 900, basePrice: 6500000, difficulty: 5, desc: '차원 보스를 제압한 후 잔잔해진 수면에 홀로 남겨진 새끼 용', condition: 'vortex_secret' },
+  { id: 'hf_siamese_twin_koi', name: '🎏 샴쌍둥이 황금 비단잉어', emoji: '🎏', rarity: 'mythic', minSize: 100, maxSize: 250, basePrice: 10000000, difficulty: 5, desc: '머리가 두 개 달린 기적의 황금 잉어. 더블 캐치 발동 시 출현', condition: 'double_catch_secret' },
+  { id: 'hf_god_angler_trophy', name: '🏆 우주 낚시신의 황금 트로피어', emoji: '🏆', rarity: 'mythic', minSize: 500, maxSize: 1200, basePrice: 200000000, difficulty: 5, desc: '전 우주의 낚시터를 평정한 위대한 낚시신에게만 모습을 드러내는 살아있는 트로피', condition: 'god_angler_secret' },
 ];
 
 
@@ -424,10 +547,10 @@ export const SALVAGE_ITEMS = [
   { id: 'sal_atlantis_tablet', name: '📜 아틀란티스 석판 조각', price: 800000, desc: '잃어버린 고대 초고대 문명의 비밀이 새겨진 석판' },
 ];
 
-// 미끼 확률 합 검증 및 물고기 100종 전수 검사
+// 미끼 확률 합 검증 및 물고기 150종 전수 검사
 function validateData() {
-  if (FISH.length !== 100) {
-    console.error(`[데이터 오류] FISH 개수는 100개여야 하지만 현재 ${FISH.length}개입니다.`);
+  if (FISH.length !== 150) {
+    console.error(`[데이터 오류] FISH 개수는 150개여야 하지만 현재 ${FISH.length}개입니다.`);
   }
 
   for (const [id, bait] of Object.entries(BAITS)) {
