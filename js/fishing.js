@@ -287,10 +287,30 @@ function determineFish() {
   const chestChance = state.isFeverActive ? 0.15 : 0.07;
   if (Math.random() < chestChance) {
     const isGoldChest = Math.random() < 0.3;
-    const goldReward = isGoldChest ? Math.round(randomRange(15000, 35000)) : Math.round(randomRange(3000, 8000));
+
+    // 현재 스테이지(지역) 레벨에 비례하여 보물상자 상금 스케일링
+    // 1지역(호수) 배율 1x ~ 10지역(천상 유원지) 배율 150x+
+    const regionIdx = Math.max(0, REGIONS.findIndex((r) => r.id === state.currentRegion));
+    const stageMultiplier = [
+      1,      // 1. lake (1.5만 ~ 3.5만)
+      2.5,    // 2. river (3.75만 ~ 8.75만)
+      6,      // 3. sea (9만 ~ 21만)
+      15,     // 4. abyss (22.5만 ~ 52.5만)
+      35,     // 5. glacier (52.5만 ~ 122.5만)
+      80,     // 6. palace (120만 ~ 280만)
+      180,    // 7. nebula (270만 ~ 630만)
+      400,    // 8. volcano (600만 ~ 1400만)
+      900,    // 9. timewarp (1350만 ~ 3150만)
+      2000,   // 10. sky_ocean (3000만 ~ 7000만)
+    ][regionIdx] || (1 + regionIdx * 10);
+
+    const baseMin = isGoldChest ? 15000 : 3000;
+    const baseMax = isGoldChest ? 35000 : 8000;
+    const goldReward = Math.round(randomRange(baseMin * stageMultiplier, baseMax * stageMultiplier));
+
     pendingFish = {
       id: isGoldChest ? 'chest_gold' : 'chest_silver',
-      name: isGoldChest ? '👑 황금 해적 보물상자' : '📦 낡은 바다 보물상자',
+      name: isGoldChest ? `👑 [신화] 황금 해적 보물상자 (Lv.${regionIdx + 1})` : `📦 [전설] 바다 보물상자 (Lv.${regionIdx + 1})`,
       rarity: isGoldChest ? 'mythic' : 'legendary',
       emoji: isGoldChest ? '👑' : '📦',
       size: isGoldChest ? 99.9 : 50.0,
