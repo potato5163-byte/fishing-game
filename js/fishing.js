@@ -7,6 +7,8 @@ import {
   MESSAGES,
   REGIONS,
   TRASH_ITEMS,
+  BOATS,
+  WEATHER_FISH,
 } from './data.js';
 import {
   randomRange,
@@ -27,6 +29,7 @@ import {
   addFeverGauge,
   deactivateFever,
   addGold,
+  getEffectiveBagCapacity,
 } from './state.js';
 import { showToast, updateTopbar } from './ui.js';
 import { startReelGame, setReelHolding, isReelingActive } from './reel.js';
@@ -142,7 +145,7 @@ export function setState(next) {
 
 // 2-1. 던지기 시작 (IDLE -> CHARGING)
 function startCharging() {
-  if (state.bag.length >= state.bagCapacity) {
+  if (state.bag.length >= getEffectiveBagCapacity()) {
     showToast(MESSAGES.E01);
     return;
   }
@@ -279,6 +282,25 @@ function determineFish() {
       isTrash: true,
       ecoPoint: trash.point,
       desc: trash.desc,
+    };
+    return;
+  }
+
+  // 1-1. 날씨 전용 돌발 히든 보스 물고기 체크 (비, 안개, 밤 날씨 시 6% 확률로 출현!)
+  const w = getCurrentWeather();
+  if (WEATHER_FISH[w] && Math.random() < 0.06) {
+    const wf = WEATHER_FISH[w];
+    const size = randomRange(wf.minSize, wf.maxSize);
+    pendingFish = {
+      id: wf.id,
+      name: wf.name,
+      rarity: wf.rarity,
+      emoji: wf.emoji,
+      size: Number(size.toFixed(1)),
+      price: wf.basePrice,
+      difficulty: wf.difficulty,
+      desc: wf.desc,
+      isWeatherFish: true,
     };
     return;
   }
@@ -828,8 +850,11 @@ export function updateFishingIndicators() {
   if (rodEl) {
     const rod = RODS[state.equippedRod] || RODS.bamboo;
     const enhanceLevel = state.rodEnhancements ? (state.rodEnhancements[state.equippedRod] || 0) : 0;
-    const enhanceTag = enhanceLevel > 0 ? ` (+${enhanceLevel}강)` : '';
-    rodEl.textContent = `${rod.emoji} ${rod.name}${enhanceTag}`;
+    if (enhanceLevel > 0) {
+      enhanceTag = ` (+${enhanceLevel}강)`;
+    }
+    const boat = BOATS[state.equippedBoat] || BOATS.wood_raft;
+    rodEl.textContent = `${rod.emoji} ${rod.name}${enhanceTag} · ${boat.emoji} ${boat.name}`;
   }
 
   if (baitSelect) {

@@ -17,6 +17,7 @@ import { cycleWeather, updateWeatherVisual } from './weather.js';
 
 import { showRatesModal } from './collection.js';
 import { showRankingModal } from './ranking.js';
+import { showSlotMachineModal } from './minigame.js';
 
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-item');
@@ -269,6 +270,11 @@ function showDailyQuestModal() {
 }
 
 function initSettings() {
+  const slotBtn = document.getElementById('btn-slot-machine');
+  if (slotBtn) {
+    slotBtn.addEventListener('click', showSlotMachineModal);
+  }
+
   const rankingBtn = document.getElementById('btn-ranking');
   if (rankingBtn) {
     rankingBtn.addEventListener('click', showRankingModal);

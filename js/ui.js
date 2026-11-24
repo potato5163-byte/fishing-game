@@ -1,4 +1,4 @@
-import { state, setActiveTab } from './state.js';
+import { state, setActiveTab, getEffectiveBagCapacity } from './state.js';
 import { REGIONS } from './data.js';
 import { formatGold } from './utils.js';
 import { renderBag } from './bag.js';
@@ -24,8 +24,9 @@ export function updateTopbar() {
 
   if (bagEl) {
     const bagCount = state.bag.length;
-    bagEl.textContent = `🎒 ${bagCount}/${state.bagCapacity}`;
-    if (bagCount >= state.bagCapacity) {
+    const effectiveCap = getEffectiveBagCapacity();
+    bagEl.textContent = `🎒 ${bagCount}/${effectiveCap}`;
+    if (bagCount >= effectiveCap) {
       bagEl.classList.add('is-full');
     } else {
       bagEl.classList.remove('is-full');

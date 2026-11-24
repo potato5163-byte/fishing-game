@@ -1,4 +1,4 @@
-import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS } from './data.js';
+import { START, FISH, REGIONS, RODS, BAITS, BAG_UPGRADES, BAIT_MAX, MESSAGES, TRASH_ITEMS, ECO_SHOP, LOTTERY_TIERS, BOATS, BOAT_ORDER, WEATHER_FISH } from './data.js';
 import { updateTopbar, showToast } from './ui.js';
 
 const STORAGE_KEY = 'mulgyeol-fishing-save';
@@ -46,6 +46,8 @@ export function createNewState() {
     hasEcoRod: false, // 에코 낚싯대 보유 여부
     fisherName: '도시 어부', // 랭킹에 표시될 플레이어 닉네임
     rankingCompetitors: [], // 친구 및 타 유저 랭킹 프로필 목록
+    equippedBoat: 'wood_raft', // 보유 중인 낚싯배
+    ownedBoats: ['wood_raft'], // 소유한 낚싯배 목록
     // 일일 의뢰 (데일리 퀘스트)
     dailyQuests: [
       { id: 'q1', title: '물고기 5마리 낚기', current: 0, target: 5, reward: 5000, completed: false },
@@ -162,6 +164,8 @@ export function saveGame() {
     hasEcoRod: state.hasEcoRod || false,
     fisherName: state.fisherName || '도시 어부',
     rankingCompetitors: state.rankingCompetitors || [],
+    equippedBoat: state.equippedBoat || 'wood_raft',
+    ownedBoats: state.ownedBoats || ['wood_raft'],
     dailyQuests: state.dailyQuests || [],
     stats: state.stats,
   };
@@ -1089,5 +1093,105 @@ export function getRankingBoard(sortBy = 'score') {
 
   return list;
 }
+
+// ⛵ 낚싯배 구매 및 장착
+export function buyBoat(boatId) {
+  const boat = BOATS[boatId];
+  if (!boat) return { ok: false, error: '존재하지 않는 배입니다.' };
+  if (!state.ownedBoats) state.ownedBoats = ['wood_raft'];
+  if (state.ownedBoats.includes(boatId)) return { ok: false, error: '이미 보유 중인 배입니다.' };
+
+  if (state.gold < boat.price) {
+    return { ok: false, error: `골드가 부족합니다. (필요: ${formatGold(boat.price)}G)` };
+  }
+
+  state.gold -= boat.price;
+  state.ownedBoats.push(boatId);
+  state.equippedBoat = boatId;
+  saveGame();
+  updateTopbar();
+  return { ok: true, boat };
+}
+
+export function equipBoat(boatId) {
+  if (!state.ownedBoats || !state.ownedBoats.includes(boatId)) {
+    return { ok: false, error: '보유하지 않은 배입니다.' };
+  }
+  state.equippedBoat = boatId;
+  saveGame();
+  return { ok: true };
+}
+
+// ⛵ 보트 업그레이드로 인한 추가 가방 용량 계산
+export function getEffectiveBagCapacity() {
+  const baseCap = state.bagCapacity || 20;
+  const currentBoat = BOATS[state.equippedBoat] || BOATS.wood_raft;
+  return baseCap + (currentBoat.bagBonus || 0);
+}
+
+// 🎰 10,000G 행운의 슬롯머신 돌리기
+export function playSlotMachine() {
+  const COST = 10000;
+  if (state.gold < COST) {
+    return { ok: false, error: '골드가 부족합니다! (필요: 10,000G)' };
+  }
+
+  state.gold -= COST;
+
+  const symbols = ['🐟', '🌟', '👑', '7️⃣', '💣'];
+  const r1 = symbols[Math.floor(Math.random() * symbols.length)];
+  const r2 = symbols[Math.floor(Math.random() * symbols.length)];
+  const r3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+  let prizeType = 'none';
+  let prizeName = '아쉬워요, 다음 기회에!';
+  let rewardGold = 0;
+  let rewardBait = null;
+
+  if (r1 === '7️⃣' && r2 === '7️⃣' && r3 === '7️⃣') {
+    prizeType = 'jackpot';
+    prizeName = '🔥 [초대박 777 잭팟] 300,000G!';
+    rewardGold = 300000;
+  } else if (r1 === '👑' && r2 === '👑' && r3 === '👑') {
+    prizeType = 'crown';
+    prizeName = '👑 [황금 왕관 트리플] 150,000G!';
+    rewardGold = 150000;
+  } else if (r1 === '🌟' && r2 === '🌟' && r3 === '🌟') {
+    prizeType = 'star';
+    prizeName = '🌟 [행운의 별 트리플] 70,000G + 황금 미끼 10개!';
+    rewardGold = 70000;
+    rewardBait = { type: 'golden', count: 10 };
+  } else if (r1 === '🐟' && r2 === '🐟' && r3 === '🐟') {
+    prizeType = 'fish';
+    prizeName = '🐟 [풍어 트리플] 40,000G + 반짝이 미끼 10개!';
+    rewardGold = 40000;
+    rewardBait = { type: 'shiny', count: 10 };
+  } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+    prizeType = 'pair';
+    prizeName = '✨ [투 페어 매칭] 원금 회수 12,000G!';
+    rewardGold = 12000;
+  }
+
+  if (rewardGold > 0) {
+    state.gold += rewardGold;
+    state.stats.totalEarned = (state.stats.totalEarned || 0) + rewardGold;
+  }
+  if (rewardBait) {
+    state.baits[rewardBait.type] = (state.baits[rewardBait.type] || 0) + rewardBait.count;
+  }
+
+  saveGame();
+  updateTopbar();
+
+  return {
+    ok: true,
+    reels: [r1, r2, r3],
+    prizeType,
+    prizeName,
+    rewardGold,
+    rewardBait,
+  };
+}
+
 
 

@@ -348,6 +348,23 @@ export const LOTTERY_TIERS = [
   { rank: 4, name: '🎖️ 4등 실속 당첨', gold: 10000, baitType: 'worm', baitCount: 10, baitName: '지렁이 미끼', weight: 60, color: '#10b981' },
 ];
 
+// ⛵ 나만의 낚싯배 (선상 낚시) 커스텀 티어
+export const BOATS = {
+  wood_raft: { id: 'wood_raft', name: '낡은 목재 뗏목', emoji: '🪵', price: 0, bagBonus: 0, powerBonus: 0, desc: '강가에 띄워둔 기본 나무 뗏목' },
+  fishing_boat: { id: 'fishing_boat', name: '바다 통통배', emoji: '🚤', price: 50000, bagBonus: 10, powerBonus: 5, desc: '가방 +10칸 & 캐스팅 파워 +5% 영구 보너스' },
+  speed_boat: { id: 'speed_boat', name: '쾌속 낚시보트', emoji: '🛥️', price: 300000, bagBonus: 25, powerBonus: 12, desc: '가방 +25칸 & 캐스팅 파워 +12% 영구 보너스' },
+  luxury_yacht: { id: 'luxury_yacht', name: '황금 크루즈 유람선', emoji: '🛳️', price: 2000000, bagBonus: 50, powerBonus: 25, desc: '가방 +50칸 & 캐스팅 파워 +25% 영구 보너스' },
+};
+export const BOAT_ORDER = ['wood_raft', 'fishing_boat', 'speed_boat', 'luxury_yacht'];
+
+// 🌊 날씨 전용 돌발 히든 물고기
+export const WEATHER_FISH = {
+  rainy: { id: 'thunder_catfish', name: '⚡ 벼락 맞은 황금메기', emoji: '⚡', rarity: 'legendary', minSize: 120, maxSize: 240, basePrice: 25000, difficulty: 4, desc: '비 오는 날 번개 에너지를 흡수해 황금빛으로 번뜩이는 전설의 메기' },
+  foggy: { id: 'phantom_ray', name: '🌫️ 안개 속 유령가오리', emoji: '👻', rarity: 'legendary', minSize: 150, maxSize: 300, basePrice: 35000, difficulty: 4, desc: '짙은 안개가 자욱할 때만 수면 위로 유영하는 신비한 가오리' },
+  night: { id: 'lunar_jellyfish', name: '🌙 달빛 심연 야광해파리', emoji: '🪼', rarity: 'mythic', minSize: 80, maxSize: 180, basePrice: 80000, difficulty: 5, desc: '칠흑 같은 밤하늘 달빛을 머금고 푸른 네온빛을 뿜는 심연의 영물' },
+};
+
+
 
 // 미끼 확률 합 검증 및 물고기 100종 전수 검사
 function validateData() {

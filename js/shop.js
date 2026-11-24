@@ -8,6 +8,8 @@ import {
   getRodEnhanceLevel,
   getRodEnhanceCost,
   enhanceRod,
+  buyBoat,
+  equipBoat,
 } from './state.js';
 import {
   RODS,
@@ -16,6 +18,8 @@ import {
   BAIT_ORDER,
   BAG_UPGRADES,
   SPECIAL_ITEMS,
+  BOATS,
+  BOAT_ORDER,
   MESSAGES,
 } from './data.js';
 import { formatGold, formatMessage } from './utils.js';
@@ -35,9 +39,10 @@ export function renderShop() {
       <div class="t-subhead">🪙 보유 ${formatGold(state.gold)}G</div>
     </div>
 
-    <!-- 상점 탭 토글 (알약 4개) -->
+    <!-- 상점 탭 토글 (알약 5개) -->
     <div class="shop-tab-group">
       <button class="shop-tab-pill ${activeShopTab === 'rod' ? 'is-active' : ''}" data-shoptab="rod">낚싯대</button>
+      <button class="shop-tab-pill ${activeShopTab === 'boat' ? 'is-active' : ''}" data-shoptab="boat">⛵ 낚싯배</button>
       <button class="shop-tab-pill ${activeShopTab === 'bait' ? 'is-active' : ''}" data-shoptab="bait">미끼</button>
       <button class="shop-tab-pill ${activeShopTab === 'special' ? 'is-active' : ''}" data-shoptab="special">특수 아이템</button>
       <button class="shop-tab-pill ${activeShopTab === 'bag' ? 'is-active' : ''}" data-shoptab="bag">가방</button>
@@ -46,11 +51,13 @@ export function renderShop() {
     <div class="shop-content-pane" id="shop-content">
       ${activeShopTab === 'rod'
       ? renderRodTab()
-      : activeShopTab === 'bait'
-        ? renderBaitTab()
-        : activeShopTab === 'special'
-          ? renderSpecialTab()
-          : renderBagTab()
+      : activeShopTab === 'boat'
+        ? renderBoatTab()
+        : activeShopTab === 'bait'
+          ? renderBaitTab()
+          : activeShopTab === 'special'
+            ? renderSpecialTab()
+            : renderBagTab()
     }
     </div>
   `;
@@ -156,6 +163,43 @@ function renderBaitTab() {
           </div>
         `;
   }).join('')}
+    </div>
+  `;
+}
+
+function renderBoatTab() {
+  const ownedBoats = state.ownedBoats || ['wood_raft'];
+  const equippedBoat = state.equippedBoat || 'wood_raft';
+
+  return `
+    <div class="shop-list">
+      ${BOAT_ORDER.map((id) => {
+        const boat = BOATS[id];
+        const isOwned = ownedBoats.includes(id);
+        const isEquipped = equippedBoat === id;
+
+        return `
+          <div class="shop-item-row ${isEquipped ? 'is-equipped' : ''}">
+            <div class="shop-item-emoji">${boat.emoji}</div>
+            <div class="shop-item-info">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="t-card-title">${boat.name}</span>
+                ${isEquipped ? '<span class="collection-reward-tag is-claimed">장착 중</span>' : ''}
+              </div>
+              <div class="t-body-sm" style="color: var(--color-subtext);">${boat.desc}</div>
+            </div>
+            <div class="shop-item-action">
+              ${
+                isEquipped
+                  ? `<button class="btn-secondary" disabled>장착 중</button>`
+                  : isOwned
+                  ? `<button class="btn-secondary btn-equip-boat" data-boat-id="${id}">탑승하기</button>`
+                  : `<button class="btn-primary btn-buy-boat" data-boat-id="${id}" style="height: 44px; padding: 0 var(--space-md); font-size: 14px;">구매 ${formatGold(boat.price)}G</button>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('')}
     </div>
   `;
 }
@@ -279,6 +323,39 @@ function bindShopEvents(screen) {
       const rod = RODS[rodId];
       equipRod(rodId);
       showToast(formatMessage(MESSAGES.EQUIP_ROD, { rodName: rod.name }));
+      updateFishingIndicators();
+      renderShop();
+    });
+  });
+
+  // ⛵ 보트 구매 및 탑승 이벤트
+  const buyBoatBtns = screen.querySelectorAll('.btn-buy-boat');
+  buyBoatBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const boatId = btn.dataset.boatId;
+      const boat = BOATS[boatId];
+      if (!boat) return;
+
+      showHighPriceConfirmModal(`${boat.name}을(를) ${formatGold(boat.price)}G에 구매하시겠습니까?`, () => {
+        const res = buyBoat(boatId);
+        if (res.ok) {
+          showToast(`⛵ [${boat.name}]을(를) 구매하여 탑승했습니다!`);
+          updateFishingIndicators();
+          renderShop();
+        } else {
+          showToast(res.error);
+        }
+      });
+    });
+  });
+
+  const equipBoatBtns = screen.querySelectorAll('.btn-equip-boat');
+  equipBoatBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const boatId = btn.dataset.boatId;
+      const boat = BOATS[boatId];
+      equipBoat(boatId);
+      showToast(`⛵ [${boat.name}]에 탑승했습니다!`);
       updateFishingIndicators();
       renderShop();
     });
