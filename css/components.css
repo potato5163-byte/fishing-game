@@ -831,14 +831,84 @@
   z-index: 2;
 }
 
-.fishing-water-surface {
+/* 고화질 다층 파도 & 윤슬(빛 반사) 시스템 */
+.fishing-water-container {
   position: absolute;
   top: 45%;
+  bottom: 0;
   left: 0;
-  width: 100%;
-  height: 12px;
-  transform: translateY(-50%);
+  right: 0;
+  overflow: hidden;
+  pointer-events: none;
   z-index: 2;
+}
+
+.water-shimmer {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 40px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.05) 75%, transparent 100%);
+  animation: shimmer-drift 6s linear infinite;
+  filter: blur(2px);
+}
+
+@keyframes shimmer-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+
+.fishing-water-wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.wave-back {
+  animation: wave-flow 10s ease-in-out infinite alternate;
+  opacity: 0.6;
+}
+
+.wave-mid {
+  animation: wave-flow 6.5s ease-in-out infinite alternate-reverse;
+  opacity: 0.8;
+}
+
+.wave-front {
+  animation: wave-flow 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes wave-flow {
+  0% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(-25%) scaleY(1.15); }
+  100% { transform: translateX(-50%) scaleY(0.95); }
+}
+
+/* 수면 아래 유영하는 물고기 실루엣 */
+.underwater-shadow {
+  position: absolute;
+  top: 60%;
+  left: -60px;
+  width: 44px;
+  height: 16px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 80%);
+  border-radius: 50%;
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 2;
+  animation: fish-swim 14s ease-in-out infinite;
+}
+
+@keyframes fish-swim {
+  0% { transform: translate(0, 0) scale(0.8) rotate(5deg); opacity: 0; }
+  15% { opacity: 0.6; }
+  50% { transform: translate(260px, 20px) scale(1.2) rotate(-5deg); opacity: 0.7; }
+  85% { opacity: 0.5; }
+  100% { transform: translate(520px, -15px) scale(0.9) rotate(8deg); opacity: 0; }
 }
 
 /* 강화된 낚싯대 빛남 효과 */
@@ -905,15 +975,36 @@
   transform: translate(-50%, -50%);
   font-size: 24px;
   z-index: 3;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  transition: transform 0.1s ease;
+}
+
+.fishing-bobber::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  width: 22px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.7) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: bobber-ripple 1.8s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes bobber-ripple {
+  0% { transform: translateX(-50%) scale(0.5); opacity: 0.9; }
+  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
 }
 
 .fishing-bobber.is-biting {
-  animation: bobber-shake 0.1s infinite alternate;
+  animation: bobber-bite-pulse 0.1s infinite alternate;
 }
 
-@keyframes bobber-shake {
-  0% { transform: translate(-50%, -50%) translateY(-4px); }
-  100% { transform: translate(-50%, -50%) translateY(4px); }
+@keyframes bobber-bite-pulse {
+  0% { transform: translate(-50%, -50%) translateY(-6px) scale(0.95); filter: drop-shadow(0 0 10px #ef4444); }
+  100% { transform: translate(-50%, -50%) translateY(6px) scale(1.1); filter: drop-shadow(0 0 20px #ef4444); }
 }
 
 .fishing-bite-alert {
