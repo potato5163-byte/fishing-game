@@ -48,6 +48,7 @@ export function createNewState() {
     rankingCompetitors: [], // 친구 및 타 유저 랭킹 프로필 목록
     equippedBoat: 'wood_raft', // 보유 중인 낚싯배
     ownedBoats: ['wood_raft'], // 소유한 낚싯배 목록
+    defeatedBosses: {}, // { boss_kraken: { count: 1, firstDefeatedAt: ... }, ... }
     // 일일 의뢰 (데일리 퀘스트)
     dailyQuests: [
       { id: 'q1', title: '물고기 5마리 낚기', current: 0, target: 5, reward: 5000, completed: false },

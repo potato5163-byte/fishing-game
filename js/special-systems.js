@@ -113,10 +113,67 @@ function summonVortexBoss(bossId) {
     if (result === 'success') {
       addGold(boss.rewardGold);
       playSound('legendary');
-      showToast(`🎉 ${boss.name}을(를) 제압했습니다! 보상 +${boss.rewardGold.toLocaleString()}G!`);
+
+      // 보스 도감 기록 갱신
+      if (!state.defeatedBosses) state.defeatedBosses = {};
+      if (!state.defeatedBosses[boss.id]) {
+        state.defeatedBosses[boss.id] = {
+          count: 1,
+          firstDefeatedAt: new Date().toISOString(),
+        };
+      } else {
+        state.defeatedBosses[boss.id].count = (state.defeatedBosses[boss.id].count || 0) + 1;
+      }
+      saveGame();
+      updateTopbar();
+
+      showBossVictoryModal(boss);
     } else {
       showToast(`${boss.name}이(가) 차원 너머로 도주했습니다...`);
     }
+  });
+}
+
+// 👑 보스 격퇴 전용 대형 승리 모달
+export function showBossVictoryModal(boss) {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="boss-victory-scrim">
+      <div class="modal-content color-block block-navy" style="max-height: 85vh; text-align: center; padding: 28px 18px; border: 3px solid #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);">
+        <div class="t-eyebrow" style="color: #fbbf24; font-size: 13px; letter-spacing: 2px;">⚡ RAID BOSS DEFEATED ⚡</div>
+        <div class="t-headline" style="color: #ffffff; font-size: 26px; margin-top: 4px;">
+          ${boss.name} 토벌 완료!
+        </div>
+
+        <div style="margin: 20px 0; padding: 20px; background: rgba(15, 23, 42, 0.8); border-radius: var(--radius-lg); border: 2px solid #38bdf8;">
+          <div style="font-size: 72px; filter: drop-shadow(0 0 25px #38bdf8); animation: bounce 1s infinite alternate;">
+            ${boss.emoji}
+          </div>
+          <div style="font-size: 14px; color: #cbd5e1; margin-top: 12px; line-height: 1.5;">
+            ${boss.desc}
+          </div>
+          <div style="margin-top: 14px; padding: 8px 16px; background: rgba(245, 158, 11, 0.15); border-radius: var(--radius-pill); display: inline-block; border: 1.5px solid #f59e0b;">
+            <span style="font-size: 13px; font-weight: 800; color: #fde68a;">📖 보스 레이드 도감에 영구 등록되었습니다!</span>
+          </div>
+          <div style="font-size: 26px; font-weight: 900; color: #fbbf24; margin-top: 16px;" class="tabular-nums">
+            현상금 +${boss.rewardGold.toLocaleString()}G 지급!
+          </div>
+        </div>
+
+        <button id="btn-close-boss-victory" class="btn-primary" style="width: 100%; height: 50px; background: #7c3aed; font-size: 16px; font-weight: 800;">
+          확인 및 보상 수령
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-close-boss-victory')?.addEventListener('click', () => {
+    modalRoot.innerHTML = '';
+  });
+  document.getElementById('boss-victory-scrim')?.addEventListener('click', (e) => {
+    if (e.target.id === 'boss-victory-scrim') modalRoot.innerHTML = '';
   });
 }
 

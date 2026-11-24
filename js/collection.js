@@ -1,5 +1,5 @@
 import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
-import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH } from './data.js';
+import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
@@ -9,7 +9,7 @@ export function renderCollection() {
   if (!screen) return;
 
   const collectedCount = Object.keys(state.collection || {}).length;
-  const percent = Math.round((collectedCount / 100) * 100);
+  const percent = Math.round((collectedCount / 150) * 100);
   const crownTotal = state.stats && state.stats.crownCount ? state.stats.crownCount : 0;
   const pendingRevenue = getAquariumPendingGold();
   const aquariumList = state.aquarium || [];
@@ -20,7 +20,7 @@ export function renderCollection() {
       <div class="color-block-header">
         <div>
           <div class="t-headline">수족관 & 도감</div>
-          <div class="t-subhead">도감 ${collectedCount}/100 · 👑 황금 왕관 ${crownTotal}개</div>
+          <div class="t-subhead">도감 ${collectedCount}/150 · 👑 황금 왕관 ${crownTotal}개</div>
         </div>
         <button id="btn-show-rates" class="btn-primary" style="height: 38px; font-size: 13px; padding: 0 var(--space-md); background: #000; color: #fff;">
           📊 물고기 확률표
@@ -71,6 +71,7 @@ export function renderCollection() {
     </div>
 
     <div class="collection-body">
+      ${renderBossRaidSection()}
       ${REGIONS.map((region) => renderRegionSection(region)).join('')}
       ${renderHiddenFishSection()}
     </div>
@@ -209,7 +210,55 @@ function renderFishCard(fish) {
   `;
 }
 
-// 🤫 20종 비밀 히든 도감 섹션 렌더링 (서식지/출현조건 철저히 비공개)
+// 🌀 보스 레이드 도감 섹션 렌더링
+function renderBossRaidSection() {
+  const bosses = VORTEX_BOSSES || [];
+  const defeatedCount = bosses.filter((b) => state.defeatedBosses && state.defeatedBosses[b.id]).length;
+
+  return `
+    <div class="collection-region-group" style="border: 2px solid #7c3aed; border-radius: var(--radius-lg); padding: var(--space-sm); background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%); margin-bottom: var(--space-md);">
+      <div class="collection-region-header">
+        <div class="t-card-title" style="color: #5b21b6; display: flex; align-items: center; gap: 6px;">
+          🌀 차원 소용돌이 보스 도감
+          <span class="collection-region-count tabular-nums" style="color: #7c3aed; font-weight: 800;">${defeatedCount}/${bosses.length}</span>
+        </div>
+        <span class="collection-reward-tag" style="background: #ede9fe; color: #6d28d9; border-color: #c4b5fd;">
+          레이드 제압 증표 👑
+        </span>
+      </div>
+
+      <div class="collection-grid">
+        ${bosses.map((boss) => renderBossCard(boss)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderBossCard(boss) {
+  const record = state.defeatedBosses ? state.defeatedBosses[boss.id] : null;
+
+  if (!record) {
+    return `
+      <div class="collection-card is-unknown" style="border: 1px dashed #c4b5fd; min-height: 110px;">
+        <div class="collection-card-emoji-box" style="opacity: 0.35; background: #ede9fe; font-size: 32px;">❓</div>
+        <div class="collection-card-name t-body-sm" style="color: #8b5cf6;">미확인 보스</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="collection-card is-known rarity-mythic-card" style="border: 2px solid #7c3aed; background: linear-gradient(180deg, #ffffff 60%, rgba(124, 58, 237, 0.1) 100%); min-height: 110px;">
+      <span class="collection-card-count-badge tabular-nums" style="background: #7c3aed; color: #fff;">${record.count}회 격퇴</span>
+      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ede9fe 0%, #ddd6fe 100%); font-size: 36px;">
+        ${boss.emoji}
+      </div>
+      <div class="collection-card-name t-body-sm" style="font-weight: 800; color: #4c1d95; text-align: center;">${boss.name}</div>
+      <span class="badge-rarity rarity-mythic" style="margin-top: 2px;">보스 레이드</span>
+    </div>
+  `;
+}
+
+// 🤫 40종 비밀 히든 도감 섹션 렌더링 (서식지/출현조건 철저히 비공개)
 function renderHiddenFishSection() {
   const caughtHiddenCount = HIDDEN_FISH.filter((f) => state.collection && state.collection[f.id]).length;
 
@@ -218,7 +267,7 @@ function renderHiddenFishSection() {
       <div class="collection-region-header">
         <div class="t-card-title" style="color: #7e22ce; display: flex; align-items: center; gap: 6px;">
           🤫 미지의 비밀 히든 도감
-          <span class="collection-region-count tabular-nums" style="color: #9333ea; font-weight: 800;">${caughtHiddenCount}/20</span>
+          <span class="collection-region-count tabular-nums" style="color: #9333ea; font-weight: 800;">${caughtHiddenCount}/40</span>
         </div>
         <span class="collection-reward-tag" style="background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe;">
           출현 조건: 일급 비밀 🔒
