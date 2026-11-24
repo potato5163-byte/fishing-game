@@ -1,4 +1,4 @@
-import { updateTopbar, switchTab } from './ui.js';
+import { updateTopbar, switchTab, showToast } from './ui.js';
 import { state, loadGame, resetGame, exportSaveCode, importSaveCode, toggleSpeedMode, exchangeEcoReward } from './state.js';
 import {
   handleMainActionPress,
