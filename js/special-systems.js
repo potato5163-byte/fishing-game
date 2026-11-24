@@ -218,7 +218,7 @@ function renderFusionContent() {
           <button id="btn-close-fusion" class="btn-icon" style="background: rgba(0,0,0,0.1);">✕</button>
         </div>
         <div class="t-headline" style="color: #065f46;">🧬 심해 생체 융합 연구소</div>
-        <div class="t-subhead">물고기 2마리의 유전자를 결합해 신화 돌연변이 어종을 탄생시킵니다! (비용 15,000G)</div>
+        <div class="t-subhead">물고기 2마리의 유전자를 결합해 신화 돌연변이 어종을 탄생시킵니다!</div>
 
         <!-- 융합 슬롯 2개 -->
         <div style="display: flex; gap: 12px; margin: 16px 0; justify-content: center;">
@@ -227,6 +227,7 @@ function renderFusionContent() {
             <div id="fusion-slot-1-text" style="font-size: 14px; font-weight: 700; margin-top: 6px;">
               ${selectedFusion1 !== null ? (FISH.find(f => f.id === state.bag[selectedFusion1]?.fishId)?.name || '선택됨') : '물고기 선택'}
             </div>
+            ${selectedFusion1 !== null ? `<div style="font-size: 12px; color: #059669; font-weight: 700;">${(state.bag[selectedFusion1]?.price || 0).toLocaleString()}G</div>` : ''}
           </div>
           <div style="align-self: center; font-size: 20px;">⚡</div>
           <div style="flex: 1; padding: 12px; background: #fff; border-radius: var(--radius-md); text-align: center; border: 2px dashed #ea580c;">
@@ -234,12 +235,23 @@ function renderFusionContent() {
             <div id="fusion-slot-2-text" style="font-size: 14px; font-weight: 700; margin-top: 6px;">
               ${selectedFusion2 !== null ? (FISH.find(f => f.id === state.bag[selectedFusion2]?.fishId)?.name || '선택됨') : '물고기 선택'}
             </div>
+            ${selectedFusion2 !== null ? `<div style="font-size: 12px; color: #ea580c; font-weight: 700;">${(state.bag[selectedFusion2]?.price || 0).toLocaleString()}G</div>` : ''}
           </div>
         </div>
 
-        <button id="btn-do-fusion" class="btn-primary" style="width: 100%; height: 48px; background: #059669; font-weight: 800;">
-          🧬 유전자 융합 실행 (15,000G)
-        </button>
+        ${(() => {
+          const item1 = selectedFusion1 !== null ? state.bag[selectedFusion1] : null;
+          const item2 = selectedFusion2 !== null ? state.bag[selectedFusion2] : null;
+          const fusionCost = (item1 && item2) ? Math.max(500, Math.round((item1.price + item2.price) * 0.4)) : 5000;
+          return `
+            <div style="text-align: center; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #047857;">
+              필요 연구비: <span style="font-size: 16px; color: #d97706;" class="tabular-nums">${fusionCost.toLocaleString()}G</span>
+            </div>
+            <button id="btn-do-fusion" class="btn-primary" style="width: 100%; height: 48px; background: #059669; font-weight: 800;">
+              🧬 유전자 융합 실행 (${fusionCost.toLocaleString()}G)
+            </button>
+          `;
+        })()}
 
         <div style="margin-top: 16px;">
           <div style="font-size: 13px; font-weight: 700; color: #047857; margin-bottom: 8px;">가방 속 물고기 목록 (${state.bag.length}마리):</div>
@@ -284,11 +296,19 @@ function doFusion() {
     showToast('융합할 물고기 2마리를 먼저 선택해주세요.');
     return;
   }
-  const cost = 15000;
+
+  const fishItem1 = state.bag[selectedFusion1];
+  const fishItem2 = state.bag[selectedFusion2];
+  if (!fishItem1 || !fishItem2) return;
+
+  const cost = Math.max(500, Math.round((fishItem1.price + fishItem2.price) * 0.4));
   if (state.gold < cost) {
-    showToast('생체 융합 연구비(15,000G)가 부족합니다.');
+    showToast(`생체 융합 연구비(${cost.toLocaleString()}G)가 부족합니다.`);
     return;
   }
+
+  const name1 = FISH.find(f => f.id === fishItem1.fishId)?.name || '물고기1';
+  const name2 = FISH.find(f => f.id === fishItem2.fishId)?.name || '물고기2';
 
   // 재료 물고기 제거 (뒤 인덱스부터 제거)
   const idx1 = selectedFusion1;
@@ -304,11 +324,15 @@ function doFusion() {
   // 하이브리드 어종 무작위 획득
   const hybrid = HYBRID_FISH[Math.floor(Math.random() * HYBRID_FISH.length)];
 
+  // 재료 물고기의 가치를 반영한 균형잡힌 보너스 가격 계산
+  const baseCombined = fishItem1.price + fishItem2.price;
+  const finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.8 + 15000));
+
   const newBagItem = {
     uid: 'hyb_' + Date.now(),
     fishId: hybrid.id,
     size: 250.0,
-    price: hybrid.basePrice,
+    price: finalPrice,
     isCrown: true,
     caughtAt: new Date().toISOString(),
   };
@@ -318,10 +342,68 @@ function doFusion() {
   updateTopbar();
 
   playSound('legendary');
-  showToast(`🎉 융합 대성공! 돌연변이 신화 어종 [${hybrid.name}] 탄생! (+${hybrid.basePrice.toLocaleString()}G 가치)`);
 
+  // 결과 전용 팝업창 띄우기
+  showFusionResultModal(hybrid, finalPrice, name1, name2);
+}
+
+// 🧬 생체 융합 결과 전용 팝업창
+function showFusionResultModal(hybrid, finalPrice, parent1, parent2) {
   const modalRoot = document.getElementById('modal-root');
-  if (modalRoot) modalRoot.innerHTML = '';
+  if (!modalRoot) return;
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="fusion-result-scrim">
+      <div class="modal-content color-block block-mint" style="max-height: 85vh; text-align: center; padding: 24px 18px; border: 2.5px solid #10b981; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);">
+        <div class="t-eyebrow" style="color: #047857; letter-spacing: 1px;">GENETIC SYNTHESIS COMPLETE</div>
+        <div class="t-headline" style="color: #065f46; font-size: 24px; margin-top: 4px;">
+          🧬 생체 융합 대성공!
+        </div>
+
+        <div style="font-size: 13px; color: #047857; margin-top: 6px;">
+          [${parent1}] + [${parent2}] 의 DNA가 결합되었습니다!
+        </div>
+
+        <div style="margin: 18px 0; padding: 20px; background: #ffffff; border-radius: var(--radius-lg); border: 2px solid #a7f3d0;">
+          <div style="font-size: 64px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); animation: bounce 1s infinite alternate;">
+            ${hybrid.emoji}
+          </div>
+          <div style="font-size: 20px; font-weight: 900; margin-top: 10px; color: #065f46;">
+            ${hybrid.name}
+          </div>
+          <div style="display: inline-block; margin-top: 6px; padding: 3px 12px; background: #ecfdf5; border-radius: var(--radius-pill); border: 1px solid #10b981;">
+            <span style="font-size: 12px; font-weight: 800; color: #059669;">👑 돌연변이 신화 어종 (황금 왕관)</span>
+          </div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 10px; line-height: 1.4;">
+            ${hybrid.desc}
+          </div>
+          <div style="font-size: 24px; font-weight: 900; color: #059669; margin-top: 14px;" class="tabular-nums">
+            가치: +${finalPrice.toLocaleString()}G
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-fusion-again" class="btn-primary" style="flex: 1; height: 48px; background: #059669; font-weight: 800;">
+            한 번 더 융합하기
+          </button>
+          <button id="btn-close-fusion-result" class="btn-secondary" style="flex: 1; height: 48px; font-weight: 700;">
+            가방에 보관
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-close-fusion-result')?.addEventListener('click', () => {
+    modalRoot.innerHTML = '';
+  });
+  document.getElementById('fusion-result-scrim')?.addEventListener('click', (e) => {
+    if (e.target.id === 'fusion-result-scrim') modalRoot.innerHTML = '';
+  });
+
+  document.getElementById('btn-fusion-again')?.addEventListener('click', () => {
+    showBioFusionModal();
+  });
 }
 
 // ========================================================
