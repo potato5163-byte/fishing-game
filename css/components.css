@@ -352,39 +352,107 @@
 }
 
 /* ========================================================
-   도감 럭셔리 수족관 스타일 업그레이드
+   도감 럭셔리 수집형 TCG 트레이딩 카드 스타일 리마스터
 ======================================================== */
 .collection-card {
   background: #FFFFFF;
   border-radius: var(--radius-lg);
-  padding: var(--space-sm);
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 110px;
+  justify-content: space-between;
+  min-height: 145px;
   cursor: pointer;
-  border: 1px solid var(--color-hairline);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1.5px solid var(--color-hairline);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
 }
 
 .collection-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
 }
 
-.collection-card.rarity-mythic-card {
-  border: 1.5px solid #FF007F;
-  background: linear-gradient(180deg, #FFFFFF 60%, rgba(255, 0, 127, 0.08) 100%);
+/* TCG 홀로그램 광택 레이어 */
+.collection-card.is-known::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 60%);
+  transform: rotate(30deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.collection-card.is-known:hover::before {
+  opacity: 1;
+  animation: card-holo-shine 1.2s ease-in-out;
+}
+
+@keyframes card-holo-shine {
+  0% { transform: translateY(-30%) rotate(30deg); }
+  100% { transform: translateY(30%) rotate(30deg); }
+}
+
+/* 등급별 럭셔리 카드 프레임 */
+.collection-card.rarity-common-card {
+  border: 1.5px solid #94a3b8;
+  background: linear-gradient(180deg, #FFFFFF 60%, #f1f5f9 100%);
+}
+
+.collection-card.rarity-rare-card {
+  border: 2px solid #0284c7;
+  background: linear-gradient(180deg, #FFFFFF 55%, #e0f2fe 100%);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+}
+
+.collection-card.rarity-epic-card {
+  border: 2px solid #9333ea;
+  background: linear-gradient(180deg, #FFFFFF 55%, #f3e8ff 100%);
+  box-shadow: 0 4px 16px rgba(147, 51, 234, 0.2);
 }
 
 .collection-card.rarity-legendary-card {
-  border: 1.5px solid #FFD166;
-  background: linear-gradient(180deg, #FFFFFF 60%, rgba(255, 209, 102, 0.12) 100%);
+  border: 2px solid #f59e0b;
+  background: linear-gradient(180deg, #FFFFFF 50%, #fef3c7 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.28);
+}
+
+.collection-card.rarity-mythic-card {
+  border: 2px solid #ec4899;
+  background: linear-gradient(180deg, #FFFFFF 45%, #fce7f3 100%);
+  box-shadow: 0 6px 24px rgba(236, 72, 153, 0.35);
+  animation: card-mythic-pulse 3s infinite alternate;
+}
+
+@keyframes card-mythic-pulse {
+  0% { border-color: #ec4899; box-shadow: 0 0 15px rgba(236, 72, 153, 0.4); }
+  50% { border-color: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+  100% { border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+}
+
+.collection-card-emoji-box {
+  width: 100%;
+  height: 68px;
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease;
+}
+
+.collection-card:hover .collection-card-emoji-box {
+  transform: scale(1.08);
 }
 
 /* 지역 테마별 물고기 이모지 박스 & 카드 비주얼 차별화 */
@@ -1509,7 +1577,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* 3D 물고기 객체 */
+/* 3D 물고기 객체 & 날뛰는 벡터 피쉬 연출 */
 .reel-fish-3d {
   position: absolute;
   top: 45%;
@@ -1520,7 +1588,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: left 0.1s ease-out, top 0.15s ease-out;
+  transition: left 0.08s ease-out, top 0.12s ease-out;
 }
 
 .fish-avatar-wrap {
@@ -1529,81 +1597,98 @@
   flex-direction: column;
   align-items: center;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7));
 }
 
 .fish-avatar-emoji {
-  font-size: 42px;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
-  display: inline-block;
-  transform: scaleX(-1);
-  transition: transform 0.15s ease;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  transition: transform 0.12s ease;
+  animation: fish-swim-struggle 0.4s infinite alternate ease-in-out;
+}
+
+@keyframes fish-swim-struggle {
+  0% { transform: rotate(-5deg) translateY(-2px); }
+  100% { transform: rotate(5deg) translateY(2px); }
 }
 
 .fish-avatar-shadow {
-  width: 40px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.4);
+  width: 55px;
+  height: 14px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, transparent 75%);
   border-radius: 50%;
   filter: blur(2px);
-  margin-top: -6px;
+  margin-top: -8px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 /* 물고기 폭주 (RAGE) 모드 */
-.reel-fish-3d.is-rage-mode .fish-avatar-emoji {
-  filter: drop-shadow(0 0 14px #ef4444) saturate(2);
-  animation: rage-shake 0.15s infinite alternate ease-in-out;
+.reel-fish-3d.is-rage-mode .fish-avatar-wrap {
+  filter: drop-shadow(0 0 20px #ef4444) saturate(2.2);
+  animation: rage-shake 0.1s infinite alternate ease-in-out;
 }
 
 @keyframes rage-shake {
-  from { transform: scaleX(-1) translateY(-2px); }
-  to { transform: scaleX(-1) translateY(2px); }
+  from { transform: scale(1.1) translateY(-3px) rotate(-3deg); }
+  to { transform: scale(1.1) translateY(3px) rotate(3deg); }
 }
 
-/* 물고기 점프(JUMP) 상태 */
+/* 물고기 점프(JUMP) 상태: 물 밖으로 솟구침 */
 .reel-fish-3d.is-jumping .fish-avatar-wrap {
-  transform: translateY(-70px) scale(1.4);
+  transform: translateY(-85px) scale(1.55);
+  animation: jump-aerial-spin 0.6s infinite linear;
+}
+
+@keyframes jump-aerial-spin {
+  0% { filter: drop-shadow(0 20px 25px rgba(0,0,0,0.4)) brightness(1.2); }
+  50% { filter: drop-shadow(0 25px 30px rgba(56, 189, 248, 0.8)) brightness(1.4); }
+  100% { filter: drop-shadow(0 20px 25px rgba(0,0,0,0.4)) brightness(1.2); }
 }
 
 .reel-fish-3d.is-jumping .fish-avatar-shadow {
-  transform: scale(0.4);
-  opacity: 0.15;
+  transform: scale(0.3);
+  opacity: 0.1;
 }
 
 .fish-jump-alert {
   position: absolute;
-  top: -95px;
+  top: -115px;
   background: linear-gradient(90deg, #ef4444, #f59e0b);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
-  padding: 5px 12px;
+  padding: 6px 16px;
   border-radius: var(--radius-pill);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.9), inset 0 0 10px rgba(255, 255, 255, 0.5);
   white-space: nowrap;
-  animation: jump-badge-pulse 0.25s infinite alternate ease-in-out;
+  animation: jump-badge-pulse 0.2s infinite alternate ease-in-out;
   z-index: 10;
+  letter-spacing: 0.5px;
 }
 
 @keyframes jump-badge-pulse {
   from { transform: scale(1); filter: brightness(1); }
-  to { transform: scale(1.18); filter: brightness(1.3); }
+  to { transform: scale(1.15); filter: brightness(1.3); }
 }
 
 .fish-water-splash {
   position: absolute;
-  bottom: 0;
-  width: 50px;
-  height: 14px;
+  bottom: -4px;
+  width: 60px;
+  height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  opacity: 0.7;
-  animation: splash-ripple 1s infinite linear;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  opacity: 0.8;
+  animation: splash-ripple 0.8s infinite linear;
 }
 
 @keyframes splash-ripple {
-  0% { transform: scale(0.5); opacity: 0.9; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% { transform: scale(0.4); opacity: 0.95; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
 /* 고화질 1인칭 낚싯대 & 스피닝 릴 시스템 */

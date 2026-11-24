@@ -207,14 +207,14 @@ function renderFishCard(fish) {
   if (!record) {
     return `
       <div class="collection-card is-unknown" data-fish-id="${fish.id}">
-        <div class="collection-card-emoji-box" style="opacity: 0.35;">❔</div>
-        <div class="collection-card-name t-body-sm">???</div>
+        <div class="collection-card-emoji-box" style="opacity: 0.35; background: #f8fafc;">❓</div>
+        <div class="collection-card-name t-body-sm" style="color: #94a3b8;">???</div>
       </div>
     `;
   }
 
   const rarity = RARITIES[fish.rarity] || RARITIES.common;
-  const cardClass = fish.rarity === 'mythic' ? 'rarity-mythic-card' : fish.rarity === 'legendary' ? 'rarity-legendary-card' : '';
+  const cardClass = `rarity-${fish.rarity}-card`;
   const crownBadge = record.crown ? '<span class="collection-crown-badge" title="최대 크기 95% 이상 황금 왕관!">👑</span>' : '';
   const themeClass = `theme-${fish.region || 'lake'}`;
 
@@ -234,11 +234,13 @@ function renderFishCard(fish) {
       <span class="collection-card-count-badge tabular-nums">${record.count}회</span>
       ${crownBadge}
       <div class="collection-card-emoji-box ${themeClass}">
-        ${getFishSvg(fish.id, 46)}
+        ${getFishSvg(fish.id, 56)}
       </div>
-      <div class="collection-card-name t-body-sm" style="font-weight: 700;">${fish.name}</div>
-      <span class="fish-family-tag">${familyTag}</span>
-      <span class="badge-rarity rarity-${fish.rarity}" style="margin-top: 2px;">${rarity.name}</span>
+      <div class="collection-card-name t-body-sm" style="font-weight: 800; text-align: center; margin: 2px 0;">${fish.name}</div>
+      <div style="display: flex; gap: 4px; align-items: center; justify-content: center; width: 100%;">
+        <span class="fish-family-tag">${familyTag}</span>
+        <span class="badge-rarity rarity-${fish.rarity}" style="font-size: 10px; padding: 1px 6px;">${rarity.name}</span>
+      </div>
     </div>
   `;
 }
@@ -294,7 +296,7 @@ function renderBossCard(boss) {
 
   if (!record) {
     return `
-      <div class="collection-card is-unknown" style="border: 1px dashed #c4b5fd; min-height: 110px;">
+      <div class="collection-card is-unknown" style="border: 1px dashed #c4b5fd; min-height: 145px;">
         <div class="collection-card-emoji-box" style="opacity: 0.35; background: #ede9fe; font-size: 32px;">❓</div>
         <div class="collection-card-name t-body-sm" style="color: #8b5cf6;">미확인 보스</div>
       </div>
@@ -302,10 +304,10 @@ function renderBossCard(boss) {
   }
 
   return `
-    <div class="collection-card is-known rarity-mythic-card" style="border: 2px solid #7c3aed; background: linear-gradient(180deg, #ffffff 60%, rgba(124, 58, 237, 0.1) 100%); min-height: 110px;">
+    <div class="collection-card is-known rarity-mythic-card" style="min-height: 145px; border: 2px solid #7c3aed; background: linear-gradient(180deg, #ffffff 60%, rgba(124, 58, 237, 0.1) 100%);">
       <span class="collection-card-count-badge tabular-nums" style="background: #7c3aed; color: #fff;">${record.count}회 격퇴</span>
-      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ede9fe 0%, #ddd6fe 100%); font-size: 36px;">
-        ${boss.emoji}
+      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ede9fe 0%, #ddd6fe 100%);">
+        ${getFishSvg(boss.id, 56)}
       </div>
       <div class="collection-card-name t-body-sm" style="font-weight: 800; color: #4c1d95; text-align: center;">${boss.name}</div>
       <span class="badge-rarity rarity-mythic" style="margin-top: 2px;">보스 레이드</span>
@@ -364,7 +366,7 @@ function renderMutationCard(mut) {
 
   if (count <= 0) {
     return `
-      <div class="collection-card is-unknown" style="border: 1px dashed #a7f3d0; min-height: 110px;">
+      <div class="collection-card is-unknown" style="border: 1px dashed #a7f3d0; min-height: 145px;">
         <div class="collection-card-emoji-box" style="opacity: 0.35; background: #ecfdf5; font-size: 32px;">❓</div>
         <div class="collection-card-name t-body-sm" style="color: #10b981;">미발견 변이</div>
       </div>
@@ -372,13 +374,13 @@ function renderMutationCard(mut) {
   }
 
   const rarityMeta = RARITIES[mut.rarity] || RARITIES.common;
-  const cardClass = mut.rarity === 'mythic' ? 'rarity-mythic-card' : mut.rarity === 'legendary' ? 'rarity-legendary-card' : '';
+  const cardClass = `rarity-${mut.rarity}-card`;
 
   return `
-    <div class="collection-card is-known ${cardClass}" style="min-height: 110px;">
+    <div class="collection-card is-known ${cardClass}" style="min-height: 145px;">
       <span class="collection-card-count-badge tabular-nums" style="background: #059669; color: #fff;">${count}회 융합</span>
-      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ecfdf5 0%, #d1fae5 100%); font-size: 36px;">
-        ${mut.emoji}
+      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ecfdf5 0%, #d1fae5 100%);">
+        ${getFishSvg(mut.id, 50)}
       </div>
       <div class="collection-card-name t-body-sm" style="font-weight: 800; color: #065f46; text-align: center;">${mut.name}</div>
       <span class="badge-rarity rarity-${mut.rarity}" style="margin-top: 2px;">${rarityMeta.name}</span>
@@ -439,7 +441,7 @@ function renderHiddenFishCard(fish) {
   `;
 }
 
-// 럭셔리 수족관 상세 모달
+// 럭셔리 수족관 상세 모달 (3D 아쿠아리움 뷰어 리마스터)
 function showFishDetailModal(fishId) {
   let fish = getFishMeta(fishId, FISH, HIDDEN_FISH, HYBRID_FISH, VORTEX_BOSSES);
   let isHidden = HIDDEN_FISH.some((f) => f.id === fishId);
@@ -459,45 +461,55 @@ function showFishDetailModal(fishId) {
   const modalRoot = document.getElementById('modal-root');
   if (!modalRoot) return;
 
+  const crownText = record.crown ? '👑 황금 왕관 (최대치 달성!)' : '일반 등급';
+
   modalRoot.innerHTML = `
     <div class="modal-scrim" id="modal-detail-scrim">
-      <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}">
-        <div class="modal-content" style="padding: var(--space-xl) var(--space-lg); text-align: center;">
-          <div style="display: flex; justify-content: center; align-items: center; margin-bottom: var(--space-sm); filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));">
-            ${getFishSvg(fish.id, 100)}
-          </div>
-          <div class="t-display" style="font-size: 26px; font-weight: 700;">${fish.name}</div>
-          <div style="margin: 6px 0 var(--space-xs) 0;">
-            <span class="badge-rarity rarity-${fish.rarity}">${rarity.name}</span>
-          </div>
-          <div class="t-body-sm" style="color: var(--color-ink); margin-bottom: var(--space-md); opacity: 0.85;">
-            ${fish.desc}
+      <div class="modal-dialog ${fish.rarity === 'mythic' ? 'is-mythic' : fish.rarity === 'legendary' ? 'is-legendary' : ''}" style="max-width: 380px;">
+        <div class="modal-content" style="padding: 0; text-align: center; border-radius: var(--radius-lg); overflow: hidden; background: #ffffff;">
+          <!-- 아쿠아리움 수조 뷰어 헤더 -->
+          <div style="background: radial-gradient(circle at 50% 40%, #0284c7 0%, #0369a1 50%, #0f172a 100%); padding: 36px 16px 24px 16px; position: relative; overflow: hidden; box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);">
+            <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18) 0%, transparent 60%); pointer-events: none;"></div>
+            <div style="display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation: fish-swim-struggle 1.5s infinite alternate ease-in-out;">
+              ${getFishSvg(fish.id, 140)}
+            </div>
+            ${record.crown ? '<span style="position: absolute; top: 12px; right: 14px; font-size: 24px; filter: drop-shadow(0 0 10px #f59e0b);">👑</span>' : ''}
           </div>
 
-          <div class="modal-info-list" style="text-align: left; width: 100%;">
-            <div class="modal-info-row">
-              <span class="t-body-sm">서식지</span>
-              <span class="t-body-sm" style="font-weight: 600;">${region.name}</span>
+          <div style="padding: var(--space-lg);">
+            <div class="t-display" style="font-size: 24px; font-weight: 800; color: #0f172a;">${fish.name}</div>
+            <div style="margin: 8px 0 12px 0;">
+              <span class="badge-rarity rarity-${fish.rarity}" style="font-size: 12px; padding: 3px 12px;">${rarity.name} 어종</span>
             </div>
-            <div class="modal-info-row">
-              <span class="t-body-sm">총 낚은 횟수</span>
-              <span class="t-body-sm tabular-nums" style="font-weight: 600;">${record.count}마리</span>
+            <div class="t-body-sm" style="color: #475569; margin-bottom: var(--space-md); line-height: 1.5; background: #f8fafc; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid #e2e8f0;">
+              ${fish.desc}
             </div>
-            <div class="modal-info-row">
-              <span class="t-body-sm">최대 기록 크기</span>
-              <span class="t-body-sm tabular-nums" style="font-weight: 700; color: var(--color-ink);">${record.maxSize.toFixed(1)}cm</span>
-            </div>
-            <div class="modal-info-row">
-              <span class="t-body-sm">크기 범위</span>
-              <span class="t-body-sm tabular-nums">${fish.minSize} ~ ${fish.maxSize}cm</span>
-            </div>
-            <div class="modal-info-row">
-              <span class="t-body-sm">최초 발견일</span>
-              <span class="t-body-sm tabular-nums">${dateStr}</span>
-            </div>
-          </div>
 
-          <button id="btn-close-detail" class="btn-primary modal-action-btn" style="margin-top: var(--space-md);">닫기</button>
+            <div class="modal-info-list" style="text-align: left; width: 100%; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 8px 14px; background: #ffffff;">
+              <div class="modal-info-row" style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <span class="t-body-sm" style="color: #64748b;">주요 서식지</span>
+                <span class="t-body-sm" style="font-weight: 700; color: #0284c7;">${region.name}</span>
+              </div>
+              <div class="modal-info-row" style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <span class="t-body-sm" style="color: #64748b;">총 포획 수</span>
+                <span class="t-body-sm tabular-nums" style="font-weight: 700;">${record.count} 마리</span>
+              </div>
+              <div class="modal-info-row" style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <span class="t-body-sm" style="color: #64748b;">최대 크기 기록</span>
+                <span class="t-body-sm tabular-nums" style="font-weight: 800; color: #ea580c;">${record.maxSize.toFixed(1)} cm</span>
+              </div>
+              <div class="modal-info-row" style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <span class="t-body-sm" style="color: #64748b;">체급 등급</span>
+                <span class="t-body-sm" style="font-weight: 700; color: #f59e0b;">${crownText}</span>
+              </div>
+              <div class="modal-info-row" style="padding: 6px 0;">
+                <span class="t-body-sm" style="color: #64748b;">최초 낚은 일자</span>
+                <span class="t-body-sm tabular-nums" style="color: #94a3b8;">${dateStr}</span>
+              </div>
+            </div>
+
+            <button id="btn-close-detail" class="btn-primary modal-action-btn" style="margin-top: var(--space-md); width: 100%; height: 44px; font-weight: 800;">확인</button>
+          </div>
         </div>
       </div>
     </div>
