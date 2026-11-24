@@ -322,12 +322,77 @@ export function showSalvageCraneModal() {
     saveGame();
     updateTopbar();
 
-    const pickedItem = SALVAGE_ITEMS[Math.floor(Math.random() * SALVAGE_ITEMS.length)];
-    addGold(pickedItem.price);
+    const startBtn = document.getElementById('btn-start-salvage');
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.textContent = '⏳ 심해 와이어 인양 중... (3초 소요)';
+    }
 
-    playSound('legendary');
-    showToast(`🏗️ 침몰선 인양 성공! [${pickedItem.name}] 획득! (+${pickedItem.price.toLocaleString()}G)`);
+    playSound('cast');
+    showToast('⚓ 초고강도 와이어가 심해 1,000m 바닥으로 내려갑니다...');
 
+    setTimeout(() => {
+      const pickedItem = SALVAGE_ITEMS[Math.floor(Math.random() * SALVAGE_ITEMS.length)];
+      addGold(pickedItem.price);
+      playSound('legendary');
+
+      showSalvageResultModal(pickedItem);
+    }, 1200);
+  });
+}
+
+function showSalvageResultModal(item) {
+  const modalRoot = document.getElementById('modal-root');
+  if (!modalRoot) return;
+
+  const isJackpot = item.price >= 100000;
+
+  modalRoot.innerHTML = `
+    <div class="modal-scrim" id="salvage-result-scrim">
+      <div class="modal-content color-block ${isJackpot ? 'block-navy' : 'block-cream'}" style="max-height: 85vh; text-align: center; padding: 24px 16px;">
+        <div class="t-eyebrow" style="${isJackpot ? 'color: #38bdf8;' : ''}">SALVAGE SUCCESS</div>
+        <div class="t-headline" style="${isJackpot ? 'color: #fbbf24;' : 'color: #9a3412;'}">
+          ${isJackpot ? '✨ 대박 유물 건져올림!! ✨' : '🏗️ 침몰선 보물 인양 완료!'}
+        </div>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${isJackpot ? '#0f172a' : '#ffffff'}; border-radius: var(--radius-lg); border: 2px solid ${isJackpot ? '#f59e0b' : '#fed7aa'}; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <div style="font-size: 60px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); animation: bounce 1s infinite alternate;">
+            ${item.id.includes('anchor') ? '⚓' : item.id.includes('goblet') ? '🏆' : item.id.includes('crown') ? '👑' : item.id.includes('artifact') ? '🛸' : item.id.includes('tablet') ? '📜' : '🪙'}
+          </div>
+          <div style="font-size: 20px; font-weight: 900; margin-top: 12px; color: ${isJackpot ? '#ffffff' : '#1e293b'};">
+            ${item.name}
+          </div>
+          <div style="font-size: 13px; color: ${isJackpot ? '#94a3b8' : '#64748b'}; margin-top: 6px;">
+            ${item.desc}
+          </div>
+          <div style="font-size: 24px; font-weight: 900; color: #f59e0b; margin-top: 14px;" class="tabular-nums">
+            +${item.price.toLocaleString()}G 획득!
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-salvage-again" class="btn-primary" style="flex: 1; height: 48px; background: #ea580c; font-weight: 800;">
+            한 번 더 인양 (30,000G)
+          </button>
+          <button id="btn-close-salvage-result" class="btn-secondary" style="flex: 1; height: 48px; font-weight: 700;">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-close-salvage-result')?.addEventListener('click', () => {
     modalRoot.innerHTML = '';
+  });
+  document.getElementById('salvage-result-scrim')?.addEventListener('click', (e) => {
+    if (e.target.id === 'salvage-result-scrim') modalRoot.innerHTML = '';
+  });
+
+  document.getElementById('btn-salvage-again')?.addEventListener('click', () => {
+    showSalvageCraneModal();
+    setTimeout(() => {
+      document.getElementById('btn-start-salvage')?.click();
+    }, 100);
   });
 }
