@@ -321,27 +321,64 @@ function doFusion() {
 
   state.gold -= cost;
 
-  // 하이브리드 어종 무작위 획득
-  const hybrid = HYBRID_FISH[Math.floor(Math.random() * HYBRID_FISH.length)];
+  // 🎲 100종 돌연변이 등급별 확률 룰 적용 (일반 45%, 희귀 30%, 영웅 15%, 전설 8%, 신화 2%)
+  const rand = Math.random() * 100;
+  let targetRarity = 'common';
+  if (rand < 2) {
+    targetRarity = 'mythic'; // 2% 초대박
+  } else if (rand < 10) {
+    targetRarity = 'legendary'; // 8% 대성공
+  } else if (rand < 25) {
+    targetRarity = 'epic'; // 15% 성공
+  } else if (rand < 55) {
+    targetRarity = 'rare'; // 30% 중박
+  } else {
+    targetRarity = 'common'; // 45% 기본
+  }
 
-  // 재료 물고기의 가치를 반영한 균형잡힌 보너스 가격 계산
+  // 해당 등급의 돌연변이 풀에서 무작위 선택
+  const pool = HYBRID_FISH.filter(f => f.rarity === targetRarity);
+  const hybrid = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : HYBRID_FISH[0];
+
+  // 등급별 합리적 판매가 밸런싱 (골드 인플레이션 방지 및 등급별 차등 수익)
   const baseCombined = fishItem1.price + fishItem2.price;
-  const finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.8 + 15000));
+  let finalPrice = hybrid.basePrice;
+
+  if (targetRarity === 'mythic') {
+    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 5 + 500000));
+  } else if (targetRarity === 'legendary') {
+    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 2.5 + 80000));
+  } else if (targetRarity === 'epic') {
+    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.6 + 20000));
+  } else if (targetRarity === 'rare') {
+    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 1.2 + 5000));
+  } else {
+    finalPrice = Math.max(hybrid.basePrice, Math.round(baseCombined * 0.9 + 1000));
+  }
 
   const newBagItem = {
     uid: 'hyb_' + Date.now(),
     fishId: hybrid.id,
-    size: 250.0,
+    size: 150.0 + Math.random() * 100,
     price: finalPrice,
-    isCrown: true,
+    isCrown: targetRarity === 'mythic' || targetRarity === 'legendary',
     caughtAt: new Date().toISOString(),
   };
 
   addFishToBag(newBagItem);
+
+  // 돌연변이 도감 등록
+  if (!state.mutationCollection) state.mutationCollection = {};
+  state.mutationCollection[hybrid.id] = (state.mutationCollection[hybrid.id] || 0) + 1;
+
   saveGame();
   updateTopbar();
 
-  playSound('legendary');
+  if (targetRarity === 'mythic' || targetRarity === 'legendary') {
+    playSound('legendary');
+  } else {
+    playSound('catch');
+  }
 
   // 결과 전용 팝업창 띄우기
   showFusionResultModal(hybrid, finalPrice, name1, name2);

@@ -1,5 +1,5 @@
 import { state, collectAquariumRevenue, getAquariumPendingGold, releaseFishFromAquarium, sellFishFromAquarium, claimRegionReward } from './state.js';
-import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES } from './data.js';
+import { FISH, REGIONS, RARITIES, MESSAGES, BAITS, HIDDEN_FISH, VORTEX_BOSSES, HYBRID_FISH } from './data.js';
 import { formatGold } from './utils.js';
 import { showToast } from './ui.js';
 import { getFishSvg } from './fish-icons.js';
@@ -72,6 +72,7 @@ export function renderCollection() {
 
     <div class="collection-body">
       ${renderBossRaidSection()}
+      ${renderMutationSection()}
       ${REGIONS.map((region) => renderRegionSection(region)).join('')}
       ${renderHiddenFishSection()}
     </div>
@@ -254,6 +255,57 @@ function renderBossCard(boss) {
       </div>
       <div class="collection-card-name t-body-sm" style="font-weight: 800; color: #4c1d95; text-align: center;">${boss.name}</div>
       <span class="badge-rarity rarity-mythic" style="margin-top: 2px;">보스 레이드</span>
+    </div>
+  `;
+}
+
+// 🧬 100종 돌연변이 생체 도감 섹션 렌더링
+function renderMutationSection() {
+  const muts = HYBRID_FISH || [];
+  const discoveredCount = muts.filter((m) => state.mutationCollection && state.mutationCollection[m.id]).length;
+
+  return `
+    <div class="collection-region-group" style="border: 2px solid #10b981; border-radius: var(--radius-lg); padding: var(--space-sm); background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%); margin-bottom: var(--space-md);">
+      <div class="collection-region-header">
+        <div class="t-card-title" style="color: #065f46; display: flex; align-items: center; gap: 6px;">
+          🧬 돌연변이 생체 도감
+          <span class="collection-region-count tabular-nums" style="color: #059669; font-weight: 800;">${discoveredCount}/100</span>
+        </div>
+        <span class="collection-reward-tag" style="background: #d1fae5; color: #047857; border-color: #6ee7b7;">
+          생체 연구소 융합종 🔬
+        </span>
+      </div>
+
+      <div class="collection-grid">
+        ${muts.map((mut) => renderMutationCard(mut)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderMutationCard(mut) {
+  const count = state.mutationCollection ? (state.mutationCollection[mut.id] || 0) : 0;
+
+  if (count <= 0) {
+    return `
+      <div class="collection-card is-unknown" style="border: 1px dashed #a7f3d0; min-height: 110px;">
+        <div class="collection-card-emoji-box" style="opacity: 0.35; background: #ecfdf5; font-size: 32px;">❓</div>
+        <div class="collection-card-name t-body-sm" style="color: #10b981;">미발견 변이</div>
+      </div>
+    `;
+  }
+
+  const rarityMeta = RARITIES[mut.rarity] || RARITIES.common;
+  const cardClass = mut.rarity === 'mythic' ? 'rarity-mythic-card' : mut.rarity === 'legendary' ? 'rarity-legendary-card' : '';
+
+  return `
+    <div class="collection-card is-known ${cardClass}" style="min-height: 110px;">
+      <span class="collection-card-count-badge tabular-nums" style="background: #059669; color: #fff;">${count}회 융합</span>
+      <div class="collection-card-emoji-box" style="background: radial-gradient(circle, #ecfdf5 0%, #d1fae5 100%); font-size: 36px;">
+        ${mut.emoji}
+      </div>
+      <div class="collection-card-name t-body-sm" style="font-weight: 800; color: #065f46; text-align: center;">${mut.name}</div>
+      <span class="badge-rarity rarity-${mut.rarity}" style="margin-top: 2px;">${rarityMeta.name}</span>
     </div>
   `;
 }
